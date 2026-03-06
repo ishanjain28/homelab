@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     flake-compat = {
       url = "github:nix-community/flake-compat";
       flake = false;
@@ -33,11 +38,21 @@
     };
 
     deploy-rs = {
-      url = "github:szlend/deploy-rs/fix-show-derivation-parsing";
-      # url = "github:serokell/deploy-rs";
+      # url = "github:szlend/deploy-rs/fix-show-derivation-parsing";
+      url = "github:serokell/deploy-rs";
       inputs.flake-compat.follows = "flake-compat";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.utils.follows = "flake-utils";
+    };
+
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v0.4.2";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -67,13 +82,16 @@
           packages = [ inputs.deploy-rs.packages.${pkgs.system}.deploy-rs ];
         };
 
-      # systems = with inputs; {
-      #   modules = {
-      #     nixos =
-      #       [ disko.nixosModules.disko lanzaboote.nixosModules.lanzaboote ];
-      #   };
-      #   hosts = { kepler.modules = [ ]; };
-      # };
+      systems = with inputs; {
+        modules = {
+          nixos = [
+            disko.nixosModules.disko
+            lanzaboote.nixosModules.lanzaboote
+            nixos-generators.nixosModules.all-formats
+          ];
+        };
+        hosts = { kepler.modules = [ ]; };
+      };
 
       outputs-builder = channels: {
         formatter =

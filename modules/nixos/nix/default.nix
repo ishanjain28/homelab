@@ -1,4 +1,4 @@
-{ lib, pkgs, namespace, ... }:
+{ config, lib, pkgs, namespace, ... }:
 with lib.${namespace}; {
   documentation = enabled // {
     doc = disabled;
@@ -6,7 +6,13 @@ with lib.${namespace}; {
     dev = disabled;
   };
 
-  users.users.kepler.packages = with pkgs; [ nix-output-monitor ];
+  programs.nh = enabled // {
+    clean.enable = config.${namespace}.server.enable;
+    flake = "$HOME/dotfiles";
+  };
+
+  users.users.ishan.packages = with pkgs; [ nix-output-monitor ];
 
   nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
 }
+

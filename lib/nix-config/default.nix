@@ -12,8 +12,8 @@
 
     settings = {
       accept-flake-config = true;
-      allowed-users = [ "kepler" ];
-      auto-optimise-store = false;
+      allowed-users = [ "kepler" "ishan" ];
+      auto-optimise-store = true;
       builders-use-substitutes = true;
       experimental-features = lib.mkForce [
         "auto-allocate-uids"
@@ -28,7 +28,7 @@
       log-lines = 20;
       max-jobs = "auto";
       sandbox = lib.mkForce (!pkgs.stdenv.isDarwin);
-      trusted-users = [ "root" "kepler" ];
+      trusted-users = [ "root" "kepler" "ishan" ];
       warn-dirty = false;
     };
   };

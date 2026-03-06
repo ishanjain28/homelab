@@ -3,41 +3,25 @@ with lib;
 with lib.${namespace};
 let hostName = "kepler";
 in {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [ ./disk-config.nix ./hardware-configuration.nix ];
 
-  # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+  homelab = {
+    server = enabled;
 
-  # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+    hardware.networking = {
+      inherit hostName;
+      tcpPorts = [ 22 ];
+    };
 
-  networking.hostName = hostName;
-
-  # Enable networking
-  networking.networkmanager.enable = true;
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_IN";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_IN";
-    LC_IDENTIFICATION = "en_IN";
-    LC_MEASUREMENT = "en_IN";
-    LC_MONETARY = "en_IN";
-    LC_NAME = "en_IN";
-    LC_NUMERIC = "en_IN";
-    LC_PAPER = "en_IN";
-    LC_TELEPHONE = "en_IN";
-    LC_TIME = "en_IN";
+    system.boot = enabled // {
+      secure = disabled;
+      timeout = 10;
+    };
   };
-
-  time.timeZone = "Asia/Kolkata";
 
   # Enable passwordless sudo.
   security.sudo.extraRules = [{
-    users = [ "kepler" ];
+    users = [ "ishan" ];
     commands = [{
       command = "ALL";
       options = [ "NOPASSWD" ];
@@ -55,17 +39,15 @@ in {
 
   nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
 
-  users.users.kepler.packages = with pkgs; [ nix-output-monitor ];
-
   users = {
     mutableUsers = false;
-    users.kepler = {
+    users.ishan = {
       uid = 1000;
       extraGroups = [ "wheel" "networkmanager" ];
       isSystemUser = true;
       group = "users";
       createHome = true;
-      home = "/home/kepler";
+      home = "/home/ishan";
       homeMode = "700";
       useDefaultShell = true;
       openssh.authorizedKeys.keys = [
@@ -73,8 +55,11 @@ in {
       ];
       isNormalUser = false;
       ignoreShellProgramCheck = true;
+      shell = pkgs.fish;
     };
   };
+
+  environment.shells = with pkgs; [ fish ];
 
   system.stateVersion = "25.11";
 }

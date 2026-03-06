@@ -14,10 +14,10 @@
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/da361663-426e-47a2-9c68-b0339a37741e";
-    fsType = "ext4";
-  };
+  # fileSystems."/" = {
+  #   device = "/dev/disk/by-uuid/da361663-426e-47a2-9c68-b0339a37741e";
+  #   fsType = "ext4";
+  # };
 
   networking.useDHCP = lib.mkDefault true;
 

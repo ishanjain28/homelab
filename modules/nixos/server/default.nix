@@ -10,8 +10,18 @@ in {
   };
 
   config = mkIf cfg.enable {
-    homelab = { };
+    homelab = {
+      services = { chrony = enabled; };
 
-    users.users.kepler.packages = with pkgs; [ nfs-utils ];
+      virtualisation = disabled;
+    };
+
+    users.users.ishan.packages = with pkgs; [
+      fish
+      htop
+      neovim
+      ncdu
+      kitty.terminfo
+    ];
   };
 }
