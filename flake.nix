@@ -1,13 +1,86 @@
 {
   description = "Ishan's homelab configuration";
 
-  inputs = { nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable"; };
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-  outputs = { self, nixpkgs }: {
+    flake-compat = {
+      url = "github:nix-community/flake-compat";
+      flake = false;
+    };
 
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
+    flake-utils.url = "github:numtide/flake-utils";
 
-    packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
+    flake-utils-plus = {
+      url = "github:gytis-ivaskevicius/flake-utils-plus";
+      inputs.flake-utils.follows = "flake-utils";
+    };
 
+    snowfall-lib = {
+      url = "github:snowfallorg/lib/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils-plus.follows = "flake-utils-plus";
+    };
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    deploy-rs = {
+      url = "github:szlend/deploy-rs/fix-show-derivation-parsing";
+      # url = "github:serokell/deploy-rs";
+      inputs.flake-compat.follows = "flake-compat";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.utils.follows = "flake-utils";
+    };
   };
+
+  outputs = inputs@{ deploy-rs, self, ... }:
+    let
+      lib = inputs.snowfall-lib.mkLib {
+        inherit inputs;
+        src = ./.;
+        snowfall = {
+          namespace = "homelab";
+          meta = {
+            name = "ishan-nix-configs";
+            title = "Ishan's Nix configuration";
+          };
+        };
+      };
+      treefmtModule = inputs.treefmt-nix.lib.evalModule;
+    in lib.mkFlake {
+      inherit inputs;
+      src = ./.;
+
+      deploy = lib.mkDeploy { inherit (inputs) self; };
+
+      devShells.x86_64-linux.default =
+        let pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
+        in pkgs.mkShell {
+          packages = [ inputs.deploy-rs.packages.${pkgs.system}.deploy-rs ];
+        };
+
+      # systems = with inputs; {
+      #   modules = {
+      #     nixos =
+      #       [ disko.nixosModules.disko lanzaboote.nixosModules.lanzaboote ];
+      #   };
+      #   hosts = { kepler.modules = [ ]; };
+      # };
+
+      outputs-builder = channels: {
+        formatter =
+          (treefmtModule channels.nixpkgs ./treefmt.nix).config.build.wrapper;
+      };
+    } // {
+      inherit (inputs) self;
+    };
 }
+
