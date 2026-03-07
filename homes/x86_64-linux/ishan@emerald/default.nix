@@ -1,5 +1,6 @@
 { lib, namespace, ... }:
-with lib.${namespace}; {
+with lib.${namespace};
+{
   profiles.${namespace} = {
     neovim = disabled;
     oh-my-posh = enabled;

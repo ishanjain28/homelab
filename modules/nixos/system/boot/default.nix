@@ -1,15 +1,22 @@
-{ config, pkgs, namespace, lib, ... }:
+{
+  config,
+  pkgs,
+  namespace,
+  lib,
+  ...
+}:
 with lib;
 with lib.${namespace};
-let cfg = config.${namespace}.system.boot;
-in {
+let
+  cfg = config.${namespace}.system.boot;
+in
+{
   options.${namespace}.system.boot = with types; {
     enable = mkBoolOpt false "Whether or not to enable booting";
     timeout = mkOpt types.int 60 "Timeout for the bootloader";
     secure = {
       enable = mkBoolOpt false "Enable Secure Boot";
-      pkiBundle =
-        mkOpt types.str "/etc/secureboot" "The path to the PKI bundle";
+      pkiBundle = mkOpt types.str "/etc/secureboot" "The path to the PKI bundle";
     };
   };
 
@@ -40,4 +47,3 @@ in {
     };
   };
 }
-

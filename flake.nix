@@ -54,9 +54,15 @@
       url = "github:nix-community/lanzaboote/v0.4.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    devshell = {
+      url = "github:numtide/devshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ deploy-rs, self, ... }:
+  outputs =
+    inputs@{ self, ... }:
     let
       lib = inputs.snowfall-lib.mkLib {
         inherit inputs;
@@ -70,15 +76,18 @@
         };
       };
       treefmtModule = inputs.treefmt-nix.lib.evalModule;
-    in lib.mkFlake {
+    in
+    lib.mkFlake {
       inherit inputs;
       src = ./.;
 
       deploy = lib.mkDeploy { inherit (inputs) self; };
 
       devShells.x86_64-linux.default =
-        let pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
-        in pkgs.mkShell {
+        let
+          pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
+        in
+        pkgs.mkShell {
           packages = [ inputs.deploy-rs.packages.${pkgs.system}.deploy-rs ];
         };
 
@@ -90,15 +99,20 @@
             nixos-generators.nixosModules.all-formats
           ];
         };
-        hosts = { kepler.modules = [ ]; };
+        hosts = {
+          kepler.modules = [ ];
+        };
       };
 
       outputs-builder = channels: {
-        formatter =
-          (treefmtModule channels.nixpkgs ./treefmt.nix).config.build.wrapper;
+        formatter = (treefmtModule channels.nixpkgs ./treefmt.nix).config.build.wrapper;
       };
-    } // {
+
+      templates = {
+        rust.description = "devshell for Rust projects";
+      };
+    }
+    // {
       inherit (inputs) self;
     };
 }
-

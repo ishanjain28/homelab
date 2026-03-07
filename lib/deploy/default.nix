@@ -1,7 +1,10 @@
 { inputs }:
-let inherit (inputs) deploy-rs;
-in {
-  mkDeploy = { self }:
+let
+  inherit (inputs) deploy-rs;
+in
+{
+  mkDeploy =
+    { self }:
     let
       hosts = self.nixosConfigurations or { };
       nodes = builtins.mapAttrs (_: machine: {
@@ -12,9 +15,12 @@ in {
         magicRollback = false;
         profiles.system = {
           user = "root";
-          sshUser = machine.config.networking.hostName;
+          sshUser = "ishan";
           path = deploy-rs.lib.${machine.pkgs.system}.activate.nixos machine;
         };
       }) hosts;
-    in { inherit nodes; };
+    in
+    {
+      inherit nodes;
+    };
 }

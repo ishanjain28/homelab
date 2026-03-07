@@ -1,5 +1,12 @@
-{ config, lib, pkgs, namespace, ... }:
-with lib.${namespace}; {
+{
+  config,
+  lib,
+  pkgs,
+  namespace,
+  ...
+}:
+with lib.${namespace};
+{
   documentation = enabled // {
     doc = disabled;
     man = enabled;
@@ -13,6 +20,7 @@ with lib.${namespace}; {
 
   users.users.ishan.packages = with pkgs; [ nix-output-monitor ];
 
-  nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
+  nix = mkNixConfig { inherit lib pkgs; } // {
+    optimise.automatic = true;
+  };
 }
-

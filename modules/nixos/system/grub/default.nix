@@ -1,7 +1,14 @@
-{ config, lib, namespace, ... }:
+{
+  config,
+  lib,
+  namespace,
+  ...
+}:
 with lib;
-let cfg = config.${namespace}.profiles.grub;
-in {
+let
+  cfg = config.${namespace}.profiles.grub;
+in
+{
   options.${namespace}.profiles.grub = {
     enable = mkEnableOption "Enable the GRUB bootloader";
   };

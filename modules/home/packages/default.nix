@@ -1,4 +1,5 @@
-{ pkgs, namespace, ... }: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
     cachix
     curl

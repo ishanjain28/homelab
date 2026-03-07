@@ -1,16 +1,43 @@
-{ lib, pkgs, namespace, ... }:
+{
+  lib,
+  pkgs,
+  namespace,
+  ...
+}:
 with lib;
 with lib.${namespace};
-let hostName = "kepler";
-in {
-  imports = [ ./disk-config.nix ./hardware-configuration.nix ];
+let
+  hostName = "kepler";
+in
+{
+  imports = [
+    ./disk-config.nix
+    ./hardware-configuration.nix
+  ];
 
   homelab = {
     server = enabled;
 
     hardware.networking = {
       inherit hostName;
+
+      enable = true;
+      domain = "direct.home.ishanjain.me";
       tcpPorts = [ 22 ];
+      vlans = {
+        vlan50 = {
+          id = 50;
+          interface = "ens19";
+        };
+      };
+      interfaces = {
+        vlan50 = {
+          name = "vlan50";
+          macAddress = "00:11:22:33:44:01";
+          mtu = 1500;
+          useDHCP = true;
+        };
+      };
     };
 
     system.boot = enabled // {
@@ -20,13 +47,17 @@ in {
   };
 
   # Enable passwordless sudo.
-  security.sudo.extraRules = [{
-    users = [ "ishan" ];
-    commands = [{
-      command = "ALL";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
+  security.sudo.extraRules = [
+    {
+      users = [ "ishan" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
   services.openssh = enabled // {
     settings = {
@@ -37,13 +68,18 @@ in {
 
   systemd.targets.multi-user.enable = true;
 
-  nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
+  nix = mkNixConfig { inherit lib pkgs; } // {
+    optimise.automatic = true;
+  };
 
   users = {
     mutableUsers = false;
     users.ishan = {
       uid = 1000;
-      extraGroups = [ "wheel" "networkmanager" ];
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+      ];
       isSystemUser = true;
       group = "users";
       createHome = true;
@@ -63,4 +99,3 @@ in {
 
   system.stateVersion = "25.11";
 }
-
