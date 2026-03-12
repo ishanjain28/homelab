@@ -93,6 +93,14 @@
 
       deploy = lib.mkDeploy { inherit (inputs) self; };
 
+      devShells.aarch64-linux.default =
+        let
+          pkgs = import inputs.nixpkgs { system = "aarch64-linux"; };
+        in
+        pkgs.mkShell {
+          packages = [ inputs.deploy-rs.packages.${pkgs.system}.deploy-rs ];
+        };
+
       devShells.x86_64-linux.default =
         let
           pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };

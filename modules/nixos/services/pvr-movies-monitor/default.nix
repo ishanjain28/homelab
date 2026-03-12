@@ -1,10 +1,17 @@
-{ config, lib, pkgs, namespace, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  namespace,
+  ...
+}:
 with lib;
 with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.pvr-movies-monitor;
-in {
+in
+{
   options.${namespace}.services.pvr-movies-monitor = {
     enable = mkEnableOption "PVR Movies Monitor";
     host = mkOpt types.str "" "Listen address for this application";
@@ -22,8 +29,7 @@ in {
         PORT = cfg.port;
       };
       serviceConfig = {
-        ExecStart =
-          "${pkgs.${namespace}.pvr-movies-monitor}/bin/pvr-movies-monitor";
+        ExecStart = "${pkgs.${namespace}.pvr-movies-monitor}/bin/pvr-movies-monitor";
         Restart = "always";
         DynamicUser = true;
       };
