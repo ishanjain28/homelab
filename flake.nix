@@ -38,7 +38,6 @@
     };
 
     deploy-rs = {
-      # url = "github:szlend/deploy-rs/fix-show-derivation-parsing";
       url = "github:serokell/deploy-rs";
       inputs.flake-compat.follows = "flake-compat";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -59,6 +58,16 @@
       url = "github:numtide/devshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    crane = {
+      url = "github:ipetkov/crane";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -76,6 +85,7 @@
         };
       };
       treefmtModule = inputs.treefmt-nix.lib.evalModule;
+
     in
     lib.mkFlake {
       inherit inputs;
@@ -97,6 +107,7 @@
             disko.nixosModules.disko
             lanzaboote.nixosModules.lanzaboote
             nixos-generators.nixosModules.all-formats
+            sops-nix.nixosModules.sops
           ];
         };
         hosts = {

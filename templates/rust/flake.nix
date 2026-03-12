@@ -49,9 +49,7 @@
         };
       in
       {
-        checks = {
-          inherit custom-package;
-        };
+        checks = { inherit custom-package; };
 
         packages.default = custom-package;
 

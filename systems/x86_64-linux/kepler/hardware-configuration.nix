@@ -1,4 +1,11 @@
-{ lib, modulesPath, ... }:
+{
+  lib,
+  modulesPath,
+  namespace,
+  ...
+}:
+with lib;
+with lib.${namespace};
 {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
@@ -20,7 +27,7 @@
   #   fsType = "ext4";
   # };
 
-  networking.useDHCP = lib.mkDefault true;
+  networking.useDHCP = mkDefault true;
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  nixpkgs.hostPlatform = mkDefault "x86_64-linux";
 }

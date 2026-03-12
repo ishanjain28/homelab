@@ -15,4 +15,9 @@ in
   system ? currentSystem,
   pkgs ? import (getFlake "nixpkgs") { localSystem = { inherit system; }; },
 }:
-{ }
+let
+  callPackage = pkg: pkgs.callPackage pkg;
+in
+{
+  pvr-movies-monitor = callPackage ./packages/pvr-movies-monitor { };
+}
