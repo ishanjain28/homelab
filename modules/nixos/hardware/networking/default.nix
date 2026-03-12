@@ -22,6 +22,11 @@ in
   };
 
   config = mkIf cfg.enable {
+
+    # WiFi is not used on any device.
+    # TODO: make this option configurable for each system.
+    systemd.services.wpa_supplicant = disabled;
+
     networking = {
       inherit (cfg) domain;
       inherit (cfg) hosts;
@@ -38,6 +43,9 @@ in
       # Enable networking
       networkmanager.enable = cfg.extra;
       nftables.enable = cfg.extra;
+
+      # TODO: make this configurable by machine
+      networkmanager.unmanaged = [ "type:wifi" ];
 
       firewall = enabled // {
         allowPing = true;

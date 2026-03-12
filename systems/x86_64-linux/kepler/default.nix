@@ -19,11 +19,18 @@ in
     server = enabled;
 
     services = {
+      ssh = enabled // {
+        addRootKeys = true;
+        passwordAuth = false;
+        permitRootLogin = true;
+      };
+
       pvr-movies-monitor = enabled // {
         host = "0.0.0.0";
         port = "3000";
         apiKey = "test-key";
       };
+
     };
 
     hardware.networking = {
@@ -67,15 +74,6 @@ in
     }
   ];
 
-  services = {
-    openssh = enabled // {
-      settings = {
-        PasswordAuthentication = false;
-        PermitRootLogin = "prohibit-password";
-      };
-    };
-  };
-
   systemd.targets.multi-user.enable = true;
 
   nix = mkNixConfig { inherit lib pkgs; } // {
@@ -96,9 +94,6 @@ in
       home = "/home/ishan";
       homeMode = "700";
       useDefaultShell = true;
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise"
-      ];
       isNormalUser = false;
       ignoreShellProgramCheck = true;
       shell = pkgs.fish;

@@ -22,7 +22,7 @@ in
         chrony = enabled;
       };
 
-      virtualisation = enabled;
+      virtualisation = disabled;
     };
 
     users.users.ishan.packages = with pkgs; [
