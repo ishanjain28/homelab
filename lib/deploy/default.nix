@@ -12,7 +12,7 @@ in
         fastConnection = true;
         remoteBuild = false;
         autoRollback = false;
-        magicRollback = false;
+        magicRollback = true;
         profiles.system = {
           user = "root";
           sshUser = "ishan";

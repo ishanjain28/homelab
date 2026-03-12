@@ -1,9 +1,19 @@
-{ lib, pkgs, namespace, ... }:
+{
+  lib,
+  pkgs,
+  namespace,
+  ...
+}:
 with lib;
 with lib.${namespace};
-let hostName = "kepler";
-in {
-  imports = [ ./disk-config.nix ./hardware-configuration.nix ];
+let
+  hostName = "kepler";
+in
+{
+  imports = [
+    ./disk-config.nix
+    ./hardware-configuration.nix
+  ];
 
   homelab = {
     server = enabled;
@@ -45,13 +55,17 @@ in {
   };
 
   # Enable passwordless sudo.
-  security.sudo.extraRules = [{
-    users = [ "ishan" ];
-    commands = [{
-      command = "ALL";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
+  security.sudo.extraRules = [
+    {
+      users = [ "ishan" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
   services = {
     openssh = enabled // {
@@ -64,13 +78,18 @@ in {
 
   systemd.targets.multi-user.enable = true;
 
-  nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
+  nix = mkNixConfig { inherit lib pkgs; } // {
+    optimise.automatic = true;
+  };
 
   users = {
     mutableUsers = false;
     users.ishan = {
       uid = 1000;
-      extraGroups = [ "wheel" "networkmanager" ];
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+      ];
       isSystemUser = true;
       group = "users";
       createHome = true;
