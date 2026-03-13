@@ -61,7 +61,6 @@
 
     crane = {
       url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     sops-nix = {
@@ -98,7 +97,9 @@
           pkgs = import inputs.nixpkgs { system = "aarch64-linux"; };
         in
         pkgs.mkShell {
-          packages = [ inputs.deploy-rs.packages.${pkgs.system}.deploy-rs ];
+          packages = [
+            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
+          ];
         };
 
       devShells.x86_64-linux.default =
@@ -106,7 +107,9 @@
           pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
         in
         pkgs.mkShell {
-          packages = [ inputs.deploy-rs.packages.${pkgs.system}.deploy-rs ];
+          packages = [
+            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
+          ];
         };
 
       systems = with inputs; {

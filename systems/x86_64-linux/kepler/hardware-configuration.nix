@@ -27,7 +27,5 @@ with lib.${namespace};
   #   fsType = "ext4";
   # };
 
-  networking.useDHCP = mkDefault true;
-
   nixpkgs.hostPlatform = mkDefault "x86_64-linux";
 }

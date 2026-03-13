@@ -8,6 +8,7 @@ with lib;
 with lib.${namespace};
 let
   hostName = "kepler";
+  inherit mkMigratableContainerVolume;
 in
 {
   imports = [
@@ -29,9 +30,21 @@ in
         host = "0.0.0.0";
         port = "3000";
         apiKey = "test-key";
+        volumeConfig = {
+          root = mkMigratableContainerVolume {
+            name = "pvr-movies-monitor";
+            size = "5G";
+            containerPath = "/var/lib/pvr-monitor";
+            uuid = "63d76b1a-8531-4836-8961-7360f068697b";
+          };
+        };
       };
-
     };
+
+    # systemd.network.links."10-wan" = {
+    #   matchConfig.MACAddress = "bc:24:11:de:01:ed";
+    #   linkConfig.Name = "eth0";
+    # };
 
     hardware.networking = {
       inherit hostName;
@@ -39,20 +52,6 @@ in
       enable = true;
       domain = "direct.home.ishanjain.me";
       tcpPorts = [ 22 ];
-      vlans = {
-        vlan50 = {
-          id = 50;
-          interface = "ens19";
-        };
-      };
-      interfaces = {
-        vlan50 = {
-          name = "vlan50";
-          macAddress = "00:11:22:33:44:01";
-          mtu = 1500;
-          useDHCP = true;
-        };
-      };
     };
 
     system.boot = enabled // {
@@ -102,5 +101,5 @@ in
 
   environment.shells = with pkgs; [ fish ];
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }

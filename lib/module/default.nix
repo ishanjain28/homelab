@@ -1,5 +1,4 @@
 { lib, ... }:
-
 with lib;
 rec {
   ## Create a NixOS module option.
