@@ -10,6 +10,8 @@ let
   };
 in
 craneLib.buildPackage {
+  pname = "pvr-movies-monitor";
+  version = "0.1.5";
   inherit src;
   strictDeps = true;
 }
