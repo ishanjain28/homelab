@@ -18,3 +18,7 @@
 5. create vms
 6. Implement migratable mounts that are copied from one node to the other when a service is moved. mounts can be identified using a fixed id for non-epheraml data.
 7. implement disk partitioning using lvm and implement moving using built in lvm features.
+8. generate a better minimal iso with the right ssh access.
+9. Add deployment order dependency if possible.
+10. Grow and shrink LVS based on updated values. Require user action if the LVS was shrunk!
+11. service.networking similar to hardware.networking ?
