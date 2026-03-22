@@ -13,7 +13,6 @@ in
 {
   options.${namespace}.server = {
     enable = mkEnableOption "Profile for servers";
-    extraPackages = mkOpt (types.listOf types.package) [ ] "Extra packages to install on servers";
   };
 
   config = mkIf cfg.enable {
@@ -25,15 +24,29 @@ in
       virtualisation = disabled;
     };
 
-    users.users.ishan.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
+      bind
+      fish
+      htop
+      iotop
+      iperf3
+      jq
+      kitty.terminfo
+      lm_sensors
+      mediainfo
+      mtr
+      ncdu
+      neovim
+      nmap
+      nvme-cli
       openssl
       pkg-config
       ripgrep
-      fish
-      htop
-      neovim
-      ncdu
-      kitty.terminfo
+      rsync
+      smartmontools
+      tcpdump
+      traceroute
+      tree
     ];
   };
 }

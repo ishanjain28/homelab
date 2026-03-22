@@ -2,9 +2,11 @@
   config,
   lib,
   namespace,
+  pkgs,
   ...
 }:
 let
+  utils = import "${pkgs.path}/nixos/lib/utils.nix" { inherit lib config pkgs; };
   inherit (lib)
     mkIf
     mkMerge
@@ -15,16 +17,8 @@ let
   allServices = config.${namespace}.services or { };
   enabledServices = filterAttrs (_name: srv: srv.enable or false) allServices;
 
-  # Helper to escape path for systemd unit names (simple version)
-  # /var/lib/volumes/foo -> var-lib-volumes-foo.mount
-  toMountUnit =
-    path:
-    let
-      p = if lib.hasPrefix "/" path then lib.removePrefix "/" path else path;
-      escaped = lib.replaceStrings [ "/" ] [ "-" ] p;
-    in
-    "${escaped}.mount";
-
+  # Helper to escape path for systemd unit names
+  toMountUnit = path: "${utils.escapeSystemdPath path}.mount";
 in
 {
   config = mkMerge [

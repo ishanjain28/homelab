@@ -14,10 +14,7 @@
 
       settings = {
         accept-flake-config = true;
-        allowed-users = [
-          "kepler"
-          "ishan"
-        ];
+        allowed-users = [ "ishan" ];
         auto-optimise-store = true;
         builders-use-substitutes = true;
         experimental-features = lib.mkForce [
@@ -35,7 +32,6 @@
         sandbox = lib.mkForce (!pkgs.stdenv.isDarwin);
         trusted-users = [
           "root"
-          "kepler"
           "ishan"
         ];
         warn-dirty = false;
