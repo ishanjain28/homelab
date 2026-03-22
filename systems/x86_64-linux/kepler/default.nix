@@ -8,7 +8,7 @@ with lib;
 with lib.${namespace};
 let
   hostName = "kepler";
-  inherit mkMigratableContainerVolume mkTaggedVlanIfList mkNetworkIfList;
+  inherit mkMigratableContainerVolume mkBridgeIf mkTaggedVlanIf;
 in
 {
   imports = [
@@ -45,34 +45,42 @@ in
       inherit hostName;
 
       domain = "direct.home.ishanjain.me";
-
       # Rename PHYs to values I like using the permanent
       # MAC address as reference.
       links = mkIfLinks [
         {
-          name = "hvlan99";
-          macAddress = "DC:24:11:DE:01:EF";
-        }
-        {
-          name = "hvlan10";
-          macAddress = "AA:BB:CC:DD:EE:FF";
-        }
-        {
-          name = "hvlan50";
+          name = "eth0";
           macAddress = "BC:24:11:DE:01:ED";
         }
-
       ];
 
-      netdevs = mkTaggedVlanIfList [
-        10
-        50
-        99
+      netdevs = lib.mkMerge [
+        # Creates a VLAN aware bridge on the host
+        (mkBridgeIf "br0")
+        # A interface on VLAN99 on the host for accessing it.
+        (mkTaggedVlanIf 99)
       ];
 
-      networks = mkNetworkIfList [
+      networks = lib.mkMerge [
         {
-          name = "hvlan99";
+          # Add PHYs to the Bridge
+          "30-uplinks" = {
+            matchConfig.Name = "eth*";
+            networkConfig.Bridge = "br0";
+          };
+          # Attach the Host Management VLAN to the Bridge.
+          "30-vmbr0" = {
+            matchConfig.Name = "br0";
+            vlan = [ "vlan99" ];
+          };
+          # Container Trunk Ports (Host-side of the veth)
+          "30-ve-containers" = {
+            matchConfig.Name = "ve-*"; # Matches nspawn default veth prefix
+            networkConfig.Bridge = "br0";
+          };
+        }
+        (mkNetworkIf {
+          name = "vlan99";
           config = {
             Description = "Tagged VLAN99 interface for accessing the host";
             DHCP = "yes";
@@ -81,32 +89,45 @@ in
             EmitLLDP = "no";
             LLMNR = "no";
           };
-        }
-        {
-          name = "hvlan10";
-          config = {
-            Description = "Passthrough VLAN10 interface for applications";
-            KeepConfiguration = "yes";
-            LinkLocalAddressing = "no";
-            IPv6AcceptRA = "no";
-            LLMNR = "no";
-            EmitLLDP = "no";
-            LLDP = "no";
-          };
-        }
-        {
-          name = "hvlan50";
-          config = {
-            Description = "Passthrough VLAN50 interface for applications";
-            KeepConfiguration = "yes";
-            LinkLocalAddressing = "no";
-            IPv6AcceptRA = "no";
-            LLDP = "no";
-            EmitLLDP = "no";
-            LLMNR = "no";
-          };
-        }
+        })
       ];
+
+      # networks = mkNetworkIfList [{
+      #   name = "hvlan99";
+      #   config = {
+      #     Description = "Tagged VLAN99 interface for accessing the host";
+      #     DHCP = "yes";
+      #     IPv6AcceptRA = "yes";
+      #     LLDP = "no";
+      #     EmitLLDP = "no";
+      #     LLMNR = "no";
+      #   };
+      # }
+      # {
+      #   name = "hvlan10";
+      #   config = {
+      #     Description = "Passthrough VLAN10 interface for applications";
+      #     KeepConfiguration = "yes";
+      #     LinkLocalAddressing = "no";
+      #     IPv6AcceptRA = "no";
+      #     LLMNR = "no";
+      #     EmitLLDP = "no";
+      #     LLDP = "no";
+      #   };
+      # }
+      # {
+      #   name = "hvlan50";
+      #   config = {
+      #     Description = "Passthrough VLAN50 interface for applications";
+      #     KeepConfiguration = "yes";
+      #     LinkLocalAddressing = "no";
+      #     IPv6AcceptRA = "no";
+      #     LLDP = "no";
+      #     EmitLLDP = "no";
+      #     LLMNR = "no";
+      #   };
+      # }
+      #  ];
 
       tcpPorts = [ 22 ];
     };
