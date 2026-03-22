@@ -50,7 +50,7 @@ in
       links = mkIfLinks [
         {
           name = "eth0";
-          macAddress = "BC:24:11:DE:01:ED";
+          macAddress = "DC:24:11:DE:01:EF";
         }
       ];
 
@@ -69,9 +69,14 @@ in
             networkConfig.Bridge = "br0";
           };
           # Attach the Host Management VLAN to the Bridge.
-          "30-vmbr0" = {
+          "30-br0" = {
             matchConfig.Name = "br0";
             vlan = [ "vlan99" ];
+          };
+          # Add VLANs to the Bridge
+          "30-br0-vlans" = {
+            matchConfig.Name = "br0";
+            bridgeVLANs = [ { VLAN = "95-100"; } ];
           };
           # Container Trunk Ports (Host-side of the veth)
           "30-ve-containers" = {
