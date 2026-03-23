@@ -22,3 +22,6 @@
 9. Add deployment order dependency if possible.
 10. Grow and shrink LVS based on updated values. Require user action if the LVS was shrunk!
 11. service.networking similar to hardware.networking ?
+12. modify systemd-resolved to disable fallback servers. Maybe disable stub resolver.
+13. run ssh in every service container for direct access.
+14. host side veth interfaces for containers should have minimal vlan access. A service in untagged vlan 10 should be attached to a veth interface on host that also only allows vlan10.

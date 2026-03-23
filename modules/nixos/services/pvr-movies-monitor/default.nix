@@ -42,48 +42,35 @@ in
           {
             networking = {
               networkmanager = disabled;
+              useHostResolvConf = false;
               firewall = enabled // {
                 allowedTCPPorts = [ cfg.port ];
               };
             };
 
-            users.users.root.shell = pkgs.bashInteractive;
-
             # Fix for https://github.com/nixos/nixpkgs/issues/493934
             security.pam.services.login.updateWtmp = lib.mkForce false;
 
             environment.systemPackages = with pkgs; [
+              htop
               bash
-              fish
               kitty.terminfo
             ];
 
-            systemd.network = {
-              netdevs = mkTaggedVlanIf 10;
-              networks = lib.mkMerge [
-                {
-                  "30-eth0" = {
-                    matchConfig.Name = "eth0";
-                    vlan = [ "vlan10" ];
-                    networkConfig.LinkLocalAddressing = "no";
-                  };
-                }
-                (mkNetworkIf {
-                  name = "vlan10";
+            systemd.network = enabled // {
+              networks = mkNetworkIf {
+                  name = "eth0";
                   config = {
                     Description = "Tagged VLAN99 interface for accessing the host";
-                    DHCP = "no";
-                    IPv6AcceptRA = "no";
+                    DHCP = "yes";
+                    IPv6AcceptRA = "yes";
                     # TODO: remove duplicates
                     LLDP = "no";
                     EmitLLDP = "no";
                     LLMNR = "no";
                   };
-                })
-              ];
+                };
             };
-
-            systemd.network.wait-online.enable = false;
 
             systemd.services.pvr-movies-monitor = {
               description = "PVR Movies Monitoring Service";
