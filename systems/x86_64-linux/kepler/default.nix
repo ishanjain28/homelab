@@ -90,30 +90,26 @@ in
             matchConfig.Name = "br0";
             # Add VLAN99 interface to the bridge to access the host.
             vlan = [ "vlan99" ];
-            # Add VLANs to the Bridge (CPU)
+            # Add VLAN to the Bridge (CPU)
+            bridgeVLANs = [ { VLAN = [ 99 ]; } ];
+          };
+          # Container Trunk Ports (Host-side of the veth)
+          "30-vb-vlan10-containers" = {
+            matchConfig.Name = "vb-*"; # Matches nspawn default veth prefix
+            networkConfig.Bridge = "br0";
             bridgeVLANs = [
               {
-                VLAN = [
-                  10
-                  20
-                  30
-                  40
-                  50
-                  60
-                  70
-                  99
-                  140
-                  150
-                  160
-                ];
+                VLAN = [ 50 ];
+                PVID = 50; # Tag incoming traffic as 10
+                EgressUntagged = 50;
               }
             ];
           };
-          # Container Trunk Ports (Host-side of the veth)
-          "30-vb-containers" = {
-            matchConfig.Name = "vb-*"; # Matches nspawn default veth prefix
-            networkConfig.Bridge = "br0";
-          };
+          # "30-vb-vlan99-containers" = {
+          #   matchConfig.Name = "vb-a*"; # Matches nspawn default veth prefix
+          #   networkConfig.Bridge = "br0";
+          #   bridgeVLANs = [{ VLAN = [ 99 ]; }];
+          # };
         }
         (mkNetworkIf {
           name = "vlan99";
