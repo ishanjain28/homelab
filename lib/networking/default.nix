@@ -24,7 +24,7 @@ let
       VLANProtocol = "802.1q";
       VLANFiltering = "yes";
       DefaultPVID = "none";
-      STP = "yes";
+      STP = "no";
     };
   };
 

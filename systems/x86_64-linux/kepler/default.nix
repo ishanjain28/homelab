@@ -67,16 +67,48 @@ in
           "30-uplinks" = {
             matchConfig.Name = "eth*";
             networkConfig.Bridge = "br0";
+            # Add VLANs to the Trunk Port
+            bridgeVLANs = [
+              {
+                VLAN = [
+                  10
+                  20
+                  30
+                  40
+                  50
+                  60
+                  70
+                  99
+                  140
+                  150
+                  160
+                ];
+              }
+            ];
           };
           # Attach the Host Management VLAN to the Bridge.
           "30-br0" = {
             matchConfig.Name = "br0";
+            # Add VLAN99 interface to the bridge to access the host.
             vlan = [ "vlan99" ];
-          };
-          # Add VLANs to the Bridge
-          "30-br0-vlans" = {
-            matchConfig.Name = "br0";
-            bridgeVLANs = [ { VLAN = "95-100"; } ];
+            # Add VLANs to the Bridge (CPU)
+            bridgeVLANs = [
+              {
+                VLAN = [
+                  10
+                  20
+                  30
+                  40
+                  50
+                  60
+                  70
+                  99
+                  140
+                  150
+                  160
+                ];
+              }
+            ];
           };
           # Container Trunk Ports (Host-side of the veth)
           "30-ve-containers" = {
