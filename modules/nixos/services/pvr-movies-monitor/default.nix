@@ -29,7 +29,8 @@ in
       containers.pvr-movies-monitor = {
         autoStart = true;
         privateNetwork = true;
-        macvlans = [ "hvlan50" ];
+        # Plug into host bridge
+        hostBridge = "br0";
 
         specialArgs = {
           inherit namespace;
@@ -46,7 +47,43 @@ in
               };
             };
 
-            environment.systemPackages = with pkgs; [ kitty.terminfo ];
+            users.users.root.shell = pkgs.bashInteractive;
+
+            # Fix for https://github.com/nixos/nixpkgs/issues/493934
+            security.pam.services.login.updateWtmp = lib.mkForce false;
+
+            environment.systemPackages = with pkgs; [
+              bash
+              fish
+              kitty.terminfo
+            ];
+
+            systemd.network = {
+              netdevs = mkTaggedVlanIf 10;
+              networks = lib.mkMerge [
+                {
+                  "30-eth0" = {
+                    matchConfig.Name = "eth0";
+                    vlan = [ "vlan10" ];
+                    networkConfig.LinkLocalAddressing = "no";
+                  };
+                }
+                (mkNetworkIf {
+                  name = "vlan10";
+                  config = {
+                    Description = "Tagged VLAN99 interface for accessing the host";
+                    DHCP = "no";
+                    IPv6AcceptRA = "no";
+                    # TODO: remove duplicates
+                    LLDP = "no";
+                    EmitLLDP = "no";
+                    LLMNR = "no";
+                  };
+                })
+              ];
+            };
+
+            systemd.network.wait-online.enable = false;
 
             systemd.services.pvr-movies-monitor = {
               description = "PVR Movies Monitoring Service";
@@ -54,7 +91,7 @@ in
               environment = {
                 API_KEY = cfg.apiKey;
                 HOST = cfg.host;
-                PORT = builtins.toString cfg.port;
+                PORT = toString cfg.port;
                 RUST_LOG = "info";
               };
               serviceConfig = {

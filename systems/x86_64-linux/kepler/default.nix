@@ -8,7 +8,6 @@ with lib;
 with lib.${namespace};
 let
   hostName = "kepler";
-  inherit mkMigratableContainerVolume mkBridgeIf mkTaggedVlanIf;
 in
 {
   imports = [
@@ -111,8 +110,8 @@ in
             ];
           };
           # Container Trunk Ports (Host-side of the veth)
-          "30-ve-containers" = {
-            matchConfig.Name = "ve-*"; # Matches nspawn default veth prefix
+          "30-vb-containers" = {
+            matchConfig.Name = "vb-*"; # Matches nspawn default veth prefix
             networkConfig.Bridge = "br0";
           };
         }
@@ -128,43 +127,6 @@ in
           };
         })
       ];
-
-      # networks = mkNetworkIfList [{
-      #   name = "hvlan99";
-      #   config = {
-      #     Description = "Tagged VLAN99 interface for accessing the host";
-      #     DHCP = "yes";
-      #     IPv6AcceptRA = "yes";
-      #     LLDP = "no";
-      #     EmitLLDP = "no";
-      #     LLMNR = "no";
-      #   };
-      # }
-      # {
-      #   name = "hvlan10";
-      #   config = {
-      #     Description = "Passthrough VLAN10 interface for applications";
-      #     KeepConfiguration = "yes";
-      #     LinkLocalAddressing = "no";
-      #     IPv6AcceptRA = "no";
-      #     LLMNR = "no";
-      #     EmitLLDP = "no";
-      #     LLDP = "no";
-      #   };
-      # }
-      # {
-      #   name = "hvlan50";
-      #   config = {
-      #     Description = "Passthrough VLAN50 interface for applications";
-      #     KeepConfiguration = "yes";
-      #     LinkLocalAddressing = "no";
-      #     IPv6AcceptRA = "no";
-      #     LLDP = "no";
-      #     EmitLLDP = "no";
-      #     LLMNR = "no";
-      #   };
-      # }
-      #  ];
 
       tcpPorts = [ 22 ];
     };
