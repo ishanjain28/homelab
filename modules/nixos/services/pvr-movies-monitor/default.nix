@@ -25,72 +25,63 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    {
-      containers.pvr-movies-monitor = {
-        autoStart = true;
-        privateNetwork = true;
-        # Plug into host bridge
-        hostBridge = "br0";
-
-        specialArgs = {
-          inherit namespace;
-          pvr-movies-monitor-package = pkgs.${namespace}.pvr-movies-monitor;
-        };
-
-        config =
-          { pvr-movies-monitor-package, ... }:
-          {
-            networking = {
-              networkmanager = disabled;
-              useHostResolvConf = false;
-              firewall = enabled // {
-                allowedTCPPorts = [ cfg.port ];
-              };
-            };
-
-            # Fix for https://github.com/nixos/nixpkgs/issues/493934
-            security.pam.services.login.updateWtmp = lib.mkForce false;
-
-            environment.systemPackages = with pkgs; [
-              htop
-              bash
-              kitty.terminfo
-            ];
-
-            systemd.network = enabled // {
-              networks = mkNetworkIf {
-                  name = "eth0";
-                  config = {
-                    Description = "Tagged VLAN99 interface for accessing the host";
-                    DHCP = "yes";
-                    IPv6AcceptRA = "yes";
-                    # TODO: remove duplicates
-                    LLDP = "no";
-                    EmitLLDP = "no";
-                    LLMNR = "no";
-                  };
-                };
-            };
-
-            systemd.services.pvr-movies-monitor = {
-              description = "PVR Movies Monitoring Service";
-              wantedBy = [ "multi-user.target" ];
-              environment = {
-                API_KEY = cfg.apiKey;
-                HOST = cfg.host;
-                PORT = toString cfg.port;
-                RUST_LOG = "info";
-              };
-              serviceConfig = {
-                ExecStart = "${pvr-movies-monitor-package}/bin/pvr-movies-monitor";
-                Restart = "always";
-                DynamicUser = true;
-              };
-            };
-
-            system.stateVersion = "26.05";
-          };
+    (mkBridgedContainer {
+      name = "pvr-movies-monitor";
+      vlan = 50;
+      specialArgs = {
+        inherit namespace;
+        pvr-movies-monitor-package = pkgs.${namespace}.pvr-movies-monitor;
       };
-    }
+      config =
+        { pvr-movies-monitor-package, ... }:
+        {
+          networking = {
+            networkmanager = disabled;
+            useHostResolvConf = false;
+            firewall = enabled // {
+              allowedTCPPorts = [ cfg.port ];
+            };
+          };
+          # Fix for https://github.com/nixos/nixpkgs/issues/493934
+          security.pam.services.login.updateWtmp = lib.mkForce false;
+          environment.systemPackages = with pkgs; [
+            htop
+            bash
+            kitty.terminfo
+          ];
+          systemd.network = enabled // {
+            networks = mkNetworkIf {
+              name = "eth0";
+              config = {
+                Description = "Tagged VLAN99 interface for accessing the host";
+                DHCP = "yes";
+                IPv6AcceptRA = "yes";
+                # TODO: remove duplicates
+                LLDP = "no";
+                EmitLLDP = "no";
+                LLMNR = "no";
+              };
+            };
+          };
+
+          systemd.services.pvr-movies-monitor = {
+            description = "PVR Movies Monitoring Service";
+            wantedBy = [ "multi-user.target" ];
+            environment = {
+              API_KEY = cfg.apiKey;
+              HOST = cfg.host;
+              PORT = toString cfg.port;
+              RUST_LOG = "info";
+            };
+            serviceConfig = {
+              ExecStart = "${pvr-movies-monitor-package}/bin/pvr-movies-monitor";
+              Restart = "always";
+              DynamicUser = true;
+            };
+          };
+
+          system.stateVersion = "26.05";
+        };
+    })
   ]);
 }

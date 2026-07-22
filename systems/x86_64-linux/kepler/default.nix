@@ -1,19 +1,9 @@
-{
-  lib,
-  pkgs,
-  namespace,
-  ...
-}:
+{ lib, pkgs, namespace, ... }:
 with lib;
 with lib.${namespace};
-let
-  hostName = "kepler";
-in
-{
-  imports = [
-    ./disk-config.nix
-    ./hardware-configuration.nix
-  ];
+let hostName = "kepler";
+in {
+  imports = [ ./disk-config.nix ./hardware-configuration.nix ];
 
   homelab = {
     server = enabled;
@@ -46,17 +36,15 @@ in
       domain = "direct.home.ishanjain.me";
       # Rename PHYs to values I like using the permanent
       # MAC address as reference.
-      links = mkIfLinks [
-        {
-          name = "eth0";
-          macAddress = "DC:24:11:DE:01:EF";
-        }
-      ];
+      links = mkIfLink {
+        name = "eth0";
+        macAddress = "DC:24:11:DE:01:EF";
+      };
 
       netdevs = lib.mkMerge [
         # Creates a VLAN aware bridge on the host
         (mkBridgeIf "br0")
-        # A interface on VLAN99 on the host for accessing it.
+        # A interface on VLAN99 on the host bridge for accessing the host.
         (mkTaggedVlanIf 99)
       ];
 
@@ -66,24 +54,8 @@ in
           "30-uplinks" = {
             matchConfig.Name = "eth*";
             networkConfig.Bridge = "br0";
-            # Add VLANs to the Trunk Port
-            bridgeVLANs = [
-              {
-                VLAN = [
-                  10
-                  20
-                  30
-                  40
-                  50
-                  60
-                  70
-                  99
-                  140
-                  150
-                  160
-                ];
-              }
-            ];
+            # Add allowed VLANs to the Trunk Port
+            bridgeVLANs = [{ VLAN = [ 10 20 30 40 50 60 70 99 140 150 160 ]; }];
           };
           # Attach the Host Management VLAN to the Bridge.
           "30-br0" = {
@@ -91,22 +63,10 @@ in
             # Add VLAN99 interface to the bridge to access the host.
             vlan = [ "vlan99" ];
             # Add VLAN to the Bridge (CPU)
-            bridgeVLANs = [ { VLAN = [ 99 ]; } ];
-          };
-          # Container Trunk Ports (Host-side of the veth)
-          "30-vb-vlan10-containers" = {
-            matchConfig.Name = "vb-*"; # Matches nspawn default veth prefix
-            networkConfig.Bridge = "br0";
-            bridgeVLANs = [
-              {
-                VLAN = [ 50 ];
-                PVID = 50; # Tag incoming traffic as 10
-                EgressUntagged = 50;
-              }
-            ];
+            bridgeVLANs = [{ VLAN = [ 99 ]; }];
           };
           # "30-vb-vlan99-containers" = {
-          #   matchConfig.Name = "vb-a*"; # Matches nspawn default veth prefix
+          #   matchConfig.Name = "vb-a*"; # Matches nspawn default vbridge prefix
           #   networkConfig.Bridge = "br0";
           #   bridgeVLANs = [{ VLAN = [ 99 ]; }];
           # };
@@ -134,32 +94,23 @@ in
   };
 
   # Enable passwordless sudo.
-  security.sudo.extraRules = [
-    {
-      users = [ "ishan" ];
-      commands = [
-        {
-          command = "ALL";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
+  security.sudo.extraRules = [{
+    users = [ "ishan" ];
+    commands = [{
+      command = "ALL";
+      options = [ "NOPASSWD" ];
+    }];
+  }];
 
   systemd.targets.multi-user.enable = true;
 
-  nix = mkNixConfig { inherit lib pkgs; } // {
-    optimise.automatic = true;
-  };
+  nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
 
   users = {
     mutableUsers = false;
     users.ishan = {
       uid = 1000;
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-      ];
+      extraGroups = [ "wheel" "networkmanager" ];
       isSystemUser = true;
       group = "users";
       createHome = true;
@@ -169,7 +120,8 @@ in
       isNormalUser = false;
       ignoreShellProgramCheck = true;
       shell = pkgs.fish;
-      hashedPassword = "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
+      hashedPassword =
+        "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
     };
   };
 
