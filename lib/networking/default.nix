@@ -3,6 +3,14 @@
 # different machines.
 { lib, ... }:
 let
+  # Shorthand for generating interface link configuration
+  genIfLink =
+    { name, macAddress }:
+    {
+      matchConfig.PermanentMACAddress = macAddress;
+      linkConfig.Name = name;
+    };
+
   # Shorthand for generating tagged vlan interfaces
   genTaggedVlanIf = id: {
     netdevConfig = {
@@ -14,7 +22,7 @@ let
     };
   };
 
-  # Shorthand for generating tagged vlan interfaces
+  # Shorthand for generating vlan aware bridge
   genBridgeIf = name: {
     netdevConfig = {
       Name = name;
@@ -28,8 +36,25 @@ let
     };
   };
 
+  # Shorthand for generating network configuration
+  genNetworkIf =
+    { config, name }:
+    {
+      matchConfig.Name = name;
+      networkConfig = config;
+    };
+
 in
 {
+  mkIfLink =
+    { name, macAddress }:
+    let
+      lowerAddress = lib.toLower macAddress;
+      hash = builtins.hashString "sha256" lowerAddress;
+    in
+    {
+      "10-${hash}" = genIfLink { inherit name macAddress; };
+    };
   mkIfLinks =
     data:
     builtins.listToAttrs (
@@ -40,11 +65,7 @@ in
           hash = builtins.hashString "sha256" lowerAddress;
         in
         {
-          name = "10-${hash}";
-          value = {
-            matchConfig.PermanentMACAddress = lowerAddress;
-            linkConfig.Name = name;
-          };
+          "10-${hash}" = genIfLink { inherit name macAddress; };
         }
       ) data
     );
@@ -70,31 +91,24 @@ in
     );
 
   mkNetworkIf =
-    { name, config }:
+    { config, name }:
     let
       hash = builtins.hashString "sha256" name;
     in
     {
-      "40-${hash}" = {
-        matchConfig.Name = name;
-        networkConfig = config;
-      };
+      "40-${hash}" = genNetworkIf { inherit config name; };
     };
-
   mkNetworkIfList =
     data:
     builtins.listToAttrs (
       map (
-        { name, config }:
+        { config, name }:
         let
           hash = builtins.hashString "sha256" name;
         in
         {
           name = "40-${hash}";
-          value = {
-            matchConfig.Name = name;
-            networkConfig = config;
-          };
+          value = genNetworkIf { inherit config name; };
         }
       ) data
     );
