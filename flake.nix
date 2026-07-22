@@ -89,6 +89,10 @@
     lib.mkFlake {
       inherit inputs;
       src = ./.;
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
       deploy = lib.mkDeploy { inherit (inputs) self; };
 
