@@ -16,7 +16,7 @@ in
         profiles.system = {
           user = "root";
           sshUser = "ishan";
-          path = deploy-rs.lib.${machine.pkgs.system}.activate.nixos machine;
+          path = deploy-rs.lib.${machine.pkgs.stdenv.hostPlatform.system}.activate.nixos machine;
         };
       }) hosts;
     in

@@ -44,11 +44,11 @@ in
           };
           # Fix for https://github.com/nixos/nixpkgs/issues/493934
           security.pam.services.login.updateWtmp = lib.mkForce false;
-          environment.systemPackages = with pkgs; [
-            htop
-            bash
-            kitty.terminfo
-          ];
+          documentation.enable = false;
+          environment.defaultPackages = lib.mkForce [ ];
+          environment.systemPackages = lib.mkForce [ ];
+          nix.enable = false;
+          programs.command-not-found.enable = false;
           systemd.network = enabled // {
             networks = mkNetworkIf {
               name = "eth0";

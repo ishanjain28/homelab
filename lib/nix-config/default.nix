@@ -4,7 +4,7 @@
     {
       generateNixPathFromInputs = true;
       linkInputs = true;
-      distributedBuilds = true;
+      distributedBuilds = false;
 
       extraOptions = ''
         keep-outputs = true
@@ -16,7 +16,7 @@
         accept-flake-config = true;
         allowed-users = [ "ishan" ];
         auto-optimise-store = true;
-        builders-use-substitutes = true;
+        builders-use-substitutes = false;
         experimental-features = lib.mkForce [
           "auto-allocate-uids"
           "ca-derivations"
