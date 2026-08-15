@@ -11,6 +11,7 @@ let
   srv = config.${namespace}.services;
   cfg = srv.pvr-movies-monitor;
   secret = config.sops.secrets.pvr-movies-monitor;
+  containerSecretPath = "/run/container-secrets/pvr-movies-monitor.env";
 in
 {
   options.${namespace}.services.pvr-movies-monitor =
@@ -30,12 +31,13 @@ in
       sops.secrets.pvr-movies-monitor = {
         sopsFile = snowfall.fs.get-file "secrets/pvr-movies-monitor.env";
         format = "dotenv";
+        mode = "0444";
         restartUnits = [ "container@pvr-movies-monitor.service" ];
       };
 
       containers.pvr-movies-monitor = {
         localMacAddress = "bc:24:11:ac:c5:9d";
-        bindMounts.${secret.path} = {
+        bindMounts.${containerSecretPath} = {
           hostPath = secret.path;
           isReadOnly = true;
         };
@@ -48,13 +50,18 @@ in
       vlan = 50;
       port = [ cfg.port ];
       package = pkgs.${namespace}.pvr-movies-monitor;
+      resources = {
+        CPUQuota = "100%";
+        MemoryMax = "128M";
+        TasksMax = 256;
+      };
       environment = {
         HOST = cfg.host;
         PORT = toString cfg.port;
         RUST_LOG = "info";
       };
       serviceConfig = {
-        EnvironmentFile = secret.path;
+        EnvironmentFile = containerSecretPath;
       };
     })
   ]);
