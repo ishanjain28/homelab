@@ -40,6 +40,10 @@ in
         };
       };
 
+      huawei-sms-telegram = enabled // {
+        monitor = disabled;
+      };
+
       gatus = disabled // {
         port = 8080;
         externalEndpoints = [ ];

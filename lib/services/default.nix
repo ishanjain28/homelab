@@ -91,7 +91,7 @@ let
       name,
       package,
       vlan,
-      port,
+      port ? [ ],
       description ? name,
       exec ? "/bin/${name}",
       environment ? { },
@@ -112,7 +112,7 @@ let
               networkmanager = disabled;
               useHostResolvConf = false;
               firewall = enabled // {
-                allowedTCPPorts = [ port ];
+                allowedTCPPorts = port;
               };
             };
 
