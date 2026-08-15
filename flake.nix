@@ -84,7 +84,58 @@
         };
       };
       treefmtModule = inputs.treefmt-nix.lib.evalModule;
+      mkGeneratedConfigCommand =
+        pkgs:
+        { name, fileAttr }:
+        pkgs.writeShellApplication {
+          inherit name;
+          runtimeInputs = with pkgs; [
+            coreutils
+            nix
+          ];
+          text = ''
+            set -euo pipefail
 
+            host="''${1:-kepler}"
+            flake="''${HOMELAB_FLAKE:-.}"
+            base="$flake#nixosConfigurations.$host.config"
+
+            build_path() {
+              nix --option eval-cache false build --no-link --print-out-paths "$base.$1"
+            }
+
+            path="$(build_path '${fileAttr}')"
+            printf '##########\n## Host: %s\n##########\n\n' "$host"
+            cat "$path"
+          '';
+        };
+      generatedConfigCommands = pkgs: [
+        (mkGeneratedConfigCommand pkgs {
+          name = "gatus";
+          fileAttr = "services.gatus.configFile";
+        })
+      ];
+      shellAliasCommands =
+        pkgs:
+        let
+          mkGitAlias =
+            name: args:
+            pkgs.writeShellApplication {
+              inherit name;
+              runtimeInputs = [ pkgs.git ];
+              text = ''
+                exec git ${args} "$@"
+              '';
+            };
+        in
+        [
+          (mkGitAlias "g" "")
+          (mkGitAlias "gst" "status")
+          (mkGitAlias "gds" "diff --staged")
+          (mkGitAlias "gp" "pull")
+          (mkGitAlias "gd" "diff")
+          (mkGitAlias "gcp" "cherry-pick")
+        ];
     in
     lib.mkFlake {
       inherit inputs;
@@ -101,9 +152,14 @@
           pkgs = import inputs.nixpkgs { system = "aarch64-linux"; };
         in
         pkgs.mkShell {
-          packages = [
-            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
-          ];
+          packages =
+            (generatedConfigCommands pkgs)
+            ++ (shellAliasCommands pkgs)
+            ++ [
+              pkgs.age
+              inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
+              pkgs.sops
+            ];
         };
 
       devShells.x86_64-linux.default =
@@ -111,9 +167,14 @@
           pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
         in
         pkgs.mkShell {
-          packages = [
-            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
-          ];
+          packages =
+            (generatedConfigCommands pkgs)
+            ++ (shellAliasCommands pkgs)
+            ++ [
+              pkgs.age
+              inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
+              pkgs.sops
+            ];
         };
 
       systems = with inputs; {

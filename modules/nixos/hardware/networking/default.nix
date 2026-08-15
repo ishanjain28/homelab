@@ -60,7 +60,7 @@ in
       useDHCP = mkDefault false;
 
       # Enable networking
-      nftables.enable = true;
+      nftables = enabled;
 
       firewall = enabled // {
         allowPing = true;

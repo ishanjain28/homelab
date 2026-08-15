@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+before="$(mktemp)"
+after="$(mktemp)"
+trap 'rm -f "$before" "$after"' EXIT
+
+git diff --binary > "$before"
+
+echo "running nix fmt"
+nix fmt
+
+git diff --binary > "$after"
+
+if ! cmp -s "$before" "$after"; then
+  echo
+  echo "nix fmt changed files. Review and stage the formatting changes, then commit again."
+  git diff --name-only
+  exit 1
+fi
