@@ -11,7 +11,7 @@ in
         hostname = machine.config.networking.hostName;
         fastConnection = true;
         remoteBuild = false;
-        autoRollback = false;
+        autoRollback = true;
         magicRollback = true;
         profiles.system = {
           user = "root";

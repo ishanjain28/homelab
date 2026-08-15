@@ -11,6 +11,7 @@ let
   srv = config.${namespace}.services;
   cfg = srv.gatus;
   secret = config.sops.secrets.gatus;
+  containerSecretPath = "/run/container-secrets/gatus.env";
 in
 {
   options.${namespace}.services.gatus = with types; {
@@ -29,11 +30,12 @@ in
       sops.secrets.gatus = {
         sopsFile = snowfall.fs.get-file "secrets/gatus.env";
         format = "dotenv";
+        mode = "0444";
         restartUnits = [ "container@gatus.service" ];
       };
 
       containers.gatus = {
-        bindMounts.${secret.path} = {
+        bindMounts.${containerSecretPath} = {
           hostPath = secret.path;
           isReadOnly = true;
         };
@@ -83,6 +85,7 @@ in
       port = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";
+      hardeningProfile = "network-monitor";
       environment = {
         GATUS_CONFIG_PATH = "${config.services.gatus.configFile}";
       };
@@ -91,11 +94,8 @@ in
       };
       serviceConfig = {
         Restart = "always";
-        AmbientCapabilities = "CAP_NET_RAW";
-        CapabilityBoundingSet = "CAP_NET_RAW";
-        NoNewPrivileges = true;
         StateDirectory = "gatus";
-        EnvironmentFile = secret.path;
+        EnvironmentFile = containerSecretPath;
       };
     })
   ]);

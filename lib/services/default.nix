@@ -8,17 +8,27 @@ let
     mkForce
     types
     ;
+  containerProfiles = import ../containers/default.nix { };
+  inherit (containerProfiles)
+    getNspawnHardeningProfile
+    getNspawnIsolationProfile
+    ;
 
   genBridgedContainer =
     {
       name,
       vlan,
       config,
+      isolationProfile ? "unprivileged",
+      resources ? { },
       specialArgs ? { },
     }:
+    let
+      isolationConfig = getNspawnIsolationProfile isolationProfile;
+    in
     {
       # Generate the container entry
-      containers.${name} = {
+      containers.${name} = isolationConfig // {
         autoStart = true;
         privateNetwork = true;
         # Plug into host bridge
@@ -43,6 +53,8 @@ let
           }
         ];
       };
+
+      systemd.services."container@${name}".serviceConfig = resources;
     };
 
   genServiceOptions =
@@ -97,10 +109,21 @@ let
       environment ? { },
       serviceConfig ? { },
       containerConfig ? { },
+      isolationProfile ? "unprivileged",
+      hardeningProfile ? "default",
+      resources ? { },
       specialArgs ? { },
     }:
+    let
+      hardeningConfig = getNspawnHardeningProfile hardeningProfile;
+    in
     genBridgedContainer {
-      inherit name vlan;
+      inherit
+        name
+        vlan
+        isolationProfile
+        resources
+        ;
       specialArgs = specialArgs // {
         servicePackage = package;
       };
@@ -148,6 +171,7 @@ let
                 Restart = "always";
                 DynamicUser = true;
               }
+              // hardeningConfig
               // serviceConfig;
             };
 
