@@ -36,7 +36,6 @@ in
       };
 
       containers.pvr-movies-monitor = {
-        localMacAddress = "bc:24:11:ac:c5:9d";
         bindMounts.${containerSecretPath} = {
           hostPath = secret.path;
           isReadOnly = true;

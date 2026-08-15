@@ -44,6 +44,8 @@ in
         monitor = disabled;
       };
 
+      bentopdf = enabled;
+
       gatus = disabled // {
         port = 8080;
         externalEndpoints = [ ];
