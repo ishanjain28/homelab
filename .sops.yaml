@@ -1,0 +1,4 @@
+creation_rules:
+  - path_regex: .*secrets/.*\.(env|yaml)$
+    age: >-
+      age13ks0vqf5dnavpq29ukkuhwgk4a2r5cdk52g9ls0aalcd0wg6yy2sq2fpwc, ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO3v+iBjoxCB44gjlgVMZuKb3lFYWlBeAxdJ38tSWIkC root@work, ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise

@@ -1,12 +1,23 @@
-{ lib, pkgs, namespace, ... }:
+{
+  lib,
+  pkgs,
+  namespace,
+  ...
+}:
 with lib;
 with lib.${namespace};
-let hostName = "kepler";
-in {
-  imports = [ ./disk-config.nix ./hardware-configuration.nix ];
+let
+  hostName = "kepler";
+in
+{
+  imports = [
+    ./disk-config.nix
+    ./hardware-configuration.nix
+  ];
 
   homelab = {
     server = enabled;
+    secrets = enabled;
 
     services = {
       ssh = enabled // {
@@ -16,9 +27,9 @@ in {
       };
 
       pvr-movies-monitor = enabled // {
-        host = "0.0.0.0";
-        port = 3000;
-        apiKey = "test-key";
+        monitor = enabled // {
+          protocol = "tcp";
+        };
         volumeConfig = {
           root = mkMigratableContainerVolume {
             name = "pvr-movies-monitor";
@@ -27,6 +38,11 @@ in {
             uuid = "63d76b1a-8531-4836-8961-7360f068697b";
           };
         };
+      };
+
+      gatus = disabled // {
+        port = 8080;
+        externalEndpoints = [ ];
       };
     };
 
@@ -53,17 +69,37 @@ in {
           # Add PHYs to the Bridge
           "30-uplinks" = {
             matchConfig.Name = "eth*";
-            networkConfig.Bridge = "br0";
+            networkConfig = {
+              Bridge = "br0";
+            };
+            linkConfig.RequiredForOnline = "no";
             # Add allowed VLANs to the Trunk Port
-            bridgeVLANs = [{ VLAN = [ 10 20 30 40 50 60 70 99 140 150 160 ]; }];
+            bridgeVLANs = [
+              {
+                VLAN = [
+                  10
+                  20
+                  30
+                  40
+                  50
+                  60
+                  70
+                  99
+                  140
+                  150
+                  160
+                ];
+              }
+            ];
           };
           # Attach the Host Management VLAN to the Bridge.
           "30-br0" = {
             matchConfig.Name = "br0";
+            linkConfig.RequiredForOnline = "no";
             # Add VLAN99 interface to the bridge to access the host.
             vlan = [ "vlan99" ];
             # Add VLAN to the Bridge (CPU)
-            bridgeVLANs = [{ VLAN = [ 99 ]; }];
+            bridgeVLANs = [ { VLAN = [ 99 ]; } ];
           };
           # "30-vb-vlan99-containers" = {
           #   matchConfig.Name = "vb-a*"; # Matches nspawn default vbridge prefix
@@ -94,23 +130,32 @@ in {
   };
 
   # Enable passwordless sudo.
-  security.sudo.extraRules = [{
-    users = [ "ishan" ];
-    commands = [{
-      command = "ALL";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
+  security.sudo.extraRules = [
+    {
+      users = [ "ishan" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
-  systemd.targets.multi-user.enable = true;
+  systemd.targets.multi-user = enabled;
 
-  nix = mkNixConfig { inherit lib pkgs; } // { optimise.automatic = true; };
+  nix = mkNixConfig { inherit lib pkgs; } // {
+    optimise.automatic = true;
+  };
 
   users = {
     mutableUsers = false;
     users.ishan = {
       uid = 1000;
-      extraGroups = [ "wheel" "networkmanager" ];
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+      ];
       isSystemUser = true;
       group = "users";
       createHome = true;
@@ -120,8 +165,7 @@ in {
       isNormalUser = false;
       ignoreShellProgramCheck = true;
       shell = pkgs.fish;
-      hashedPassword =
-        "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
+      hashedPassword = "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
     };
   };
 

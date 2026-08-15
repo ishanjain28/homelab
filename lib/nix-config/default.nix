@@ -30,6 +30,7 @@
         log-lines = 20;
         max-jobs = "auto";
         sandbox = lib.mkForce (!pkgs.stdenv.isDarwin);
+        substitute = false;
         trusted-users = [
           "root"
           "ishan"
