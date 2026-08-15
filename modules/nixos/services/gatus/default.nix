@@ -80,7 +80,7 @@ in
       name = "gatus";
       description = "Monitoring service for homelab";
       vlan = 50;
-      inherit (cfg) port;
+      port = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";
       environment = {
