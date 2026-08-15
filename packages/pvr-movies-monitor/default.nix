@@ -1,6 +1,5 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 let
-  craneLib = inputs.crane.mkLib pkgs;
   src = pkgs.fetchFromGitea {
     domain = "git.ishanjain.me";
     owner = "ishan";
@@ -9,9 +8,10 @@ let
     hash = "sha256-jUWqLNxr/SQdZ7T+m7YbCW8XmuEp1OOlNWSCbqxU/3k=";
   };
 in
-craneLib.buildPackage {
+pkgs.rustPlatform.buildRustPackage {
   pname = "pvr-movies-monitor";
   version = "0.1.5";
   inherit src;
-  strictDeps = true;
+
+  cargoHash = "sha256-HCIOtWMOwA7Z2IHuQ13fh1Ux+COkNefrGClADOt7Q18=";
 }

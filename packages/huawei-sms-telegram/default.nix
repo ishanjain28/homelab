@@ -1,6 +1,5 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 let
-  craneLib = inputs.crane.mkLib pkgs;
   src = pkgs.fetchFromGitea {
     domain = "git.ishanjain.me";
     owner = "ishan";
@@ -9,9 +8,15 @@ let
     hash = "sha256-KHpCGS7WOm91RLT6dQ4Gz5ev33xg4Xtnp1VA1sMBGck=";
   };
 in
-craneLib.buildPackage {
+pkgs.rustPlatform.buildRustPackage {
   pname = "huawei-sms-telegram";
   version = "0.1.0";
   inherit src;
-  strictDeps = true;
+
+  cargoHash = "sha256-x1kfreRrkEYXeraD6KC+H4Qr3tprgYCHNYIYdXLpGdM=";
+
+  nativeBuildInputs = [ pkgs.pkg-config ];
+  buildInputs = [ pkgs.openssl ];
+
+  RUSTC_BOOTSTRAP = 1;
 }
