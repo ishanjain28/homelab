@@ -41,6 +41,7 @@ in
       description = "Huawei 5G Modem messages to Telegram";
       vlan = 50;
       package = pkgs.${namespace}.huawei-sms-telegram;
+      exec = "/bin/huawei-msg";
       environment = {
         RUST_LOG = "info";
       };
