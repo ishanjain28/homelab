@@ -113,8 +113,7 @@ let
     {
       name,
       vlan,
-      ports ? port,
-      port ? [ ],
+      ports ? [ ],
       secrets ? { },
       containerConfig ? { },
       isolationProfile ? "unprivileged",
@@ -173,6 +172,7 @@ let
   genServiceOptions =
     {
       name,
+      port ? null,
       monitor ? { },
     }:
     let
@@ -180,6 +180,8 @@ let
     in
     {
       enable = mkEnableOption name;
+
+      port = mkOpt (types.nullOr types.port) port "Primary listener port for this service container.";
 
       vlan = mkOption {
         type = types.port;
@@ -203,7 +205,7 @@ let
           "icmpv6"
         ]) protocol "Gatus check protocol.";
         address = mkOpt types.str (monitor.address or "") "Gatus check address.";
-        port = mkOpt types.port monitor.port "Gatus check port.";
+        port = mkOpt (types.nullOr types.port) (monitor.port or null) "Gatus check port.";
         path = mkOpt types.str (monitor.path or "/") "Gatus HTTP path.";
         interval = mkOpt types.str (monitor.interval or "30s") "Gatus check interval.";
         conditions = mkOpt (types.listOf types.str) (monitor.conditions or (
@@ -223,8 +225,7 @@ let
       package ? null,
       command ? null,
       vlan,
-      ports ? port,
-      port ? [ ],
+      ports ? [ ],
       secrets ? { },
       description ? name,
       exec ? "/bin/${name}",

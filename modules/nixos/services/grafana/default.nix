@@ -14,17 +14,13 @@ let
   ldapConfigPath = "/run/container-secrets/ldap.toml";
 in
 {
-  options.${namespace}.services.grafana =
-    mkServiceOptions {
-      name = "grafana";
-      monitor = {
-        inherit (cfg) port;
-        protocol = "http";
-      };
-    }
-    // (with types; {
-      port = mkOpt port 3000 "Grafana HTTP port.";
-    });
+  options.${namespace}.services.grafana = mkServiceOptions {
+    name = "grafana";
+    port = 3000;
+    monitor = {
+      protocol = "http";
+    };
+  };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "grafana";

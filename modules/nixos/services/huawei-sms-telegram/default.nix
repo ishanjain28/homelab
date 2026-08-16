@@ -15,9 +15,8 @@ in
 {
   options.${namespace}.services.huawei-sms-telegram = mkServiceOptions {
     name = "huawei-sms-telegram";
-    monitor = {
-      inherit (cfg) port;
-    };
+    # No way to monitor it yet
+    monitor = disabled;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
