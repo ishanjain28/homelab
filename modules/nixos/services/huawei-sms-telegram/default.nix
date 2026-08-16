@@ -38,7 +38,7 @@ in
       };
     }
 
-    (mkNspawnService {
+    (mkSingleServiceContainer {
       name = "huawei-sms-telegram";
       description = "Huawei 5G Modem messages to Telegram";
       vlan = 50;

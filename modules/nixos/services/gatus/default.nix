@@ -78,19 +78,16 @@ in
       };
     }
 
-    (mkNspawnService {
+    (mkSingleServiceContainer {
       name = "gatus";
       description = "Monitoring service for homelab";
       vlan = 50;
-      port = [ cfg.port ];
+      ports = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";
       hardeningProfile = "network-monitor";
       environment = {
         GATUS_CONFIG_PATH = "${config.services.gatus.configFile}";
-      };
-      containerConfig = {
-        networking.firewall.allowedTCPPorts = [ cfg.port ];
       };
       serviceConfig = {
         Restart = "always";
