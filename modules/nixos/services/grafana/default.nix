@@ -33,13 +33,13 @@ in
     secrets = {
       config = {
         name = "grafana-ini";
-        file = "secrets/grafana/grafana.ini.sops";
+        file = "secrets/grafana/grafana.ini";
         format = "binary";
         mountPath = grafanaConfigPath;
       };
       ldap = {
         name = "grafana-ldap";
-        file = "secrets/grafana/ldap.toml.sops";
+        file = "secrets/grafana/ldap.toml";
         format = "binary";
         mountPath = ldapConfigPath;
       };
