@@ -10,8 +10,8 @@ with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.lldap;
-  containerEnvPath = "/run/container-secrets/lldap.env";
-  containerKeyPath = "/run/container-secrets/lldap-server-key";
+  confPath = "/run/container-secrets/config.toml";
+  containerKeyPath = "/run/container-secrets/server-key";
 in
 {
   options.${namespace}.services.lldap =
@@ -25,9 +25,6 @@ in
     // (with types; {
       ldapPort = mkOpt port 389 "LLDAP LDAP listener port.";
       httpPort = mkOpt port 17170 "LLDAP HTTP listener port.";
-      ldapBaseDn = mkOpt str "dc=home,dc=arpa" "LLDAP base DN.";
-      httpUrl = mkOpt str "http://localhost:17170" "LLDAP public URL.";
-      ldapUserEmail = mkOpt str "admin@example.com" "Initial admin email.";
     });
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
@@ -39,16 +36,16 @@ in
       cfg.httpPort
     ];
     package = pkgs.lldap;
-    exec = "/bin/lldap run";
+    exec = "/bin/lldap run -c ${confPath}";
     secrets = {
       env = {
-        name = "lldap-env";
-        file = "secrets/lldap/env.env";
-        format = "dotenv";
-        mountPath = containerEnvPath;
+        name = "config";
+        file = "secrets/lldap/config.toml";
+        format = "binary";
+        mountPath = confPath;
       };
       serverKey = {
-        name = "lldap-server-key";
+        name = "server-key";
         file = "secrets/lldap/server.key";
         format = "binary";
         mountPath = containerKeyPath;
@@ -61,19 +58,11 @@ in
     };
 
     environment = {
-      LLDAP_LDAP_HOST = "0.0.0.0";
-      LLDAP_LDAP_PORT = toString cfg.ldapPort;
-      LLDAP_HTTP_HOST = "0.0.0.0";
-      LLDAP_HTTP_PORT = toString cfg.httpPort;
-      LLDAP_HTTP_URL = cfg.httpUrl;
-      LLDAP_LDAP_BASE_DN = cfg.ldapBaseDn;
-      LLDAP_LDAP_USER_EMAIL = cfg.ldapUserEmail;
       LLDAP_KEY_FILE = containerKeyPath;
     };
 
     serviceConfig = {
-      EnvironmentFile = containerEnvPath;
-      Restart = "always";
+      Restart = "on-failure";
       RestartSec = "5s";
 
       AmbientCapabilities = "CAP_NET_BIND_SERVICE";
