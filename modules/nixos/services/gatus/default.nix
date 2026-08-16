@@ -13,16 +13,24 @@ let
   containerSecretPath = "/run/container-secrets/gatus.env";
 in
 {
-  options.${namespace}.services.gatus = with types; {
-    enable = mkBoolOpt true "Whether to enable Gatus.";
-    openFirewall = mkBoolOpt true "Whether to open the Gatus web UI port.";
-    address = mkOpt str "0.0.0.0" "Bind address";
-    port = mkOpt port 8080 "Gatus web UI port.";
-    defaultInterval = mkOpt str "30s" "Default interval for generated service checks.";
-    externalEndpoints =
-      mkOpt (listOf attrs) [ ]
-        "Additional raw Gatus endpoints for cameras and infrastructure.";
-  };
+  options.${namespace}.services.gatus =
+    mkServiceOptions {
+      name = "gatus";
+      monitor = {
+        inherit (cfg) port;
+        protocol = "http";
+      };
+    }
+    // (with types; {
+      enable = mkBoolOpt true "Whether to enable Gatus.";
+      openFirewall = mkBoolOpt true "Whether to open the Gatus web UI port.";
+      address = mkOpt str "0.0.0.0" "Bind address";
+      port = mkOpt port 8080 "Gatus web UI port.";
+      defaultInterval = mkOpt str "30s" "Default interval for generated service checks.";
+      externalEndpoints =
+        mkOpt (listOf attrs) [ ]
+          "Additional raw Gatus endpoints for cameras and infrastructure.";
+    });
 
   config = mkIf cfg.enable (mkMerge [
     {
@@ -64,7 +72,7 @@ in
     (mkSingleServiceContainer {
       name = "gatus";
       description = "Monitoring service for homelab";
-      vlan = 50;
+      inherit (cfg) vlan;
       ports = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";

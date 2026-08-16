@@ -27,6 +27,7 @@ in
       };
 
       pvr-movies-monitor = enabled // {
+        vlan = 50;
         monitor = enabled // {
           protocol = "tcp";
         };
@@ -41,12 +42,16 @@ in
       };
 
       huawei-sms-telegram = enabled // {
+        vlan = 50;
         monitor = disabled;
       };
 
-      bentopdf = enabled;
+      bentopdf = enabled // {
+        vlan = 50;
+      };
 
       lldap = enabled // {
+        vlan = 50;
         httpUrl = "https://ldap.ishanjain.me";
         ldapBaseDn = "dc=ishanjain,dc=me";
         ldapUserEmail = "admin@direct.home.ishanjain.me";
@@ -59,7 +64,13 @@ in
         maxmemory = "256mb";
       };
 
+      grafana = enabled // {
+        vlan = 50;
+        port = 3000;
+      };
+
       gatus = disabled // {
+        vlan = 50;
         port = 8080;
         externalEndpoints = [ ];
       };

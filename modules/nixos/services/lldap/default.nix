@@ -33,7 +33,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "lldap";
     description = "LDAP server";
-    vlan = 50;
+    inherit (cfg) vlan;
     ports = [
       cfg.ldapPort
       cfg.httpPort
