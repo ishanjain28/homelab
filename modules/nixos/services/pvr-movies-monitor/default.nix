@@ -43,11 +43,11 @@ in
       };
     }
 
-    (mkNspawnService {
+    (mkSingleServiceContainer {
       name = "pvr-movies-monitor";
       description = "PVR Movies Monitoring Service";
       vlan = 50;
-      port = [ cfg.port ];
+      ports = [ cfg.port ];
       package = pkgs.${namespace}.pvr-movies-monitor;
       resources = {
         CPUQuota = "100%";

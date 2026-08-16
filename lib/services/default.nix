@@ -21,7 +21,8 @@ let
     in
     "02:${octet 0}:${octet 2}:${octet 4}:${octet 6}:${octet 8}";
 
-  genBridgedContainer =
+  # Container mechanics only: nspawn, bridge/VLAN, stable MAC, and host limits.
+  genContainerBase =
     {
       name,
       vlan,
@@ -66,6 +67,74 @@ let
       systemd.services."container@${name}".serviceConfig = resources;
     };
 
+  genContainerDefaults =
+    {
+      name,
+      ports ? [ ],
+    }:
+    {
+      networking = {
+        networkmanager = disabled;
+        useHostResolvConf = false;
+        firewall = enabled // {
+          allowedTCPPorts = ports;
+        };
+      };
+
+      # Fix for https://github.com/NixOS/nixpkgs/issues/493934
+      security.pam.services.login.updateWtmp = mkForce false;
+
+      documentation = disabled;
+      environment.defaultPackages = mkForce [ ];
+      environment.systemPackages = mkForce [ ];
+      nix = disabled;
+      programs.command-not-found = disabled;
+
+      systemd.network = enabled // {
+        networks."30-eth0" = {
+          matchConfig.Name = "eth0";
+          networkConfig = {
+            Description = "${name} service container interface";
+            DHCP = "yes";
+            IPv6AcceptRA = "yes";
+            LLDP = "no";
+            EmitLLDP = "no";
+            LLMNR = "no";
+          };
+        };
+      };
+
+      system.stateVersion = "26.05";
+    };
+
+  # Default homelab service container: minimal NixOS guest plus arbitrary inner config.
+  genServiceContainer =
+    {
+      name,
+      vlan,
+      ports ? port,
+      port ? [ ],
+      containerConfig ? { },
+      isolationProfile ? "unprivileged",
+      macAddress ? mkContainerMacAddress name,
+      resources ? { },
+      specialArgs ? { },
+    }:
+    genContainerBase {
+      inherit
+        name
+        vlan
+        isolationProfile
+        macAddress
+        resources
+        specialArgs
+        ;
+      config = mkMerge [
+        (genContainerDefaults { inherit name ports; })
+        containerConfig
+      ];
+    };
+
   genServiceOptions =
     {
       name,
@@ -107,14 +176,18 @@ let
       };
     };
 
-  genNspawnService =
+  # Convenience wrapper for the common one-container/one-systemd-service case.
+  genSingleServiceContainer =
     {
       name,
-      package,
+      package ? null,
+      command ? null,
       vlan,
+      ports ? port,
       port ? [ ],
       description ? name,
       exec ? "/bin/${name}",
+      serviceName ? name,
       environment ? { },
       serviceConfig ? { },
       containerConfig ? { },
@@ -126,75 +199,49 @@ let
     }:
     let
       hardeningConfig = getNspawnHardeningProfile hardeningProfile;
+      execStart =
+        if command != null then
+          command
+        else if package != null then
+          "${package}${exec}"
+        else
+          throw "mkSingleServiceContainer '${name}' requires either 'command' or 'package'.";
     in
-    genBridgedContainer {
+    genServiceContainer {
       inherit
         name
         vlan
+        ports
         isolationProfile
         macAddress
         resources
         ;
       specialArgs = specialArgs // {
-        servicePackage = package;
-        inherit macAddress;
+        inherit package macAddress;
       };
-      config =
-        { servicePackage, ... }:
-        mkMerge [
-          {
-            networking = {
-              networkmanager = disabled;
-              useHostResolvConf = false;
-              firewall = enabled // {
-                allowedTCPPorts = port;
-              };
-            };
-
-            # Fix for https://github.com/NixOS/nixpkgs/issues/493934
-            security.pam.services.login.updateWtmp = mkForce false;
-
-            documentation = disabled;
-            environment.defaultPackages = mkForce [ ];
-            environment.systemPackages = mkForce [ ];
-            nix = disabled;
-            programs.command-not-found = disabled;
-
-            systemd.network = enabled // {
-              networks."30-eth0" = {
-                matchConfig.Name = "eth0";
-                networkConfig = {
-                  Description = "${name} service container interface";
-                  DHCP = "yes";
-                  IPv6AcceptRA = "yes";
-                  LLDP = "no";
-                  EmitLLDP = "no";
-                  LLMNR = "no";
-                };
-              };
-            };
-
-            systemd.services.${name} = {
-              inherit description;
-              wantedBy = [ "multi-user.target" ];
-              inherit environment;
-              serviceConfig = {
-                ExecStart = "${servicePackage}${exec}";
-                Restart = "always";
-                DynamicUser = true;
-              }
-              // hardeningConfig
-              // serviceConfig;
-            };
-
-            system.stateVersion = "26.05";
-          }
-          containerConfig
-        ];
+      containerConfig = mkMerge [
+        {
+          systemd.services.${serviceName} = {
+            inherit description;
+            wantedBy = [ "multi-user.target" ];
+            inherit environment;
+            serviceConfig = {
+              ExecStart = execStart;
+              Restart = "always";
+              DynamicUser = true;
+            }
+            // hardeningConfig
+            // serviceConfig;
+          };
+        }
+        containerConfig
+      ];
     };
 in
 {
-  mkBridgedContainer = genBridgedContainer;
+  mkContainerBase = genContainerBase;
   mkServiceOptions = genServiceOptions;
-  mkNspawnService = genNspawnService;
+  mkServiceContainer = genServiceContainer;
+  mkSingleServiceContainer = genSingleServiceContainer;
+
 }

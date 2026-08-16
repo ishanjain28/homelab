@@ -24,15 +24,11 @@ in
       port = mkOpt port 8080 "Listener Port";
     });
 
-  config = mkIf cfg.enable (mkNspawnService {
+  config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "bentopdf";
     description = "Bentopdf";
     vlan = 50;
-    port = [ cfg.port ];
-    package = pkgs.caddy;
-
-    isolationProfile = "unprivileged";
-    hardeningProfile = "default";
+    ports = [ cfg.port ];
 
     resources = {
       CPUQuota = "100%";
@@ -40,8 +36,6 @@ in
       TasksMax = 256;
     };
 
-    serviceConfig = {
-      ExecStart = "${pkgs.caddy}/bin/caddy file-server --listen :${toString cfg.port} --root ${pkgs.bentopdf}";
-    };
+    command = "${pkgs.caddy}/bin/caddy file-server --listen :${toString cfg.port} --root ${pkgs.bentopdf}";
   });
 }

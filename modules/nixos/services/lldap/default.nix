@@ -61,20 +61,16 @@ in
       };
     }
 
-    (mkNspawnService {
+    (mkSingleServiceContainer {
       name = "lldap";
       description = "LDAP server";
       vlan = 50;
-      port = [
+      ports = [
         cfg.ldapPort
         cfg.httpPort
       ];
       package = pkgs.lldap;
       exec = "/bin/lldap run";
-
-      isolationProfile = "unprivileged";
-      hardeningProfile = "default";
-
       resources = {
         CPUQuota = "100%";
         MemoryMax = "512M";
