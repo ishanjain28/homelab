@@ -52,6 +52,13 @@ in
         ldapUserEmail = "admin@direct.home.ishanjain.me";
       };
 
+      redis = enabled // {
+        vlan = 50;
+        port = 6379;
+        bind = "0.0.0.0";
+        maxmemory = "256mb";
+      };
+
       gatus = disabled // {
         port = 8080;
         externalEndpoints = [ ];

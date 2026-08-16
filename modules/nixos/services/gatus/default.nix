@@ -10,7 +10,6 @@ with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.gatus;
-  secret = config.sops.secrets.gatus;
   containerSecretPath = "/run/container-secrets/gatus.env";
 in
 {
@@ -26,22 +25,6 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    {
-      sops.secrets.gatus = {
-        sopsFile = snowfall.fs.get-file "secrets/gatus.env";
-        format = "dotenv";
-        mode = "0444";
-        restartUnits = [ "container@gatus.service" ];
-      };
-
-      containers.gatus = {
-        bindMounts.${containerSecretPath} = {
-          hostPath = secret.path;
-          isReadOnly = true;
-        };
-      };
-    }
-
     {
       services.gatus = disabled // {
         settings = {
@@ -86,6 +69,12 @@ in
       package = pkgs.gatus;
       exec = "/bin/gatus";
       hardeningProfile = "network-monitor";
+      secrets.env = {
+        name = "gatus";
+        file = "secrets/gatus.env";
+        format = "dotenv";
+        mountPath = containerSecretPath;
+      };
       environment = {
         GATUS_CONFIG_PATH = "${config.services.gatus.configFile}";
       };

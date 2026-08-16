@@ -4,6 +4,7 @@ with lib.${namespace};
 let
   inherit (lib)
     mkEnableOption
+    mapAttrsToList
     mkMerge
     mkForce
     types
@@ -114,26 +115,60 @@ let
       vlan,
       ports ? port,
       port ? [ ],
+      secrets ? { },
       containerConfig ? { },
       isolationProfile ? "unprivileged",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
       specialArgs ? { },
     }:
-    genContainerBase {
-      inherit
-        name
-        vlan
-        isolationProfile
-        macAddress
-        resources
-        specialArgs
-        ;
-      config = mkMerge [
-        (genContainerDefaults { inherit name ports; })
-        containerConfig
-      ];
-    };
+    let
+      repoRoot = ../..;
+      mkSecretName = secretName: secret: secret.name or "${name}-${secretName}";
+      secretConfig = mkMerge (
+        mapAttrsToList (
+          secretName: secret:
+          let
+            sopsName = mkSecretName secretName secret;
+            inherit (secret) mountPath;
+            hostPath = secret.path or "/run/secrets/${sopsName}";
+          in
+          {
+            sops.secrets.${sopsName} = {
+              sopsFile = repoRoot + "/${secret.file}";
+              format = secret.format or "dotenv";
+              # With privateUsers = "pick", container root is not host root.
+              # Read-only bind-mounted secrets must be readable by the mapped uid.
+              mode = secret.mode or "0444";
+              restartUnits = secret.restartUnits or [ "container@${name}.service" ];
+            }
+            // optionalAttrs (secret ? path) { inherit (secret) path; };
+
+            containers.${name}.bindMounts.${mountPath} = {
+              inherit hostPath;
+              isReadOnly = true;
+            };
+          }
+        ) secrets
+      );
+    in
+    mkMerge [
+      secretConfig
+      (genContainerBase {
+        inherit
+          name
+          vlan
+          isolationProfile
+          macAddress
+          resources
+          specialArgs
+          ;
+        config = mkMerge [
+          (genContainerDefaults { inherit name ports; })
+          containerConfig
+        ];
+      })
+    ];
 
   genServiceOptions =
     {
@@ -185,6 +220,7 @@ let
       vlan,
       ports ? port,
       port ? [ ],
+      secrets ? { },
       description ? name,
       exec ? "/bin/${name}",
       serviceName ? name,
@@ -212,6 +248,7 @@ let
         name
         vlan
         ports
+        secrets
         isolationProfile
         macAddress
         resources
@@ -243,5 +280,4 @@ in
   mkServiceOptions = genServiceOptions;
   mkServiceContainer = genServiceContainer;
   mkSingleServiceContainer = genSingleServiceContainer;
-
 }
