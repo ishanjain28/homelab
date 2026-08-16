@@ -62,15 +62,10 @@ in
 
       lldap = enabled // {
         vlan = 50;
-        httpUrl = "https://ldap.ishanjain.me";
-        ldapBaseDn = "dc=ishanjain,dc=me";
-        ldapUserEmail = "admin@direct.home.ishanjain.me";
       };
 
-      redis = enabled // {
+      authelia = enabled // {
         vlan = 50;
-        port = 6379;
-        maxmemory = "256mb";
       };
 
       grafana = enabled // {
