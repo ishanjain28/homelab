@@ -16,13 +16,10 @@ in
   options.${namespace}.services.pvr-movies-monitor =
     mkServiceOptions {
       name = "pvr-movies-monitor";
-      monitor = {
-        inherit (cfg) port;
-      };
+      port = 3000;
     }
     // (with types; {
       host = mkOpt str "0.0.0.0" "Host";
-      port = mkOpt port 3000 "Port";
     });
 
   config = mkIf cfg.enable (mkSingleServiceContainer {

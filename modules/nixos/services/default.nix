@@ -33,7 +33,7 @@ let
       domain = config.${namespace}.hardware.networking.domain;
       defaultAddress = if domain != "" then "${serviceName}.${domain}" else serviceName;
       address = if monitor.address != "" then monitor.address else defaultAddress;
-      port = monitor.port or srv.port;
+      port = if monitor.port != null then monitor.port else srv.port;
       path = monitor.path or "/";
       url =
         if protocol == "http" || protocol == "https" then

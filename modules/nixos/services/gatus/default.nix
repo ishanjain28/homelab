@@ -16,8 +16,8 @@ in
   options.${namespace}.services.gatus =
     mkServiceOptions {
       name = "gatus";
+      port = 8080;
       monitor = {
-        inherit (cfg) port;
         protocol = "http";
       };
     }
@@ -25,7 +25,6 @@ in
       enable = mkBoolOpt true "Whether to enable Gatus.";
       openFirewall = mkBoolOpt true "Whether to open the Gatus web UI port.";
       address = mkOpt str "0.0.0.0" "Bind address";
-      port = mkOpt port 8080 "Gatus web UI port.";
       defaultInterval = mkOpt str "30s" "Default interval for generated service checks.";
       externalEndpoints =
         mkOpt (listOf attrs) [ ]

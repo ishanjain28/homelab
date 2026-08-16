@@ -12,17 +12,13 @@ let
   cfg = srv.bentopdf;
 in
 {
-  options.${namespace}.services.bentopdf =
-    mkServiceOptions {
-      name = "bentopdf";
-      monitor = {
-        inherit (cfg) port;
-        protocol = "http";
-      };
-    }
-    // (with types; {
-      port = mkOpt port 8080 "Listener Port";
-    });
+  options.${namespace}.services.bentopdf = mkServiceOptions {
+    name = "bentopdf";
+    port = 8080;
+    monitor = {
+      protocol = "http";
+    };
+  };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "bentopdf";

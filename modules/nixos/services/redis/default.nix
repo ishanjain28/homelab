@@ -15,13 +15,12 @@ in
   options.${namespace}.services.redis =
     mkServiceOptions {
       name = "redis";
+      port = 6379;
       monitor = {
-        inherit (cfg) port;
         protocol = "tcp";
       };
     }
     // (with types; {
-      port = mkOpt port 6379 "Redis TCP port.";
       bind = mkOpt str "0.0.0.0" "Redis bind address inside the container.";
       maxmemory = mkOpt str "256mb" "Redis maxmemory setting.";
     });

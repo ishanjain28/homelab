@@ -69,6 +69,11 @@ in
         port = 3000;
       };
 
+      mathesar = enabled // {
+        vlan = 50;
+        port = 5001;
+      };
+
       gatus = disabled // {
         vlan = 50;
         port = 8080;
