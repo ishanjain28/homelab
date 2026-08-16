@@ -45,7 +45,7 @@ in
     containerConfig = {
       services.redis.servers."" = {
         enable = true;
-        inherit (cfg) port bind;
+        inherit (cfg) bind port;
         openFirewall = true;
         requirePassFile = containerPasswordPath;
 

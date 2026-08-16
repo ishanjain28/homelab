@@ -19,11 +19,28 @@ in
     server = enabled;
     secrets = enabled;
 
+    # volumes.pvr-movies-monitor = {
+    #   uuid = "63d76b1a-8531-4836-8961-7360f068697b";
+    #   host = hostName;
+    #   ownerService = "pvr-movies-monitor";
+    #   mountPath = "/var/lib/pvr-monitor";
+    #   size = "1G";
+    #   migratable = true;
+    #   owner = {
+    #     user = "pvr-movies-monitor";
+    #     uid = 20001;
+    #     group = "pvr-movies-monitor";
+    #     gid = 20001;
+    #     namespaceBase = 131072;
+    #     mode = "0700";
+    #   };
+    # };
+
     services = {
       ssh = enabled // {
         addRootKeys = true;
         passwordAuth = false;
-        permitRootLogin = true;
+        permitRootLogin = false;
       };
 
       pvr-movies-monitor = enabled // {
@@ -31,14 +48,7 @@ in
         monitor = enabled // {
           protocol = "tcp";
         };
-        volumeConfig = {
-          root = mkMigratableContainerVolume {
-            name = "pvr-movies-monitor";
-            size = "1G";
-            containerPath = "/var/lib/pvr-monitor";
-            uuid = "63d76b1a-8531-4836-8961-7360f068697b";
-          };
-        };
+        # volumes = [ "pvr-movies-monitor" ];
       };
 
       huawei-sms-telegram = enabled // {
@@ -60,7 +70,6 @@ in
       redis = enabled // {
         vlan = 50;
         port = 6379;
-        bind = "0.0.0.0";
         maxmemory = "256mb";
       };
 
