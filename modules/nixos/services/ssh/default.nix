@@ -27,7 +27,7 @@ in
     services.openssh = enabled // {
       inherit (cfg) package;
       settings = {
-        X11Forwarding = mkDefault true;
+        X11Forwarding = mkDefault false;
         PermitRootLogin = mkForce (bool-to-yes-no cfg.permitRootLogin);
         PasswordAuthentication = mkDefault cfg.passwordAuth;
       };

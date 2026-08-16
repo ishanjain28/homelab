@@ -46,6 +46,12 @@ in
 
       bentopdf = enabled;
 
+      lldap = enabled // {
+        httpUrl = "https://ldap.ishanjain.me";
+        ldapBaseDn = "dc=ishanjain,dc=me";
+        ldapUserEmail = "admin@direct.home.ishanjain.me";
+      };
+
       gatus = disabled // {
         port = 8080;
         externalEndpoints = [ ];

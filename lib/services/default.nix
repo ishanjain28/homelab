@@ -13,6 +13,13 @@ let
     getNspawnHardeningProfile
     getNspawnIsolationProfile
     ;
+  mkContainerMacAddress =
+    name:
+    let
+      hash = builtins.hashString "sha256" name;
+      octet = offset: builtins.substring offset 2 hash;
+    in
+    "02:${octet 0}:${octet 2}:${octet 4}:${octet 6}:${octet 8}";
 
   genBridgedContainer =
     {
@@ -20,6 +27,7 @@ let
       vlan,
       config,
       isolationProfile ? "unprivileged",
+      macAddress ? mkContainerMacAddress name,
       resources ? { },
       specialArgs ? { },
     }:
@@ -31,6 +39,7 @@ let
       containers.${name} = isolationConfig // {
         autoStart = true;
         privateNetwork = true;
+        localMacAddress = macAddress;
         # Plug into host bridge
         hostBridge = "br0";
 
@@ -111,6 +120,7 @@ let
       containerConfig ? { },
       isolationProfile ? "unprivileged",
       hardeningProfile ? "default",
+      macAddress ? mkContainerMacAddress name,
       resources ? { },
       specialArgs ? { },
     }:
@@ -122,10 +132,12 @@ let
         name
         vlan
         isolationProfile
+        macAddress
         resources
         ;
       specialArgs = specialArgs // {
         servicePackage = package;
+        inherit macAddress;
       };
       config =
         { servicePackage, ... }:
