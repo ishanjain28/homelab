@@ -10,7 +10,6 @@ with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.huawei-sms-telegram;
-  secret = config.sops.secrets.huawei-sms-telegram;
   containerSecretPath = "/run/container-secrets/huawei-sms-telegram.env";
 in
 {
@@ -21,40 +20,28 @@ in
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [
-    {
-      sops.secrets.huawei-sms-telegram = {
-        sopsFile = snowfall.fs.get-file "secrets/huawei-sms-telegram.env";
-        format = "dotenv";
-        mode = "0444";
-        restartUnits = [ "container@huawei-sms-telegram.service" ];
-      };
-
-      containers.huawei-sms-telegram = {
-        bindMounts.${containerSecretPath} = {
-          hostPath = secret.path;
-          isReadOnly = true;
-        };
-      };
-    }
-
-    (mkSingleServiceContainer {
+  config = mkIf cfg.enable (mkSingleServiceContainer {
+    name = "huawei-sms-telegram";
+    description = "Huawei 5G Modem messages to Telegram";
+    vlan = 50;
+    secrets.env = {
       name = "huawei-sms-telegram";
-      description = "Huawei 5G Modem messages to Telegram";
-      vlan = 50;
-      resources = {
-        CPUQuota = "100%";
-        MemoryMax = "128M";
-        TasksMax = 256;
-      };
-      package = pkgs.${namespace}.huawei-sms-telegram;
-      exec = "/bin/huawei-msg";
-      environment = {
-        RUST_LOG = "info";
-      };
-      serviceConfig = {
-        EnvironmentFile = containerSecretPath;
-      };
-    })
-  ]);
+      file = "secrets/huawei-sms-telegram.env";
+      format = "dotenv";
+      mountPath = containerSecretPath;
+    };
+    resources = {
+      CPUQuota = "100%";
+      MemoryMax = "128M";
+      TasksMax = 256;
+    };
+    package = pkgs.${namespace}.huawei-sms-telegram;
+    exec = "/bin/huawei-msg";
+    environment = {
+      RUST_LOG = "info";
+    };
+    serviceConfig = {
+      EnvironmentFile = containerSecretPath;
+    };
+  });
 }
