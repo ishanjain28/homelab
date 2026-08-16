@@ -23,7 +23,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "huawei-sms-telegram";
     description = "Huawei 5G Modem messages to Telegram";
-    vlan = 50;
+    inherit (cfg) vlan;
     secrets.env = {
       name = "huawei-sms-telegram";
       file = "secrets/huawei-sms-telegram.env";

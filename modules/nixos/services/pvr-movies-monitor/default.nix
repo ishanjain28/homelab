@@ -28,7 +28,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "pvr-movies-monitor";
     description = "PVR Movies Monitoring Service";
-    vlan = 50;
+    inherit (cfg) vlan;
     ports = [ cfg.port ];
     package = pkgs.${namespace}.pvr-movies-monitor;
     secrets.env = {

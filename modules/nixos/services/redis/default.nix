@@ -21,10 +21,6 @@ in
       };
     }
     // (with types; {
-      vlan = mkOption {
-        type = port;
-        description = "VLAN ID for the Redis service container.";
-      };
       port = mkOpt port 6379 "Redis TCP port.";
       bind = mkOpt str "0.0.0.0" "Redis bind address inside the container.";
       maxmemory = mkOpt str "256mb" "Redis maxmemory setting.";

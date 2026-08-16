@@ -16,6 +16,8 @@
       nixfmt.includes = [ "*.nix" ];
       statix.includes = [ "*.nix" ];
       shellcheck.excludes = [ "*.envrc" ];
+      taplo.excludes = [ "secrets/**" ];
+      yamlfmt.excludes = [ "secrets/**" ];
     };
   };
 }
