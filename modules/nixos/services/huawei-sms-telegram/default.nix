@@ -30,7 +30,7 @@ in
       mountPath = containerSecretPath;
     };
     resources = {
-      CPUQuota = "100%";
+      CPUQuota = "30%";
       MemoryMax = "128M";
       TasksMax = 256;
     };
@@ -38,6 +38,7 @@ in
     exec = "/bin/huawei-msg";
     environment = {
       RUST_LOG = "info";
+      TOKIO_WORKER_THREADS = "2";
     };
     serviceConfig = {
       EnvironmentFile = containerSecretPath;
