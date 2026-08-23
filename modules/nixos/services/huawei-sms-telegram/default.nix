@@ -23,8 +23,8 @@ in
     name = "huawei-sms-telegram";
     description = "Huawei 5G Modem messages to Telegram";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     secrets.env = {
-      name = "huawei-sms-telegram";
       file = "secrets/huawei-sms-telegram.env";
       format = "dotenv";
       mountPath = containerSecretPath;

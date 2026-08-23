@@ -9,7 +9,8 @@ let
     mkForce
     types
     ;
-  containerProfiles = import ../containers/default.nix { };
+  containerUidOffset = 100000;
+  containerProfiles = import ../containers/default.nix;
   inherit (containerProfiles)
     getNspawnHardeningProfile
     getNspawnIsolationProfile
@@ -31,6 +32,7 @@ let
       isolationProfile ? "unprivileged",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
+      extraFlags ? [ ],
       specialArgs ? { },
     }:
     let
@@ -44,6 +46,7 @@ let
         localMacAddress = macAddress;
         # Plug into host bridge
         hostBridge = "br0";
+        inherit extraFlags;
 
         inherit config;
         inherit specialArgs;
@@ -65,7 +68,10 @@ let
         ];
       };
 
-      systemd.services."container@${name}".serviceConfig = resources;
+      systemd.services."container@${name}".serviceConfig = {
+        TimeoutStopSec = "25s";
+      }
+      // resources;
     };
 
   genContainerDefaults =
@@ -90,6 +96,16 @@ let
       environment.systemPackages = mkForce [ ];
       nix = disabled;
       programs.command-not-found = disabled;
+      services.logind = disabled;
+      services.nscd = disabled;
+      services.getty = disabled;
+      services.timesyncd = disabled;
+      system.nssModules = mkForce [ ];
+      systemd.oomd = disabled;
+      systemd.services."console-getty" = disabled;
+      systemd.services.systemd-update-utmp = disabled;
+      systemd.services.systemd-update-utmp-runlevel = disabled;
+      systemd.services.systemd-user-sessions = disabled;
 
       systemd.network = enabled // {
         networks."30-eth0" = {
@@ -115,30 +131,49 @@ let
       vlan,
       ports ? [ ],
       secrets ? { },
+      runtimeUser,
       containerConfig ? { },
       isolationProfile ? "unprivileged",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
+      extraFlags ? [ ],
       specialArgs ? { },
     }:
     let
       repoRoot = ../..;
-      mkSecretName = secretName: secret: secret.name or "${name}-${secretName}";
+      mkSecretName = secretName: _secret: "${name}-${secretName}";
+      mkContainerUid = secret: secret.uid or runtimeUser.uid;
+      mkContainerGid = secret: secret.gid or (mkContainerUid secret);
+      mkHostUid = secret: containerUidOffset + mkContainerUid secret;
+      mkHostGid = secret: containerUidOffset + mkContainerGid secret;
+      mkSecretHostPath = secretName: "/run/homelab-container-secrets/${name}/${secretName}";
+      mkSecretPrepareLine =
+        secretName: secret:
+        let
+          sopsName = mkSecretName secretName secret;
+          sourcePath = secret.path or "/run/secrets/${sopsName}";
+          hostPath = mkSecretHostPath secretName;
+        in
+        ''
+          install -d -m 0700 -o root -g root ${escapeShellArg "/run/homelab-container-secrets/${name}"}
+          install -m ${secret.mode or "0400"} -o ${toString (mkHostUid secret)} -g ${toString (mkHostGid secret)} ${escapeShellArg sourcePath} ${escapeShellArg hostPath}
+        '';
       secretConfig = mkMerge (
         mapAttrsToList (
           secretName: secret:
           let
             sopsName = mkSecretName secretName secret;
             inherit (secret) mountPath;
-            hostPath = secret.path or "/run/secrets/${sopsName}";
+            hostPath = mkSecretHostPath secretName;
           in
           {
             sops.secrets.${sopsName} = {
               sopsFile = repoRoot + "/${secret.file}";
-              format = secret.format or "dotenv";
-              # With privateUsers = "pick", container root is not host root.
-              # Read-only bind-mounted secrets must be readable by the mapped uid.
-              mode = secret.mode or "0444";
+              format = secret.format or "binary";
+              key = "";
+              owner = "root";
+              group = "root";
+              mode = "0400";
               restartUnits = secret.restartUnits or [ "container@${name}.service" ];
             }
             // optionalAttrs (secret ? path) { inherit (secret) path; };
@@ -153,6 +188,11 @@ let
     in
     mkMerge [
       secretConfig
+      {
+        systemd.services."container@${name}".preStart = concatStringsSep "\n" (
+          mapAttrsToList mkSecretPrepareLine secrets
+        );
+      }
       (genContainerBase {
         inherit
           name
@@ -160,10 +200,19 @@ let
           isolationProfile
           macAddress
           resources
+          extraFlags
           specialArgs
           ;
         config = mkMerge [
           (genContainerDefaults { inherit name ports; })
+          {
+            users.groups.${runtimeUser.group}.gid = mkForce runtimeUser.gid;
+            users.users.${runtimeUser.name} = {
+              isSystemUser = true;
+              uid = mkForce runtimeUser.uid;
+              group = mkForce runtimeUser.group;
+            };
+          }
           containerConfig
         ];
       })
@@ -189,6 +238,19 @@ let
       };
 
       volumes = mkOpt (types.listOf types.str) [ ] "Volume IDs to attach to this service container.";
+
+      runtimeUser = {
+        name = mkOpt types.str name "User that runs this service inside the container.";
+        uid = mkOption {
+          type = types.int;
+          description = "Stable numeric UID for this service inside the container.";
+        };
+        group = mkOpt types.str name "Group that runs this service inside the container.";
+        gid = mkOption {
+          type = types.int;
+          description = "Stable numeric GID for this service inside the container.";
+        };
+      };
 
       monitor = {
         enable = mkBoolOpt (monitor.enable or true) "Whether to generate a Gatus check for this service.";
@@ -231,10 +293,12 @@ let
       environment ? { },
       serviceConfig ? { },
       containerConfig ? { },
+      runtimeUser,
       isolationProfile ? "unprivileged",
       hardeningProfile ? "default",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
+      extraFlags ? [ ],
       specialArgs ? { },
     }:
     let
@@ -252,10 +316,12 @@ let
         name
         vlan
         ports
-        secrets
         isolationProfile
         macAddress
         resources
+        secrets
+        runtimeUser
+        extraFlags
         ;
       specialArgs = specialArgs // {
         inherit package macAddress;
@@ -269,7 +335,10 @@ let
             serviceConfig = {
               ExecStart = execStart;
               Restart = "always";
-              DynamicUser = true;
+              TimeoutStopSec = "20s";
+              DynamicUser = false;
+              User = runtimeUser.name;
+              Group = runtimeUser.group;
             }
             // hardeningConfig
             // serviceConfig;
@@ -280,6 +349,7 @@ let
     };
 in
 {
+  inherit containerUidOffset;
   mkContainerBase = genContainerBase;
   mkServiceOptions = genServiceOptions;
   mkServiceContainer = genServiceContainer;

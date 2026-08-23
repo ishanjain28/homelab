@@ -18,7 +18,6 @@ let
     hasAttr
     length
     mapAttrsToList
-    mkForce
     mkMerge
     optional
     unique
@@ -30,7 +29,6 @@ let
   inherit (cfg) volumes;
   inherit (cfg) deletedVolumes;
   services = cfg.services or { };
-  allServiceNames = attrNames services;
   enabledServices = filterAttrs (_name: srv: srv.enable or false) services;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
@@ -90,59 +88,18 @@ let
     ) volumes
   );
 
-  mixedNamespaceServices = filter (
-    serviceName:
-    let
-      namespaceBases = unique (
-        map (volume: volume.owner.namespaceBase) (serviceVolumes services.${serviceName})
-      );
-    in
-    length namespaceBases > 1
-  ) allServiceNames;
-
-  mixedOwnerServices = filter (
-    serviceName:
-    let
-      ownerPairs = unique (
-        map (volume: "${toString volume.owner.uid}:${toString volume.owner.gid}") (
-          serviceVolumes services.${serviceName}
-        )
-      );
-    in
-    length ownerPairs > 1
-  ) allServiceNames;
-
-  namespaceBasesOnHost = unique (map (volume: volume.owner.namespaceBase) (attrValues volumesOnHost));
-  invalidNamespaceBases = flatten (
-    mapAttrsToList (
-      volumeId: volume:
-      optional (
-        volume.owner.namespaceBase != (builtins.div volume.owner.namespaceBase 65536) * 65536
-      ) "${volumeId}:${toString volume.owner.namespaceBase}"
-    ) volumes
-  );
-  duplicateNamespaceBases = filter (
-    namespaceBase:
-    length (
-      unique (
-        map (volume: volume.ownerService) (
-          filter (volume: volume.owner.namespaceBase == namespaceBase) (attrValues volumesOnHost)
-        )
-      )
-    ) > 1
-  ) namespaceBasesOnHost;
-
   activeDeletedVolumes = filter (volumeId: hasAttr volumeId volumes) (attrNames deletedVolumes);
 
-  ownerHostUid = volume: volume.owner.namespaceBase + volume.owner.uid;
-  ownerHostGid = volume: volume.owner.namespaceBase + volume.owner.gid;
+  volumeOwner = volume: services.${volume.ownerService}.runtimeUser;
+  ownerHostUid = volume: containerUidOffset + (volumeOwner volume).uid;
+  ownerHostGid = volume: containerUidOffset + (volumeOwner volume).gid;
   volumeLvPath = volume: "/dev/pool/${volume.name}";
-  volumeHostMode = volume: removePrefix "0" volume.owner.mode;
+  volumeHostMode = volume: removePrefix "0" volume.mode;
   volumePrepareUnit = volume: "homelab-volume-${volume.name}.service";
 
   mkVolumeHostTmpfilesRule =
     _volumeId: volume:
-    "d ${volumeHostPath volume} ${volume.owner.mode} ${toString (ownerHostUid volume)} ${toString (ownerHostGid volume)} -";
+    "d ${volumeHostPath volume} ${volume.mode} ${toString (ownerHostUid volume)} ${toString (ownerHostGid volume)} -";
 
   mkVolumePrepareScript =
     volumeId: volume:
@@ -306,14 +263,10 @@ let
       lvPath = volumeLvPath volume;
       hostPath = volumeHostPath volume;
       owner = {
-        inherit (volume.owner)
-          user
-          uid
-          group
-          gid
-          mode
-          namespaceBase
-          ;
+        inherit (volume) mode;
+        user = (volumeOwner volume).name;
+        inherit (volumeOwner volume) uid group gid;
+        namespaceBase = containerUidOffset;
         hostUid = ownerHostUid volume;
         hostGid = ownerHostGid volume;
       };
@@ -324,15 +277,11 @@ let
     serviceName: srv:
     let
       attachedVolumes = serviceVolumes srv;
-      firstVolume = builtins.head attachedVolumes;
       hasVolumes = attachedVolumes != [ ];
     in
     if hasVolumes then
       {
         containers.${serviceName} = {
-          privateUsers = mkForce firstVolume.owner.namespaceBase;
-          extraFlags = [ "--private-users-ownership=map" ];
-
           bindMounts = mkMerge (
             map (volume: {
               ${volume.mountPath} = {
@@ -343,24 +292,13 @@ let
           );
 
           config = {
-            users.groups.${firstVolume.owner.group} = {
-              gid = firstVolume.owner.gid;
-            };
-            users.users.${firstVolume.owner.user} = {
-              isSystemUser = true;
-              uid = firstVolume.owner.uid;
-              group = firstVolume.owner.group;
-            };
-
             systemd.tmpfiles.rules = map (
-              volume: "d ${volume.mountPath} ${volume.owner.mode} ${volume.owner.user} ${volume.owner.group} -"
+              volume:
+              let
+                owner = volumeOwner volume;
+              in
+              "d ${volume.mountPath} ${volume.mode} ${owner.name} ${owner.group} -"
             ) attachedVolumes;
-
-            systemd.services.${serviceName}.serviceConfig = {
-              DynamicUser = mkForce false;
-              User = firstVolume.owner.user;
-              Group = firstVolume.owner.group;
-            };
           };
         };
 
@@ -405,29 +343,7 @@ in
             backend = mkOpt (types.enum [ "lvm" ]) "lvm" "Volume backend.";
             migratable = mkBoolOpt false "Whether this volume is managed by migration tooling.";
             readOnly = mkBoolOpt false "Whether to bind mount this volume read-only.";
-            owner = {
-              user = mkOption {
-                type = types.str;
-                description = "User that owns the mounted data inside the container.";
-              };
-              uid = mkOption {
-                type = types.int;
-                description = "Stable numeric UID that owns the mounted data inside the container.";
-              };
-              group = mkOption {
-                type = types.str;
-                description = "Group that owns the mounted data inside the container.";
-              };
-              gid = mkOption {
-                type = types.int;
-                description = "Stable numeric GID that owns the mounted data inside the container.";
-              };
-              namespaceBase = mkOption {
-                type = types.int;
-                description = "Stable host UID/GID namespace base for this unprivileged container.";
-              };
-              mode = mkOpt types.str "0700" "Directory mode for the mounted data inside the container.";
-            };
+            mode = mkOpt types.str "0700" "Directory mode for the mounted data inside the container.";
           };
         }
       )
@@ -474,20 +390,10 @@ in
           message = "Volumes reference missing owner services: ${concatStringsSep ", " missingOwnerServices}";
         }
         {
-          assertion = mixedOwnerServices == [ ];
-          message = "Services have attached volumes with mixed owner UIDs/GIDs: ${concatStringsSep ", " mixedOwnerServices}";
-        }
-        {
-          assertion = mixedNamespaceServices == [ ];
-          message = "Services have attached volumes with mixed namespace bases: ${concatStringsSep ", " mixedNamespaceServices}";
-        }
-        {
-          assertion = invalidNamespaceBases == [ ];
-          message = "Volume namespace bases must be multiples of 65536 for systemd-nspawn ownership adjustment: ${concatStringsSep ", " invalidNamespaceBases}";
-        }
-        {
-          assertion = duplicateNamespaceBases == [ ];
-          message = "Multiple services use the same volume namespace base on ${currentHost}: ${concatStringsSep ", " (map toString duplicateNamespaceBases)}";
+          assertion = all (
+            volume: hasAttr volume.ownerService services && services.${volume.ownerService} ? runtimeUser
+          ) (attrValues volumes);
+          message = "Every volume ownerService must point at a service with runtimeUser.";
         }
         {
           assertion = activeDeletedVolumes == [ ];

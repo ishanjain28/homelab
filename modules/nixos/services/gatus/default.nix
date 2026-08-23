@@ -72,12 +72,12 @@ in
       name = "gatus";
       description = "Monitoring service for homelab";
       inherit (cfg) vlan;
+      inherit (cfg) runtimeUser;
       ports = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";
       hardeningProfile = "network-monitor";
       secrets.env = {
-        name = "gatus";
         file = "secrets/gatus.env";
         format = "dotenv";
         mountPath = containerSecretPath;

@@ -26,19 +26,18 @@ in
     name = "grafana";
     description = "Grafana dashboard service";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     ports = [ cfg.port ];
     package = pkgs.grafana;
     exec = "/bin/grafana server -homepath ${pkgs.grafana}/share/grafana -config ${grafanaConfigPath}";
 
     secrets = {
       config = {
-        name = "grafana-ini";
         file = "secrets/grafana/grafana.ini";
-        format = "binary";
+        format = "ini";
         mountPath = grafanaConfigPath;
       };
       ldap = {
-        name = "grafana-ldap";
         file = "secrets/grafana/ldap.toml";
         format = "binary";
         mountPath = ldapConfigPath;

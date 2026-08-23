@@ -28,6 +28,7 @@ in
   config = mkIf cfg.enable (mkServiceContainer {
     name = "redis";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     ports = [ cfg.port ];
 
     secrets.password = {

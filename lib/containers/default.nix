@@ -1,8 +1,7 @@
-_:
 let
   isolationProfiles = {
     unprivileged = {
-      privateUsers = "pick";
+      privateUsers = 100000;
     };
 
     privileged = {
@@ -19,9 +18,9 @@ let
       MemoryDenyWriteExecute = true;
       PrivateDevices = true;
       PrivateTmp = true;
-      ProtectHome = true;
       ProtectClock = true;
       ProtectControlGroups = true;
+      ProtectHome = true;
       ProtectHostname = true;
       ProtectKernelLogs = true;
       ProtectKernelModules = true;
@@ -46,14 +45,12 @@ let
     };
 
     nesting = default // {
-      PrivateDevices = false;
       RestrictNamespaces = false;
     };
 
     trusted-debug = {
       NoNewPrivileges = true;
       LockPersonality = true;
-      PrivateTmp = true;
       RestrictRealtime = true;
       SystemCallArchitectures = "native";
     };

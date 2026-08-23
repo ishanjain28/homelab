@@ -25,12 +25,12 @@ in
     name = "mathesar";
     description = "Mathesar";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     ports = [ cfg.port ];
     package = pkgs.${namespace}.mathesar;
     exec = "/bin/mathesar run --no-venv --port ${toString cfg.port}";
 
     secrets.env = {
-      name = "mathesar-env";
       file = "secrets/mathesar.env";
       format = "dotenv";
       mountPath = containerEnvPath;
