@@ -31,6 +31,7 @@ in
     name = "lldap";
     description = "LDAP server";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     ports = [
       cfg.ldapPort
       cfg.httpPort
@@ -39,13 +40,11 @@ in
     exec = "/bin/lldap run -c ${confPath}";
     secrets = {
       env = {
-        name = "config";
         file = "secrets/lldap/config.toml";
         format = "binary";
         mountPath = confPath;
       };
-      serverKey = {
-        name = "server-key";
+      server-key = {
         file = "secrets/lldap/server.key";
         format = "binary";
         mountPath = containerKeyPath;

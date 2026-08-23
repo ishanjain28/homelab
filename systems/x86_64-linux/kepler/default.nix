@@ -26,14 +26,7 @@ in
     #   mountPath = "/var/lib/pvr-monitor";
     #   size = "1G";
     #   migratable = true;
-    #   owner = {
-    #     user = "pvr-movies-monitor";
-    #     uid = 20001;
-    #     group = "pvr-movies-monitor";
-    #     gid = 20001;
-    #     namespaceBase = 131072;
-    #     mode = "0700";
-    #   };
+    #   mode = "0700";
     # };
 
     services = {
@@ -45,6 +38,10 @@ in
 
       pvr-movies-monitor = enabled // {
         vlan = 50;
+        runtimeUser = {
+          uid = 20691;
+          gid = 20691;
+        };
         monitor = enabled // {
           protocol = "tcp";
         };
@@ -53,34 +50,62 @@ in
 
       huawei-sms-telegram = enabled // {
         vlan = 50;
+        runtimeUser = {
+          uid = 27777;
+          gid = 27777;
+        };
         monitor = disabled;
       };
 
       bentopdf = enabled // {
         vlan = 50;
+        runtimeUser = {
+          uid = 50715;
+          gid = 50715;
+        };
       };
 
       lldap = enabled // {
         vlan = 50;
+        runtimeUser = {
+          uid = 25457;
+          gid = 25457;
+        };
       };
 
       authelia = enabled // {
         vlan = 50;
+        runtimeUser = {
+          uid = 20001;
+          gid = 20001;
+        };
       };
 
       grafana = enabled // {
         vlan = 50;
         port = 3000;
+        runtimeUser = {
+          uid = 31918;
+          gid = 31918;
+        };
       };
 
       mathesar = enabled // {
         vlan = 50;
         port = 5001;
+        runtimeUser = {
+          uid = 30339;
+          gid = 30339;
+        };
       };
 
       gatus = disabled // {
         vlan = 50;
         port = 8080;
+        runtimeUser = {
+          uid = 36924;
+          gid = 36924;
+        };
         externalEndpoints = [ ];
       };
     };

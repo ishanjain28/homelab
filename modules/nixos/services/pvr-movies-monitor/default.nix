@@ -26,10 +26,10 @@ in
     name = "pvr-movies-monitor";
     description = "PVR Movies Monitoring Service";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     ports = [ cfg.port ];
     package = pkgs.${namespace}.pvr-movies-monitor;
     secrets.env = {
-      name = "pvr-movies-monitor";
       file = "secrets/pvr-movies-monitor.env";
       format = "dotenv";
       mountPath = containerSecretPath;

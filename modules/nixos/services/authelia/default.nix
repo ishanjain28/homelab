@@ -26,52 +26,61 @@ in
       port = mkOpt port 9091 "HTTP listener port.";
     });
 
-  config = mkIf cfg.enable (mkServiceContainer {
-    name = "authelia";
-    inherit (cfg) vlan;
-    ports = [
-      cfg.port
-    ];
-    secrets = {
-      conf = {
-        name = "authelia-conf";
-        file = "secrets/authelia.yml";
-        format = "binary";
-        mountPath = containerConfPath;
+  config = mkIf cfg.enable (mkMerge [
+    {
+      homelab.services.authelia.runtimeUser = {
+        name = mkDefault "authelia-main";
+        group = mkDefault "authelia-main";
       };
-    };
-    resources = {
-      CPUQuota = "400%";
-      MemoryMax = "2G";
-      TasksMax = 256;
-    };
+    }
 
-    containerConfig = {
-      services.authelia.instances.main = enabled // {
-        package = pkgs.authelia;
-        settingsFiles = [ containerConfPath ];
-        secrets.manual = true;
-        environmentVariables = {
-          AUTHELIA_SERVER_ADDRESS = "tcp://${cfg.bind}:${toString cfg.port}";
+    (mkServiceContainer {
+      name = "authelia";
+      inherit (cfg) vlan runtimeUser;
+      ports = [
+        cfg.port
+      ];
+      secrets = {
+        conf = {
+          file = "secrets/authelia.yml";
+          format = "yaml";
+          mountPath = containerConfPath;
         };
       };
+      resources = {
+        CPUQuota = "400%";
+        MemoryMax = "2G";
+        TasksMax = 256;
+      };
 
-      services.redis.servers."" = enabled // {
-        bind = "127.0.0.1";
-        port = 6379;
-        openFirewall = false;
-        settings = {
-          protected-mode = "yes";
-          maxmemory = "256mb";
-          maxmemory-policy = "allkeys-lru";
-          appendonly = "no";
+      containerConfig = {
+        services.authelia.instances.main = enabled // {
+          package = pkgs.authelia;
+          settingsFiles = [ containerConfPath ];
+          secrets.manual = true;
+          environmentVariables = {
+            AUTHELIA_SERVER_ADDRESS = "tcp://${cfg.bind}:${toString cfg.port}";
+          };
+        };
+
+        services.redis.servers."" = enabled // {
+          bind = "127.0.0.1";
+          port = 6379;
+          openFirewall = false;
+          settings = {
+            protected-mode = "yes";
+            maxmemory = "256mb";
+            maxmemory-policy = "allkeys-lru";
+            appendonly = "no";
+          };
+        };
+
+        systemd.services.authelia-main.serviceConfig = {
+          PrivateUsers = mkForce false;
+          LogsDirectory = "authelia";
+          LogsDirectoryMode = "0700";
         };
       };
-
-      systemd.services.authelia-main.serviceConfig = {
-        LogsDirectory = "authelia";
-        LogsDirectoryMode = "0700";
-      };
-    };
-  });
+    })
+  ]);
 }

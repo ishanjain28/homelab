@@ -24,6 +24,7 @@ in
     name = "bentopdf";
     description = "Bentopdf";
     inherit (cfg) vlan;
+    inherit (cfg) runtimeUser;
     ports = [ cfg.port ];
 
     resources = {

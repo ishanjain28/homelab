@@ -8,9 +8,9 @@ with lib;
 with lib.${namespace};
 let
   inherit (lib)
-    mkMerge
-    mapAttrsToList
     filterAttrs
+    mapAttrsToList
+    mkMerge
     ;
 
   allServices = config.${namespace}.services or { };
