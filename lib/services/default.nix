@@ -9,7 +9,7 @@ let
     mkForce
     types
     ;
-  containerUidOffset = 100000;
+  containerUidOffset = 131072;
   containerProfiles = import ../containers/default.nix;
   inherit (containerProfiles)
     getNspawnHardeningProfile
@@ -32,7 +32,6 @@ let
       isolationProfile ? "unprivileged",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
-      extraFlags ? [ ],
       specialArgs ? { },
     }:
     let
@@ -46,7 +45,6 @@ let
         localMacAddress = macAddress;
         # Plug into host bridge
         hostBridge = "br0";
-        inherit extraFlags;
 
         inherit config;
         inherit specialArgs;
@@ -103,6 +101,7 @@ let
       system.nssModules = mkForce [ ];
       systemd.oomd = disabled;
       systemd.services."console-getty" = disabled;
+      systemd.services.systemd-networkd-persistent-storage = disabled;
       systemd.services.systemd-update-utmp = disabled;
       systemd.services.systemd-update-utmp-runlevel = disabled;
       systemd.services.systemd-user-sessions = disabled;
@@ -128,21 +127,24 @@ let
   genServiceContainer =
     {
       name,
-      vlan,
+      service,
       ports ? [ ],
       secrets ? { },
-      runtimeUser,
       containerConfig ? { },
       isolationProfile ? "unprivileged",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
-      extraFlags ? [ ],
       specialArgs ? { },
     }:
     let
       repoRoot = ../..;
+      inherit (service) runtimeId runtimeUser vlan;
+      effectiveRuntimeUser = runtimeUser // {
+        uid = if runtimeUser.uid != null then runtimeUser.uid else runtimeId;
+        gid = if runtimeUser.gid != null then runtimeUser.gid else runtimeId;
+      };
       mkSecretName = secretName: _secret: "${name}-${secretName}";
-      mkContainerUid = secret: secret.uid or runtimeUser.uid;
+      mkContainerUid = secret: secret.uid or effectiveRuntimeUser.uid;
       mkContainerGid = secret: secret.gid or (mkContainerUid secret);
       mkHostUid = secret: containerUidOffset + mkContainerUid secret;
       mkHostGid = secret: containerUidOffset + mkContainerGid secret;
@@ -200,17 +202,16 @@ let
           isolationProfile
           macAddress
           resources
-          extraFlags
           specialArgs
           ;
         config = mkMerge [
           (genContainerDefaults { inherit name ports; })
           {
-            users.groups.${runtimeUser.group}.gid = mkForce runtimeUser.gid;
-            users.users.${runtimeUser.name} = {
+            users.groups.${effectiveRuntimeUser.group}.gid = mkForce effectiveRuntimeUser.gid;
+            users.users.${effectiveRuntimeUser.name} = {
               isSystemUser = true;
-              uid = mkForce runtimeUser.uid;
-              group = mkForce runtimeUser.group;
+              uid = mkForce effectiveRuntimeUser.uid;
+              group = mkForce effectiveRuntimeUser.group;
             };
           }
           containerConfig
@@ -239,17 +240,19 @@ let
 
       volumes = mkOpt (types.listOf types.str) [ ] "Volume IDs to attach to this service container.";
 
+      runtimeId =
+        mkOpt (types.nullOr types.int) null
+          "Stable numeric UID/GID for this service inside the container.";
+
       runtimeUser = {
         name = mkOpt types.str name "User that runs this service inside the container.";
-        uid = mkOption {
-          type = types.int;
-          description = "Stable numeric UID for this service inside the container.";
-        };
+        uid =
+          mkOpt (types.nullOr types.int) null
+            "Stable numeric UID for this service inside the container.";
         group = mkOpt types.str name "Group that runs this service inside the container.";
-        gid = mkOption {
-          type = types.int;
-          description = "Stable numeric GID for this service inside the container.";
-        };
+        gid =
+          mkOpt (types.nullOr types.int) null
+            "Stable numeric GID for this service inside the container.";
       };
 
       monitor = {
@@ -284,7 +287,7 @@ let
       name,
       package ? null,
       command ? null,
-      vlan,
+      service,
       ports ? [ ],
       secrets ? { },
       description ? name,
@@ -293,15 +296,14 @@ let
       environment ? { },
       serviceConfig ? { },
       containerConfig ? { },
-      runtimeUser,
       isolationProfile ? "unprivileged",
       hardeningProfile ? "default",
       macAddress ? mkContainerMacAddress name,
       resources ? { },
-      extraFlags ? [ ],
       specialArgs ? { },
     }:
     let
+      inherit (service) runtimeUser;
       hardeningConfig = getNspawnHardeningProfile hardeningProfile;
       execStart =
         if command != null then
@@ -314,14 +316,12 @@ let
     genServiceContainer {
       inherit
         name
-        vlan
+        service
         ports
         isolationProfile
         macAddress
         resources
         secrets
-        runtimeUser
-        extraFlags
         ;
       specialArgs = specialArgs // {
         inherit package macAddress;

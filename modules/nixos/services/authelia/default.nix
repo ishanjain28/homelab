@@ -36,7 +36,7 @@ in
 
     (mkServiceContainer {
       name = "authelia";
-      inherit (cfg) vlan runtimeUser;
+      service = cfg;
       ports = [
         cfg.port
       ];
@@ -76,7 +76,6 @@ in
         };
 
         systemd.services.authelia-main.serviceConfig = {
-          PrivateUsers = mkForce false;
           LogsDirectory = "authelia";
           LogsDirectoryMode = "0700";
         };

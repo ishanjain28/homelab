@@ -24,8 +24,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "mathesar";
     description = "Mathesar";
-    inherit (cfg) vlan;
-    inherit (cfg) runtimeUser;
+    service = cfg;
     ports = [ cfg.port ];
     package = pkgs.${namespace}.mathesar;
     exec = "/bin/mathesar run --no-venv --port ${toString cfg.port}";

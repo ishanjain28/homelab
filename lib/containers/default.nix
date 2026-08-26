@@ -1,7 +1,7 @@
 let
   isolationProfiles = {
     unprivileged = {
-      privateUsers = 100000;
+      privateUsers = 131072;
     };
 
     privileged = {
@@ -14,6 +14,12 @@ let
       NoNewPrivileges = true;
       AmbientCapabilities = "";
       CapabilityBoundingSet = "";
+      RemoveIPC = true;
+      SystemCallArchitectures = "native";
+      UMask = "0077";
+    };
+
+    strict = default // {
       LockPersonality = true;
       MemoryDenyWriteExecute = true;
       PrivateDevices = true;
@@ -26,12 +32,9 @@ let
       ProtectKernelModules = true;
       ProtectKernelTunables = true;
       ProtectSystem = "strict";
-      RemoveIPC = true;
       RestrictNamespaces = true;
       RestrictRealtime = true;
       RestrictSUIDSGID = true;
-      SystemCallArchitectures = "native";
-      UMask = "0077";
     };
 
     network-monitor = default // {
@@ -40,7 +43,6 @@ let
     };
 
     device-access = default // {
-      PrivateDevices = false;
       ProtectHome = false;
     };
 

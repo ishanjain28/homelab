@@ -19,15 +19,27 @@ in
     server = enabled;
     secrets = enabled;
 
-    # volumes.pvr-movies-monitor = {
-    #   uuid = "63d76b1a-8531-4836-8961-7360f068697b";
-    #   host = hostName;
-    #   ownerService = "pvr-movies-monitor";
-    #   mountPath = "/var/lib/pvr-monitor";
-    #   size = "1G";
-    #   migratable = true;
-    #   mode = "0700";
-    # };
+    volumes = {
+      grafana = {
+        uuid = "ad555d93-40a2-40ae-90eb-e3c6c591ef65";
+        host = hostName;
+        ownerService = "grafana";
+        mountPath = "/var/lib/grafana";
+        size = "256M";
+        migratable = true;
+        mode = "0700";
+      };
+
+      seerr = {
+        uuid = "51b42873-9fd6-47d2-aa7c-71af578c4f05";
+        host = hostName;
+        ownerService = "seerr";
+        mountPath = "/var/lib/seerr";
+        size = "5G";
+        migratable = true;
+        mode = "0700";
+      };
+    };
 
     services = {
       ssh = enabled // {
@@ -38,10 +50,7 @@ in
 
       pvr-movies-monitor = enabled // {
         vlan = 50;
-        runtimeUser = {
-          uid = 20691;
-          gid = 20691;
-        };
+        runtimeId = 20691;
         monitor = enabled // {
           protocol = "tcp";
         };
@@ -50,62 +59,46 @@ in
 
       huawei-sms-telegram = enabled // {
         vlan = 50;
-        runtimeUser = {
-          uid = 27777;
-          gid = 27777;
-        };
+        runtimeId = 27777;
         monitor = disabled;
       };
 
       bentopdf = enabled // {
         vlan = 50;
-        runtimeUser = {
-          uid = 50715;
-          gid = 50715;
-        };
+        runtimeId = 50715;
       };
 
       lldap = enabled // {
         vlan = 50;
-        runtimeUser = {
-          uid = 25457;
-          gid = 25457;
-        };
+        runtimeId = 25457;
       };
 
       authelia = enabled // {
         vlan = 50;
-        runtimeUser = {
-          uid = 20001;
-          gid = 20001;
-        };
+        runtimeId = 20001;
       };
 
       grafana = enabled // {
         vlan = 50;
-        port = 3000;
-        runtimeUser = {
-          uid = 31918;
-          gid = 31918;
-        };
+        runtimeId = 31918;
+        volumes = [ "grafana" ];
       };
 
       mathesar = enabled // {
         vlan = 50;
         port = 5001;
-        runtimeUser = {
-          uid = 30339;
-          gid = 30339;
-        };
+        runtimeId = 30339;
+      };
+
+      seerr = enabled // {
+        vlan = 50;
+        runtimeId = 30340;
+        volumes = [ "seerr" ];
       };
 
       gatus = disabled // {
         vlan = 50;
-        port = 8080;
-        runtimeUser = {
-          uid = 36924;
-          gid = 36924;
-        };
+        runtimeId = 36924;
         externalEndpoints = [ ];
       };
     };
