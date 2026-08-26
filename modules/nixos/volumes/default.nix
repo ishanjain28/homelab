@@ -90,71 +90,26 @@ let
 
   activeDeletedVolumes = filter (volumeId: hasAttr volumeId volumes) (attrNames deletedVolumes);
 
-  volumeOwner = volume: services.${volume.ownerService}.runtimeUser;
+  volumeOwnerService = volume: services.${volume.ownerService};
+  volumeOwner =
+    volume:
+    let
+      service = volumeOwnerService volume;
+      inherit (service) runtimeId runtimeUser;
+    in
+    runtimeUser
+    // {
+      uid = if runtimeUser.uid != null then runtimeUser.uid else runtimeId;
+      gid = if runtimeUser.gid != null then runtimeUser.gid else runtimeId;
+    };
   ownerHostUid = volume: containerUidOffset + (volumeOwner volume).uid;
   ownerHostGid = volume: containerUidOffset + (volumeOwner volume).gid;
   volumeLvPath = volume: "/dev/pool/${volume.name}";
   volumeHostMode = volume: removePrefix "0" volume.mode;
-  volumePrepareUnit = volume: "homelab-volume-${volume.name}.service";
 
   mkVolumeHostTmpfilesRule =
     _volumeId: volume:
     "d ${volumeHostPath volume} ${volume.mode} ${toString (ownerHostUid volume)} ${toString (ownerHostGid volume)} -";
-
-  mkVolumePrepareScript =
-    volumeId: volume:
-    pkgs.writeShellApplication {
-      name = "homelab-volume-prepare-${volume.name}";
-      runtimeInputs = with pkgs; [
-        coreutils
-        e2fsprogs
-        lvm2
-        util-linux
-      ];
-      text = ''
-        lv=${escapeShellArg (volumeLvPath volume)}
-        declared_size=${escapeShellArg volume.size}
-        expected_size="$(numfmt --from=iec "$declared_size")"
-
-        if [ ! -b "$lv" ]; then
-          echo "${volumeId}: missing block device: $lv" >&2
-          exit 1
-        fi
-
-        actual_size="$(blockdev --getsize64 "$lv")"
-
-        if [ "$actual_size" -gt "$expected_size" ]; then
-          echo "${volumeId}: declared size $declared_size is smaller than actual block size $actual_size bytes" >&2
-          echo "${volumeId}: refusing to shrink automatically" >&2
-          exit 1
-        fi
-
-        if [ "$actual_size" -lt "$expected_size" ]; then
-          echo "${volumeId}: growing $lv from $actual_size bytes to $declared_size"
-          lvextend --yes --size "$declared_size" "$lv"
-          resize2fs "$lv"
-        fi
-      '';
-    };
-
-  mkVolumePrepareService =
-    volumeId: volume:
-    let
-      script = mkVolumePrepareScript volumeId volume;
-    in
-    {
-      "homelab-volume-${volume.name}" = {
-        description = "Prepare homelab volume ${volumeId}";
-        wantedBy = [ "multi-user.target" ];
-        requires = [ (volumeMountUnit volume) ];
-        after = [ (volumeMountUnit volume) ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${script}/bin/homelab-volume-prepare-${volume.name}";
-        };
-      };
-    };
 
   mkVolumeRuntimeCheck =
     volumeId: volume:
@@ -242,6 +197,10 @@ let
         type = "filesystem";
         format = volume.fsType;
         mountpoint = volumeHostPath volume;
+        mountOptions = [
+          "nofail"
+          "x-systemd.device-timeout=10s"
+        ];
         extraArgs = [
           "-U"
           volume.uuid
@@ -303,8 +262,8 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          requires = map volumePrepareUnit attachedVolumes;
-          after = (map volumeMountUnit attachedVolumes) ++ (map volumePrepareUnit attachedVolumes);
+          requires = map volumeMountUnit attachedVolumes;
+          after = map volumeMountUnit attachedVolumes;
           bindsTo = map volumeMountUnit attachedVolumes;
         };
       }
@@ -409,10 +368,6 @@ in
     {
       environment.systemPackages = [ volumeCheckScript ];
       systemd.tmpfiles.rules = mapAttrsToList mkVolumeHostTmpfilesRule volumesOnHost;
-    }
-
-    {
-      systemd.services = mkMerge (mapAttrsToList mkVolumePrepareService volumesOnHost);
     }
 
     {

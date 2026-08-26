@@ -23,8 +23,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "bentopdf";
     description = "Bentopdf";
-    inherit (cfg) vlan;
-    inherit (cfg) runtimeUser;
+    service = cfg;
     ports = [ cfg.port ];
 
     resources = {

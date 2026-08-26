@@ -25,8 +25,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "grafana";
     description = "Grafana dashboard service";
-    inherit (cfg) vlan;
-    inherit (cfg) runtimeUser;
+    service = cfg;
     ports = [ cfg.port ];
     package = pkgs.grafana;
     exec = "/bin/grafana server -homepath ${pkgs.grafana}/share/grafana -config ${grafanaConfigPath}";

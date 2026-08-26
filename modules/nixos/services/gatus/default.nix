@@ -71,8 +71,7 @@ in
     (mkSingleServiceContainer {
       name = "gatus";
       description = "Monitoring service for homelab";
-      inherit (cfg) vlan;
-      inherit (cfg) runtimeUser;
+      service = cfg;
       ports = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";

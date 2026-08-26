@@ -19,5 +19,6 @@ let
   callPackage = pkg: pkgs.callPackage pkg;
 in
 {
+  seerr = callPackage ./packages/seerr { };
   pvr-movies-monitor = callPackage ./packages/pvr-movies-monitor { };
 }
