@@ -105,90 +105,10 @@ let
   ownerHostUid = volume: containerUidOffset + (volumeOwner volume).uid;
   ownerHostGid = volume: containerUidOffset + (volumeOwner volume).gid;
   volumeLvPath = volume: "/dev/pool/${volume.name}";
-  volumeHostMode = volume: removePrefix "0" volume.mode;
 
   mkVolumeHostTmpfilesRule =
     _volumeId: volume:
     "d ${volumeHostPath volume} ${volume.mode} ${toString (ownerHostUid volume)} ${toString (ownerHostGid volume)} -";
-
-  mkVolumeRuntimeCheck =
-    volumeId: volume:
-    let
-      lvPath = volumeLvPath volume;
-      hostPath = volumeHostPath volume;
-    in
-    ''
-      echo "checking ${volumeId}"
-
-      lv=${escapeShellArg lvPath}
-      path=${escapeShellArg hostPath}
-      declared_size=${escapeShellArg volume.size}
-      expected_size="$(numfmt --from=iec "$declared_size")"
-      expected_uuid=${escapeShellArg volume.uuid}
-      expected_owner=${escapeShellArg "${toString (ownerHostUid volume)}:${toString (ownerHostGid volume)}"}
-      expected_mode=${escapeShellArg (volumeHostMode volume)}
-
-      if [ ! -b "$lv" ]; then
-        echo "  missing block device: $lv"
-        status=1
-      else
-        actual_size="$(blockdev --getsize64 "$lv")"
-        if [ "$actual_size" -gt "$expected_size" ]; then
-          echo "  declared size is smaller than actual: declared $declared_size, actual $actual_size bytes"
-          status=1
-        elif [ "$actual_size" -lt "$expected_size" ]; then
-          echo "  actual size is smaller than declared: declared $declared_size, actual $actual_size bytes"
-          status=1
-        fi
-
-        actual_uuid="$(blkid -s UUID -o value "$lv" 2>/dev/null || true)"
-        if [ "$actual_uuid" != "$expected_uuid" ]; then
-          echo "  uuid mismatch: expected $expected_uuid, got ''${actual_uuid:-missing}"
-          status=1
-        fi
-      fi
-
-      if ! findmnt -rn --target "$path" >/dev/null 2>&1; then
-        echo "  not mounted: $path"
-        status=1
-      else
-        expected_source="$(readlink -f "$lv" 2>/dev/null || true)"
-        actual_source="$(findmnt -rn -o SOURCE --target "$path" 2>/dev/null || true)"
-        actual_source="$(readlink -f "$actual_source" 2>/dev/null || true)"
-        if [ "$actual_source" != "$expected_source" ]; then
-          echo "  source mismatch: expected $expected_source, got ''${actual_source:-missing}"
-          status=1
-        fi
-      fi
-
-      actual_owner="$(stat -c '%u:%g' "$path" 2>/dev/null || true)"
-      if [ "$actual_owner" != "$expected_owner" ]; then
-        echo "  owner mismatch: expected $expected_owner, got ''${actual_owner:-missing}"
-        status=1
-      fi
-
-      actual_mode="$(stat -c '%a' "$path" 2>/dev/null || true)"
-      if [ "$actual_mode" != "$expected_mode" ]; then
-        echo "  mode mismatch: expected $expected_mode, got ''${actual_mode:-missing}"
-        status=1
-      fi
-    '';
-
-  volumeCheckScript = pkgs.writeShellApplication {
-    name = "volume-check";
-    runtimeInputs = with pkgs; [
-      coreutils
-      util-linux
-    ];
-    text = ''
-      status=0
-      ${optionalString (volumesOnHost == { }) ''
-        echo "no homelab volumes declared for ${currentHost}"
-      ''}
-      ${concatStringsSep "\n" (mapAttrsToList mkVolumeRuntimeCheck volumesOnHost)}
-      exit "$status"
-    '';
-  };
 
   mkVolumeDisko = _volumeId: volume: {
     lvm_vg.pool.lvs.${volume.name} = {
@@ -217,6 +137,8 @@ let
         host
         ownerService
         mountPath
+        size
+        fsType
         ;
       isMigratable = volume.migratable;
       lvPath = volumeLvPath volume;
@@ -271,6 +193,13 @@ let
       { };
 in
 {
+  options.system.homelab.volumes = mkOption {
+    type = types.attrsOf types.anything;
+    default = { };
+    internal = true;
+    description = "Evaluated homelab volume metadata for shell tooling.";
+  };
+
   options.${namespace} = {
     volumes = mkOpt (types.attrsOf (
       types.submodule (
@@ -366,8 +295,11 @@ in
     }
 
     {
-      environment.systemPackages = [ volumeCheckScript ];
       systemd.tmpfiles.rules = mapAttrsToList mkVolumeHostTmpfilesRule volumesOnHost;
+    }
+
+    {
+      system.homelab.volumes = mkMerge (mapAttrsToList mkVolumeMigration volumesOnHost);
     }
 
     {

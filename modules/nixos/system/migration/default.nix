@@ -9,6 +9,8 @@
           host = lib.mkOption { type = lib.types.str; };
           ownerService = lib.mkOption { type = lib.types.str; };
           mountPath = lib.mkOption { type = lib.types.str; };
+          size = lib.mkOption { type = lib.types.str; };
+          fsType = lib.mkOption { type = lib.types.str; };
           hostPath = lib.mkOption { type = lib.types.str; };
           lvPath = lib.mkOption { type = lib.types.str; };
           owner = {
