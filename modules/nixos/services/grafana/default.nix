@@ -65,6 +65,7 @@ in
       RestartSec = "5s";
       RuntimeDirectory = "grafana";
       StateDirectory = "grafana";
+      StateDirectoryMode = "0700";
       LogsDirectory = "grafana";
       WorkingDirectory = "/var/lib/grafana";
     };

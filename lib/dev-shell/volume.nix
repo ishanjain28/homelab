@@ -9,7 +9,7 @@ pkgs.writeShellApplication {
     openssh
   ];
   text = ''
-    # shellcheck disable=SC2029
+    # shellcheck disable=SC2016,SC2029
     set -euo pipefail
 
     flake="''${HOMELAB_FLAKE:-.}"
@@ -346,11 +346,15 @@ pkgs.writeShellApplication {
 
       echo "[$host/$id] current usage"
       remote_sudo "$host" df -h "$path"
+      # shellcheck disable=SC2016
       remote_sudo "$host" bash -c 'printf "allocated bytes: "; blockdev --getsize64 "$1"' bash "$lv"
+      # shellcheck disable=SC2016
       remote_sudo "$host" bash -c 'printf "used bytes: "; df -B1 --output=used "$1" | tail -n 1 | tr -d " "' bash "$path"
 
+      # shellcheck disable=SC2016
       if remote_sudo "$host" bash -c 'find "$1" -mindepth 1 ! -name lost+found -print -quit | grep -q .' bash "$path"; then
         echo "[$host/$id] refusing to delete: volume is not empty" >&2
+        # shellcheck disable=SC2016
         remote_sudo "$host" bash -c 'find "$1" -mindepth 1 ! -name lost+found -maxdepth 2 -print | sed -n "1,20p"' bash "$path"
         return 1
       fi

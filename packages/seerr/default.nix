@@ -48,9 +48,7 @@ pkgs.stdenv.mkDerivation {
     # All the extra files it asks for to work properly
     cp -r seerr-api.yml .next $out/share/${pname}/
 
-    if [ -d public ]; then
-      cp -r public $out/share/${pname}/
-    fi
+    cp -r public $out/share/${pname}/
 
     makeWrapper ${nodejs}/bin/node $out/bin/${pname} \
       --chdir "$out/share/${pname}" \

@@ -20,6 +20,16 @@ in
     secrets = enabled;
 
     volumes = {
+      actual-server = {
+        uuid = "7adaa473-69d9-46cd-9328-0ad971095e62";
+        host = hostName;
+        ownerService = "actual-server";
+        mountPath = "/var/lib/actual-server";
+        size = "512M";
+        migratable = true;
+        mode = "0700";
+      };
+
       grafana = {
         uuid = "ad555d93-40a2-40ae-90eb-e3c6c591ef65";
         host = hostName;
@@ -93,6 +103,12 @@ in
         vlan = 50;
         runtimeId = 30340;
         volumes = [ "seerr" ];
+      };
+
+      actual-server = enabled // {
+        vlan = 50;
+        runtimeId = 30341;
+        volumes = [ "actual-server" ];
       };
 
       gatus = disabled // {
