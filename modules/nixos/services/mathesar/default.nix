@@ -15,7 +15,7 @@ in
 {
   options.${namespace}.services.mathesar = mkServiceOptions {
     name = "mathesar";
-    port = 8000;
+    port = 5001;
     monitor = {
       protocol = "http";
     };
@@ -45,6 +45,8 @@ in
       HOME = "/var/lib/mathesar";
       MEDIA_ROOT = "/var/lib/mathesar/media";
       SKIP_STATIC_COLLECTION = "true";
+      HOST = "0.0.0.0";
+      PORT = toString cfg.port;
     };
 
     serviceConfig = {

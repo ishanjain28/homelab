@@ -86,7 +86,6 @@ in
 
       mathesar = enabled // {
         vlan = 50;
-        port = 5001;
         runtimeId = 30339;
       };
 
