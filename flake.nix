@@ -111,6 +111,7 @@
           fileAttr = "services.gatus.configFile";
         })
       ];
+      volumeCommand = pkgs: import ./lib/dev-shell/volume.nix { inherit pkgs; };
       shellAliasCommands =
         pkgs:
         let
@@ -152,6 +153,7 @@
             (generatedConfigCommands pkgs)
             ++ (shellAliasCommands pkgs)
             ++ [
+              (volumeCommand pkgs)
               pkgs.age
               inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
               pkgs.sops
@@ -167,6 +169,7 @@
             (generatedConfigCommands pkgs)
             ++ (shellAliasCommands pkgs)
             ++ [
+              (volumeCommand pkgs)
               pkgs.age
               inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
               pkgs.sops
