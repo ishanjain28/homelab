@@ -13,18 +13,14 @@ let
   containerConfPath = "/run/container-secrets/authelia.yml";
 in
 {
-  options.${namespace}.services.authelia =
-    mkServiceOptions {
-      name = "authelia";
-      monitor = {
-        inherit (cfg) port;
-        protocol = "http";
-      };
-    }
-    // (with types; {
-      bind = mkOpt str "0.0.0.0" "HTTP bind address";
-      port = mkOpt port 9091 "HTTP listener port.";
-    });
+  options.${namespace}.services.authelia = mkServiceOptions {
+    name = "authelia";
+    port = 9091;
+    monitor = {
+      inherit (cfg) port;
+      protocol = "http";
+    };
+  };
 
   config = mkIf cfg.enable (mkMerge [
     {
@@ -59,7 +55,7 @@ in
           settingsFiles = [ containerConfPath ];
           secrets.manual = true;
           environmentVariables = {
-            AUTHELIA_SERVER_ADDRESS = "tcp://${cfg.bind}:${toString cfg.port}";
+            AUTHELIA_SERVER_ADDRESS = "tcp://0.0.0.0:${toString cfg.port}";
           };
         };
 

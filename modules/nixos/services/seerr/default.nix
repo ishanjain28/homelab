@@ -45,6 +45,7 @@ in
     serviceConfig = {
       EnvironmentFile = confPath;
       StateDirectory = "seerr";
+      StateDirectoryMode = "0700";
       WorkingDirectory = "/var/lib/seerr";
     };
   });
