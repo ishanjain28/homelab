@@ -21,4 +21,5 @@ in
 {
   pvr-movies-monitor = callPackage ./packages/pvr-movies-monitor { };
   seerr = callPackage ./packages/seerr { };
+  tracearr = callPackage ./packages/tracearr { };
 }

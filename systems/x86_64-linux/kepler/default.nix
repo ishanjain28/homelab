@@ -111,6 +111,11 @@ in
         volumes = [ "actual-server" ];
       };
 
+      tracearr = enabled // {
+        vlan = 50;
+        runtimeId = 30342;
+      };
+
       gatus = disabled // {
         vlan = 50;
         runtimeId = 36924;
