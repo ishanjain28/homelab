@@ -13,14 +13,10 @@ let
   containerSecretPath = "/run/container-secrets/pvr-movies-monitor.env";
 in
 {
-  options.${namespace}.services.pvr-movies-monitor =
-    mkServiceOptions {
-      name = "pvr-movies-monitor";
-      port = 3000;
-    }
-    // (with types; {
-      host = mkOpt str "0.0.0.0" "Host";
-    });
+  options.${namespace}.services.pvr-movies-monitor = mkServiceOptions {
+    name = "pvr-movies-monitor";
+    port = 3000;
+  };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "pvr-movies-monitor";
@@ -39,7 +35,7 @@ in
       TasksMax = 256;
     };
     environment = {
-      HOST = cfg.host;
+      HOST = "0.0.0.0";
       PORT = toString cfg.port;
       RUST_LOG = "info";
       TOKIO_WORKER_THREADS = "2";

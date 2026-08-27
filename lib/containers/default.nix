@@ -2,6 +2,7 @@ let
   isolationProfiles = {
     unprivileged = {
       privateUsers = 131072;
+      extraFlags = [ "--private-users-ownership=chown" ];
     };
 
     privileged = {
