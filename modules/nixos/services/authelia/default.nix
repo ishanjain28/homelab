@@ -71,10 +71,6 @@ in
           };
         };
 
-        systemd.services.authelia-main.serviceConfig = {
-          LogsDirectory = "authelia";
-          LogsDirectoryMode = "0700";
-        };
       };
     })
   ]);
