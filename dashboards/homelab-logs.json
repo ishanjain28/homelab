@@ -179,7 +179,7 @@
                     },
                     "spec": {
                       "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"$priority\"}[15m]))",
+                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"}[15m]))",
                       "queryType": "range"
                     }
                   },
@@ -258,7 +258,7 @@
                     },
                     "spec": {
                       "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"warning|err|crit|alert|emerg\"}[15m]))",
+                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"warning|err|crit|alert|emerg\"}[15m]))",
                       "queryType": "range"
                     }
                   },
@@ -341,7 +341,7 @@
                     },
                     "spec": {
                       "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"err|crit|alert|emerg\"}[15m]))",
+                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"err|crit|alert|emerg\"}[15m]))",
                       "queryType": "range"
                     }
                   },
@@ -424,7 +424,7 @@
                     },
                     "spec": {
                       "editorMode": "code",
-                      "expr": "sum by (priority) (rate({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"$priority\"}[$__interval]))",
+                      "expr": "sum by (priority) (rate({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"}[$__interval]))",
                       "legendFormat": "{{priority}}",
                       "queryType": "range"
                     }
@@ -536,7 +536,7 @@
                     },
                     "spec": {
                       "editorMode": "code",
-                      "expr": "topk(20, sum by (unit) (rate({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"$priority\"}[$__interval])))",
+                      "expr": "topk(20, sum by (unit) (rate({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"}[$__interval])))",
                       "legendFormat": "{{unit}}",
                       "queryType": "range"
                     }
@@ -648,7 +648,7 @@
                     },
                     "spec": {
                       "editorMode": "code",
-                      "expr": "topk(20, sum by (unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"err|crit|alert|emerg\"}[1h])))",
+                      "expr": "topk(20, sum by (unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"err|crit|alert|emerg\"}[1h])))",
                       "legendFormat": "{{unit}}",
                       "queryType": "range"
                     }
@@ -761,7 +761,7 @@
                     "spec": {
                       "direction": "backward",
                       "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\"",
+                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\"",
                       "queryType": "range"
                     }
                   },
@@ -821,7 +821,7 @@
                     "spec": {
                       "direction": "backward",
                       "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\"",
+                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\"",
                       "queryType": "range"
                     }
                   },
@@ -881,7 +881,7 @@
                     "spec": {
                       "direction": "backward",
                       "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+\\.service\", unit!~\"systemd-.*|alloy\\.service|generate-shutdown-ramfs\\.service|firewall\\.service|dbus\\.service|dbus-broker\\.service|nix-daemon\\.service|systemd-journald\\.service|systemd-tmpfiles-.*\\.service|systemd-networkd\\.service|systemd-resolved\\.service|systemd-sysctl\\.service|systemd-remount-fs\\.service|systemd-random-seed\\.service|systemd-modules-load\\.service|systemd-machine-id-commit\\.service|systemd-update-done\\.service|systemd-vconsole-setup\\.service|logrotate\\.service\", priority=~\"$priority\"} |~ \"$search\"",
+                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"} |~ \"$search\"",
                       "queryType": "range"
                     }
                   },
@@ -941,7 +941,7 @@
                     "spec": {
                       "direction": "backward",
                       "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat\\(\\)|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
+                      "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
                       "queryType": "range"
                     }
                   },
