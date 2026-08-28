@@ -95,6 +95,7 @@ let
       nix = disabled;
       programs.command-not-found = disabled;
       services.logind = disabled;
+      services.logrotate = disabled;
       services.nscd = disabled;
       services.getty = disabled;
       services.timesyncd = disabled;
@@ -105,6 +106,15 @@ let
       systemd.services.systemd-update-utmp = disabled;
       systemd.services.systemd-update-utmp-runlevel = disabled;
       systemd.services.systemd-user-sessions = disabled;
+      services.journald = {
+        storage = "persistent";
+        extraConfig = ''
+          SplitMode=none
+          MaxRetentionSec=1week
+          SystemMaxUse=256M
+          RuntimeMaxUse=64M
+        '';
+      };
 
       systemd.network = enabled // {
         networks."30-eth0" = {
@@ -278,6 +288,10 @@ let
             [ "[CONNECTED] == true" ]
         )
         ) "Gatus check conditions.";
+      };
+
+      logging = {
+        enable = mkBoolOpt true "Whether this service container should push journald logs to Loki.";
       };
     };
 

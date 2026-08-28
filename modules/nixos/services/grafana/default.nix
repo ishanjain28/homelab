@@ -51,7 +51,6 @@ in
 
     environment = {
       GF_PATHS_DATA = "/var/lib/grafana";
-      GF_PATHS_LOGS = "/var/log/grafana";
       GF_PATHS_PLUGINS = "/var/lib/grafana/plugins";
       GF_PATHS_PROVISIONING = "/var/lib/grafana/provisioning";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
@@ -60,13 +59,11 @@ in
     };
 
     serviceConfig = {
-      ExecStartPre = "${pkgs.coreutils}/bin/install -d /var/lib/grafana/plugins /var/lib/grafana/provisioning/dashboards /var/lib/grafana/provisioning/datasources /var/lib/grafana/provisioning/plugins /var/lib/grafana/provisioning/alerting";
       Restart = "always";
       RestartSec = "5s";
       RuntimeDirectory = "grafana";
       StateDirectory = "grafana";
       StateDirectoryMode = "0700";
-      LogsDirectory = "grafana";
       WorkingDirectory = "/var/lib/grafana";
     };
   });

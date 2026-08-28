@@ -18,6 +18,9 @@ in
   homelab = {
     server = enabled;
     secrets = enabled;
+    logging = enabled // {
+      lokiPushUrl = "http://10.0.50.23:3100/loki/api/v1/push";
+    };
 
     volumes = {
       actual-server = {
@@ -46,6 +49,16 @@ in
         ownerService = "seerr";
         mountPath = "/var/lib/seerr";
         size = "5G";
+        migratable = true;
+        mode = "0700";
+      };
+
+      loki = {
+        uuid = "9f67c61c-3d4c-45d2-b4df-6f1775331d9b";
+        host = hostName;
+        ownerService = "loki";
+        mountPath = "/var/lib/loki";
+        size = "20G";
         migratable = true;
         mode = "0700";
       };
@@ -114,6 +127,12 @@ in
       tracearr = enabled // {
         vlan = 50;
         runtimeId = 30342;
+      };
+
+      loki = enabled // {
+        vlan = 50;
+        runtimeId = 30343;
+        volumes = [ "loki" ];
       };
 
       gatus = disabled // {
