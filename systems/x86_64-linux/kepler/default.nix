@@ -206,12 +206,21 @@ in
         (mkNetworkIf {
           name = "vlan99";
           config = {
-            Description = "Tagged VLAN99 interface for accessing the host";
-            DHCP = "yes";
-            IPv6AcceptRA = "yes";
-            LLDP = "no";
-            EmitLLDP = "no";
-            LLMNR = "no";
+            networkConfig = {
+              Description = "Tagged VLAN99 interface for accessing the host";
+              DHCP = "ipv4";
+              LinkLocalAddressing = "ipv6";
+              IPv6LinkLocalAddressGenerationMode = "eui64";
+              IPv6PrivacyExtensions = "no";
+              IPv6AcceptRA = "yes";
+              LLDP = "no";
+              EmitLLDP = "no";
+              LLMNR = "no";
+            };
+            ipv6AcceptRAConfig = {
+              DHCPv6Client = false;
+              Token = "eui64";
+            };
           };
         })
       ];

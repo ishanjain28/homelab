@@ -22,10 +22,20 @@ in
     };
   };
 
-  config = mkIf cfg.enable (mkServiceContainer {
+  config = mkIf cfg.enable (mkSingleServiceContainer {
     name = "tracearr";
+    description = "Tracearr media server monitoring";
     service = cfg;
     ports = [ cfg.port ];
+    package = pkgs.${namespace}.tracearr;
+    after = [
+      "network-online.target"
+      "redis.service"
+    ];
+    wants = [
+      "network-online.target"
+      "redis.service"
+    ];
     secrets.env = {
       file = "secrets/tracearr.env";
       format = "dotenv";
@@ -49,38 +59,20 @@ in
           appendonly = "no";
         };
       };
-
-      systemd.services.tracearr = {
-        description = "Tracearr media server monitoring";
-        after = [
-          "network-online.target"
-          "redis.service"
-        ];
-        wants = [
-          "network-online.target"
-          "redis.service"
-        ];
-        wantedBy = [ "multi-user.target" ];
-        environment = {
-          HOST = "0.0.0.0";
-          PORT = toString cfg.port;
-          NODE_ENV = "production";
-          LOG_LEVEL = "info";
-          REDIS_URL = "redis://127.0.0.1:6379";
-        };
-        serviceConfig = {
-          ExecStart = "${pkgs.${namespace}.tracearr}/bin/tracearr";
-          EnvironmentFile = confPath;
-          DynamicUser = false;
-          User = cfg.runtimeUser.name;
-          Group = cfg.runtimeUser.group;
-          StateDirectory = "tracearr";
-          StateDirectoryMode = "0700";
-          WorkingDirectory = "/var/lib/tracearr";
-          Restart = "always";
-          RestartSec = "5s";
-        };
-      };
+    };
+    environment = {
+      HOST = "0.0.0.0";
+      PORT = toString cfg.port;
+      NODE_ENV = "production";
+      LOG_LEVEL = "info";
+      REDIS_URL = "redis://127.0.0.1:6379";
+    };
+    serviceConfig = {
+      EnvironmentFile = confPath;
+      StateDirectory = "tracearr";
+      StateDirectoryMode = "0700";
+      WorkingDirectory = "/var/lib/tracearr";
+      RestartSec = "5s";
     };
   });
 }
