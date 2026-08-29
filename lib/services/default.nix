@@ -121,11 +121,18 @@ let
           matchConfig.Name = "eth0";
           networkConfig = {
             Description = "${name} service container interface";
-            DHCP = "yes";
+            DHCP = "ipv4";
+            LinkLocalAddressing = "ipv6";
+            IPv6LinkLocalAddressGenerationMode = "eui64";
+            IPv6PrivacyExtensions = "no";
             IPv6AcceptRA = "yes";
             LLDP = "no";
             EmitLLDP = "no";
             LLMNR = "no";
+          };
+          ipv6AcceptRAConfig = {
+            DHCPv6Client = false;
+            Token = "eui64";
           };
         };
       };
@@ -313,6 +320,8 @@ let
       isolationProfile ? "unprivileged",
       hardeningProfile ? "default",
       macAddress ? mkContainerMacAddress name,
+      after ? [ ],
+      wants ? [ ],
       resources ? { },
       specialArgs ? { },
     }:
@@ -344,6 +353,7 @@ let
         {
           systemd.services.${serviceName} = {
             inherit description;
+            inherit after wants;
             wantedBy = [ "multi-user.target" ];
             inherit environment;
             serviceConfig = {

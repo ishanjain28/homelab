@@ -41,7 +41,7 @@ let
     { config, name }:
     {
       matchConfig.Name = name;
-      networkConfig = config;
+      inherit (config) networkConfig ipv6AcceptRAConfig;
     };
 
 in
