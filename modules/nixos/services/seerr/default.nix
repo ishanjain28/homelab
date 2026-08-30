@@ -16,7 +16,7 @@ in
   options.${namespace}.services.seerr = mkServiceOptions {
     name = "seerr";
     description = "Seerr for requesting media content";
-    port = 5055;
+    port.number = 5055;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
@@ -33,7 +33,7 @@ in
       TasksMax = 512;
     };
     environment = {
-      PORT = toString cfg.port;
+      PORT = toString cfg.port.number;
       HOST = "0.0.0.0";
       NODE_ENV = "production";
       LOG_LEVEL = "info";

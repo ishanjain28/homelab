@@ -76,7 +76,7 @@ let
       domain = config.${namespace}.hardware.networking.domain;
       defaultAddress = if domain != "" then "${serviceName}.${domain}" else serviceName;
       address = if monitor.address != "" then monitor.address else defaultAddress;
-      port = if monitor.port != null then monitor.port else srv.port;
+      port = if monitor.port != null then monitor.port else srv.port.number;
       url =
         if protocol == "http" || protocol == "https" then
           "${protocol}://${address}:${toString port}${path}"
@@ -106,7 +106,6 @@ in
       services.alloy = enabled // {
         extraFlags = [
           "--disable-reporting"
-          "--server.http.listen-addr=127.0.0.1:0"
           "--server.http.enable-pprof=false"
         ];
       };
@@ -120,7 +119,6 @@ in
           services.alloy = enabled // {
             extraFlags = [
               "--disable-reporting"
-              "--server.http.listen-addr=127.0.0.1:0"
               "--server.http.enable-pprof=false"
             ];
           };

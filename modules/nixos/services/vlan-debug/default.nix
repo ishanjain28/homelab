@@ -84,7 +84,7 @@ in
       nameValuePair (mkName vlan) (mkServiceOptions {
         name = mkName vlan;
         description = "VLAN ${toString vlan} debug container";
-        port = 22;
+        port.number = 22;
         monitor = {
           enable = false;
           protocol = "tcp";

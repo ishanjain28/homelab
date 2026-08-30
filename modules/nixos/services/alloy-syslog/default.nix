@@ -17,7 +17,10 @@ in
   options.${namespace}.services.alloy-syslog = mkServiceOptions {
     name = serviceName;
     description = "Alloy syslog receiver";
-    port = 514; # Primary listening port
+    port = {
+      number = 514; # Primary listener
+      protocol = "tcp-and-udp";
+    };
     monitor = {
       protocol = "tcp";
     };
@@ -26,7 +29,14 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.grafana-alloy;
-    exec = "/bin/alloy run /etc/alloy-syslog --disable-reporting --server.http.listen-addr=127.0.0.1:0 --server.http.enable-pprof=false";
+    ports = [
+      cfg.port
+      {
+        number = 601; # Port for senders using RFC5424
+        protocol = "tcp";
+      }
+    ];
+    exec = "/bin/alloy run /etc/alloy-syslog --disable-reporting --server.http.listen-addr=127.0.0.1:23456 --server.http.enable-pprof=false";
     resources = {
       CPUQuota = "100%";
       MemoryMax = "256M";
@@ -41,8 +51,6 @@ in
       WorkingDirectory = "/var/lib/${serviceName}";
     };
     containerConfig = {
-      networking.firewall.allowedUDPPorts = [ cfg.port ];
-
       environment.etc."alloy-syslog/config.alloy".text = ''
         logging {
           level = "warn"
@@ -53,7 +61,7 @@ in
 
           rule {
             source_labels = ["__syslog_message_hostname"]
-            target_label  = "device"
+            target_label  = "container"
           }
 
           rule {
@@ -63,28 +71,18 @@ in
 
           rule {
             source_labels = ["__syslog_message_app_name"]
-            target_label  = "app"
-          }
-
-          rule {
-            source_labels = ["__syslog_message_facility"]
-            target_label  = "facility"
-          }
-
-          rule {
-            source_labels = ["__syslog_connection_hostname"]
-            target_label  = "connection_hostname"
+            target_label  = "unit"
           }
         }
 
-        loki.source.syslog "syslog" {
+        loki.source.syslog "rfc3164" {
           listener {
             address             = "0.0.0.0:514"
             protocol            = "tcp"
             syslog_format       = "rfc3164"
             use_incoming_timestamp = true
             rfc3164_default_to_current_year = true
-            labels              = { source = "syslog", protocol = "tcp" }
+            labels              = { source = "syslog" }
           }
           listener {
             address             = "0.0.0.0:514"
@@ -92,7 +90,19 @@ in
             syslog_format       = "rfc3164"
             use_incoming_timestamp = true
             rfc3164_default_to_current_year = true
-            labels              = { source = "syslog", protocol = "udp" }
+            labels              = { source = "syslog" }
+          }
+          forward_to    = [loki.write.syslog.receiver]
+          relabel_rules = loki.relabel.syslog.rules
+        }
+
+        loki.source.syslog "rfc5424" {
+          listener {
+            address             = "0.0.0.0:601"
+            protocol            = "tcp"
+            syslog_format       = "rfc5424"
+            use_incoming_timestamp = true
+            labels              = { source = "syslog" }
           }
           forward_to    = [loki.write.syslog.receiver]
           relabel_rules = loki.relabel.syslog.rules

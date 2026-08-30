@@ -16,6 +16,33 @@ let
     getNspawnHardeningProfile
     getNspawnIsolationProfile
     ;
+  portWithProtocol = types.submodule {
+    options = {
+      number = mkOption {
+        type = types.port;
+        description = "Port number.";
+      };
+
+      protocol = mkOpt (types.enum [
+        "tcp"
+        "udp"
+        "tcp-and-udp"
+      ]) "tcp" "Transport protocol exposed through the container firewall.";
+    };
+  };
+
+  portNumbersFor =
+    protocol: ports:
+    map (port: port.number) (
+      filter (
+        port:
+        let
+          portProtocol = port.protocol or "tcp";
+        in
+        portProtocol == protocol || portProtocol == "tcp-and-udp"
+      ) ports
+    );
+
   mkContainerMacAddress =
     name:
     let
@@ -80,7 +107,8 @@ let
         networkmanager = disabled;
         useHostResolvConf = false;
         firewall = enabled // {
-          allowedTCPPorts = ports;
+          allowedTCPPorts = portNumbersFor "tcp" ports;
+          allowedUDPPorts = portNumbersFor "udp" ports;
         };
       };
 
@@ -249,7 +277,9 @@ let
 
       description = mkOpt types.str description "Human-readable service description.";
 
-      port = mkOpt (types.nullOr types.port) port "Primary listener port for this service container.";
+      port =
+        mkOpt (types.nullOr portWithProtocol) port
+          "Primary listener port for this service container.";
 
       vlan = mkOption {
         type = types.port;

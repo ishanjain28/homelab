@@ -17,7 +17,7 @@ in
     mkServiceOptions {
       name = "gatus";
       description = "Monitoring service for homelab";
-      port = 8080;
+      port.number = 8080;
       monitor = {
         protocol = "http";
       };
@@ -38,7 +38,7 @@ in
         settings = {
           web = {
             inherit (cfg) address;
-            inherit (cfg) port;
+            port = cfg.port.number;
           };
 
           ui = {

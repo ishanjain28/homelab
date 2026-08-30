@@ -15,7 +15,7 @@ in
   options.${namespace}.services.bentopdf = mkServiceOptions {
     name = "bentopdf";
     description = "Bentopdf";
-    port = 8080;
+    port.number = 8080;
     monitor = {
       protocol = "http";
     };
@@ -30,6 +30,6 @@ in
       TasksMax = 256;
     };
 
-    command = "${pkgs.caddy}/bin/caddy file-server --listen :${toString cfg.port} --root ${pkgs.bentopdf}";
+    command = "${pkgs.caddy}/bin/caddy file-server --listen :${toString cfg.port.number} --root ${pkgs.bentopdf}";
   });
 }

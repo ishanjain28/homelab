@@ -40,7 +40,7 @@ in
   options.${namespace}.services.openvscode-server = mkServiceOptions {
     name = "openvscode-server";
     description = "OpenVSCode Server";
-    port = 3000;
+    port.number = 3000;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
@@ -50,7 +50,7 @@ in
       "${pkgs.openvscode-server}/bin/openvscode-server"
       "--accept-server-license-terms"
       "--host=0.0.0.0"
-      "--port=${toString cfg.port}"
+      "--port=${toString cfg.port.number}"
       "--without-connection-token"
       "--telemetry-level=off"
       "--user-data-dir=${stateDir}/user-data"

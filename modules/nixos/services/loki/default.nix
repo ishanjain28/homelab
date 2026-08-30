@@ -14,7 +14,7 @@ in
   options.${namespace}.services.loki = mkServiceOptions {
     name = "loki";
     description = "Loki log storage";
-    port = 3100;
+    port.number = 3100;
     monitor = {
       protocol = "http";
       path = "/ready";
@@ -36,7 +36,7 @@ in
 
           server = {
             http_listen_address = "0.0.0.0";
-            http_listen_port = cfg.port;
+            http_listen_port = cfg.port.number;
             grpc_listen_port = 9096;
             log_level = "warn";
           };
