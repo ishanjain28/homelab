@@ -16,7 +16,7 @@ in
   options.${namespace}.services.mathesar = mkServiceOptions {
     name = "mathesar";
     description = "Web viewer for databases";
-    port = 5001;
+    port.number = 5001;
     monitor = {
       protocol = "http";
     };
@@ -25,7 +25,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.${namespace}.mathesar;
-    exec = "/bin/mathesar run --no-venv --port ${toString cfg.port}";
+    exec = "/bin/mathesar run --no-venv --port ${toString cfg.port.number}";
 
     secrets.env = {
       file = "secrets/mathesar.env";
@@ -44,7 +44,7 @@ in
       MEDIA_ROOT = "/var/lib/mathesar/media";
       SKIP_STATIC_COLLECTION = "true";
       HOST = "0.0.0.0";
-      PORT = toString cfg.port;
+      PORT = toString cfg.port.number;
     };
 
     serviceConfig = {

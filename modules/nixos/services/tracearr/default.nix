@@ -16,9 +16,9 @@ in
   options.${namespace}.services.tracearr = mkServiceOptions {
     name = "tracearr";
     description = "Tracearr media server monitoring";
-    port = 3000;
+    port.number = 3000;
     monitor = {
-      inherit (cfg) port;
+      port = cfg.port.number;
       protocol = "http";
     };
   };
@@ -60,7 +60,7 @@ in
     };
     environment = {
       HOST = "0.0.0.0";
-      PORT = toString cfg.port;
+      PORT = toString cfg.port.number;
       NODE_ENV = "production";
       LOG_LEVEL = "info";
       REDIS_URL = "redis://127.0.0.1:6379";

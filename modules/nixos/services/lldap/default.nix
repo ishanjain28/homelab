@@ -31,8 +31,8 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     ports = [
-      cfg.ldapPort
-      cfg.httpPort
+      { number = cfg.ldapPort; }
+      { number = cfg.httpPort; }
     ];
     package = pkgs.lldap;
     exec = "/bin/lldap run -c ${confPath}";

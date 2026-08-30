@@ -17,7 +17,7 @@ in
   options.${namespace}.services.grafana = mkServiceOptions {
     name = "grafana";
     description = "Grafana dashboard service";
-    port = 3000;
+    port.number = 3000;
     monitor = {
       protocol = "http";
     };
@@ -53,7 +53,7 @@ in
       GF_PATHS_PROVISIONING = "/var/lib/grafana/provisioning";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
       GF_SERVER_HTTP_ADDR = "0.0.0.0";
-      GF_SERVER_HTTP_PORT = toString cfg.port;
+      GF_SERVER_HTTP_PORT = toString cfg.port.number;
     };
 
     serviceConfig = {
