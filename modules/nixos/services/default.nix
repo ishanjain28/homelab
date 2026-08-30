@@ -65,15 +65,18 @@ let
   serviceEndpoints = mapAttrsToList (
     serviceName: srv:
     let
-      monitor = srv.monitor or { };
-      name = monitor.name or serviceName;
-      inherit (monitor) group;
-      inherit (monitor) protocol;
+      inherit (srv) monitor;
+      inherit (monitor)
+        group
+        protocol
+        path
+        conditions
+        ;
+      inherit (monitor) name;
       domain = config.${namespace}.hardware.networking.domain;
       defaultAddress = if domain != "" then "${serviceName}.${domain}" else serviceName;
       address = if monitor.address != "" then monitor.address else defaultAddress;
       port = if monitor.port != null then monitor.port else srv.port;
-      path = monitor.path or "/";
       url =
         if protocol == "http" || protocol == "https" then
           "${protocol}://${address}:${toString port}${path}"
@@ -82,10 +85,10 @@ let
     in
     {
       inherit name group url;
-      interval = monitor.interval or gatus.defaultInterval;
-      inherit (monitor) conditions;
+      inherit (monitor) interval;
+      inherit conditions;
     }
-  ) (filterAttrs (_name: srv: srv.monitor.enable or false) enabledServices);
+  ) (filterAttrs (_name: srv: (srv ? monitor) && srv.monitor.enable) enabledServices);
 
   gatusSettings.endpoints = serviceEndpoints ++ gatus.externalEndpoints;
 in

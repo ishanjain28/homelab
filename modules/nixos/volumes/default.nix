@@ -24,20 +24,17 @@ let
     ;
 
   cfg = config.${namespace};
-  currentHost = config.networking.hostName;
-
   inherit (cfg) volumes;
   inherit (cfg) deletedVolumes;
-  services = cfg.services or { };
-  enabledServices = filterAttrs (_name: srv: srv.enable or false) services;
+  inherit (cfg) services;
+  volumeServices = filterAttrs (_name: srv: srv ? volumes) services;
+  enabledServices = filterAttrs (_name: srv: srv.enable or false) volumeServices;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
   volumeMountUnit = volume: "${utils.escapeSystemdPath (volumeHostPath volume)}.mount";
-  serviceVolumeIds = srv: srv.volumes or [ ];
+  serviceVolumeIds = srv: srv.volumes;
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
   serviceVolumes = srv: map (volumeId: volumes.${volumeId}) (existingServiceVolumeIds srv);
-
-  volumesOnHost = filterAttrs (_volumeId: volume: volume.host == currentHost) volumes;
 
   volumeUuidList = map (volume: volume.uuid) (attrValues volumes);
   duplicateUuids = unique (
@@ -50,20 +47,7 @@ let
       map (volumeId: "${serviceName}:${volumeId}") (
         filter (volumeId: !(hasAttr volumeId volumes)) (serviceVolumeIds srv)
       )
-    ) services
-  );
-
-  wrongHostRefs = flatten (
-    mapAttrsToList (
-      serviceName: srv:
-      map (
-        volumeId:
-        let
-          volume = volumes.${volumeId};
-        in
-        "${serviceName}:${volumeId} is on ${volume.host}, not ${currentHost}"
-      ) (filter (volumeId: volumes.${volumeId}.host != currentHost) (existingServiceVolumeIds srv))
-    ) services
+    ) volumeServices
   );
 
   wrongOwnerRefs = flatten (
@@ -78,7 +62,7 @@ let
           "${serviceName}:${volumeId} is owned by ${volume.ownerService}"
         )
         (filter (volumeId: volumes.${volumeId}.ownerService != serviceName) (existingServiceVolumeIds srv))
-    ) services
+    ) volumeServices
   );
 
   missingOwnerServices = flatten (
@@ -134,7 +118,6 @@ let
       inherit volumeId;
       inherit (volume)
         uuid
-        host
         ownerService
         mountPath
         size
@@ -211,25 +194,17 @@ in
               type = types.str;
               description = "Filesystem UUID. This is the stable identity of the volume.";
             };
-            host = mkOption {
-              type = types.str;
-              description = "Host that owns and mounts this volume.";
-            };
-            ownerService = mkOption {
-              type = types.str;
-              description = "Service that owns this volume.";
-            };
-            mountPath = mkOption {
-              type = types.str;
-              description = "Path where the volume is mounted inside the service container.";
-            };
+            ownerService = mkOpt types.str name "Service that owns this volume.";
+            mountPath =
+              mkOpt types.str "/var/lib/${name}"
+                "Path where the volume is mounted inside the service container.";
             size = mkOption {
               type = types.str;
               description = "Logical volume size.";
             };
             fsType = mkOpt (types.enum [ "ext4" ]) "ext4" "Filesystem type.";
             backend = mkOpt (types.enum [ "lvm" ]) "lvm" "Volume backend.";
-            migratable = mkBoolOpt false "Whether this volume is managed by migration tooling.";
+            migratable = mkBoolOpt true "Whether this volume is managed by migration tooling.";
             readOnly = mkBoolOpt false "Whether to bind mount this volume read-only.";
             mode = mkOpt types.str "0700" "Directory mode for the mounted data inside the container.";
           };
@@ -266,10 +241,6 @@ in
           message = "Services reference missing homelab volumes: ${concatStringsSep ", " missingVolumeRefs}";
         }
         {
-          assertion = wrongHostRefs == [ ];
-          message = "Services reference volumes that are not placed on this host: ${concatStringsSep ", " wrongHostRefs}";
-        }
-        {
           assertion = wrongOwnerRefs == [ ];
           message = "Services reference volumes owned by another service: ${concatStringsSep ", " wrongOwnerRefs}";
         }
@@ -291,22 +262,22 @@ in
     }
 
     {
-      disko.devices = mkMerge (mapAttrsToList mkVolumeDisko volumesOnHost);
+      disko.devices = mkMerge (mapAttrsToList mkVolumeDisko volumes);
     }
 
     {
-      systemd.tmpfiles.rules = mapAttrsToList mkVolumeHostTmpfilesRule volumesOnHost;
+      systemd.tmpfiles.rules = mapAttrsToList mkVolumeHostTmpfilesRule volumes;
     }
 
     {
-      system.homelab.volumes = mkMerge (mapAttrsToList mkVolumeMigration volumesOnHost);
+      system.homelab.volumes = mkMerge (mapAttrsToList mkVolumeMigration volumes);
     }
 
     {
       system.migration.volumes = mkMerge (
         mapAttrsToList (
           volumeId: volume: mkIf volume.migratable (mkVolumeMigration volumeId volume)
-        ) volumesOnHost
+        ) volumes
       );
     }
 

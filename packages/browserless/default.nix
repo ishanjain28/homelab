@@ -3,11 +3,11 @@ let
   pname = "browserless";
   version = "1.61.1";
   nodejs = pkgs.nodejs-slim_22;
-  buildNpmPackage = pkgs.buildNpmPackage.override { nodejs = pkgs.nodejs_22; };
   hosts = pkgs.writeText "browserless-hosts.json" "[]";
 in
-buildNpmPackage {
+pkgs.buildNpmPackage {
   inherit pname version;
+  inherit nodejs;
 
   src = pkgs.fetchurl {
     url = "https://github.com/browserless/browserless/archive/refs/tags/v${version}.tar.gz";
@@ -21,6 +21,7 @@ buildNpmPackage {
   nativeBuildInputs = [
     pkgs.makeWrapper
     pkgs.pkg-config
+    nodejs.npm
   ];
   buildInputs = [ pkgs.vips ];
 
@@ -30,7 +31,7 @@ buildNpmPackage {
     PUPPETEER_SKIP_DOWNLOAD = "true";
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true";
     SHARP_FORCE_GLOBAL_LIBVIPS = "1";
-    npm_config_nodedir = pkgs.nodejs_22;
+    npm_config_nodedir = nodejs;
   };
 
   postPatch = ''
@@ -41,6 +42,12 @@ buildNpmPackage {
   postInstall = ''
     cp ${hosts} "$out/lib/node_modules/browserless-chrome/hosts.json"
     cp package-lock.json "$out/lib/node_modules/browserless-chrome/package-lock.json"
+
+    sharpBuild="$out/lib/node_modules/browserless-chrome/node_modules/sharp/build"
+    cp "$sharpBuild/Release/sharp-linux-x64.node" "$TMPDIR/sharp-linux-x64.node"
+    rm -rf "$sharpBuild"
+    install -Dm755 "$TMPDIR/sharp-linux-x64.node" "$sharpBuild/Release/sharp-linux-x64.node"
+    rm -f "$out/lib/node_modules/browserless-chrome/node_modules/sharp/node-addon-api/nothing.target.mk"
 
     makeWrapper ${nodejs}/bin/node "$out/bin/browserless" \
       --chdir "$out/lib/node_modules/browserless-chrome" \
