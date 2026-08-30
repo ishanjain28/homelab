@@ -23,28 +23,53 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      bashInteractive
       bind
+      btop
+      coreutils
+      curl
+      dig
+      dnsutils
+      e2fsprogs
+      fd
+      file
+      findutils
       fish
+      git
       htop
+      inetutils
       iotop
+      iproute2
       iperf3
+      iputils
       jq
       kitty.terminfo
       lm_sensors
+      lsof
+      lvm2
       mediainfo
       mtr
+      netcat-openbsd
       ncdu
       neovim
       nmap
       nvme-cli
       openssl
+      pciutils
       pkg-config
+      procps
+      psmisc
       ripgrep
       rsync
       smartmontools
+      strace
+      sysstat
       tcpdump
       traceroute
       tree
+      usbutils
+      util-linux
+      wget
     ];
   };
 }
