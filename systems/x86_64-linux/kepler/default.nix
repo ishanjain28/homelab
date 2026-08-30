@@ -130,46 +130,55 @@ in
       vlan10-debug = enabled // {
         vlan = 10;
         runtimeId = 31010;
+        logging = disabled;
       };
 
       vlan20-debug = enabled // {
         vlan = 20;
         runtimeId = 31020;
+        logging = disabled;
       };
 
       vlan30-debug = enabled // {
         vlan = 30;
         runtimeId = 31030;
+        logging = disabled;
       };
 
       vlan40-debug = enabled // {
         vlan = 40;
         runtimeId = 31040;
+        logging = disabled;
       };
 
       vlan50-debug = enabled // {
         vlan = 50;
         runtimeId = 31050;
+        logging = disabled;
       };
 
       vlan99-debug = enabled // {
         vlan = 99;
         runtimeId = 31099;
+        logging = disabled;
       };
 
       vlan140-debug = enabled // {
         vlan = 140;
         runtimeId = 31140;
+        logging = disabled;
       };
 
       vlan150-debug = enabled // {
         vlan = 150;
         runtimeId = 31150;
+        logging = disabled;
       };
 
       vlan160-debug = enabled // {
         vlan = 160;
         runtimeId = 31160;
+        logging = disabled;
       };
 
       tracearr = enabled // {
