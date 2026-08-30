@@ -14,6 +14,7 @@ in
 {
   options.${namespace}.services.bentopdf = mkServiceOptions {
     name = "bentopdf";
+    description = "Bentopdf";
     port = 8080;
     monitor = {
       protocol = "http";
@@ -21,10 +22,7 @@ in
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "bentopdf";
-    description = "Bentopdf";
     service = cfg;
-    ports = [ cfg.port ];
 
     resources = {
       CPUQuota = "100%";

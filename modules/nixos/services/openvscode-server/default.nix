@@ -39,14 +39,12 @@ in
 {
   options.${namespace}.services.openvscode-server = mkServiceOptions {
     name = "openvscode-server";
+    description = "OpenVSCode Server";
     port = 3000;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "openvscode-server";
-    description = "OpenVSCode Server";
     service = cfg;
-    ports = [ cfg.port ];
     package = pkgs.openvscode-server;
     command = concatStringsSep " " [
       "${pkgs.openvscode-server}/bin/openvscode-server"

@@ -17,6 +17,7 @@ in
   options.${namespace}.services.lldap =
     mkServiceOptions {
       name = "lldap";
+      description = "LDAP server";
       monitor = {
         port = cfg.httpPort;
         protocol = "http";
@@ -28,8 +29,6 @@ in
     });
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "lldap";
-    description = "LDAP server";
     service = cfg;
     ports = [
       cfg.ldapPort

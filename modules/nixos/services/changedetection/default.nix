@@ -23,6 +23,7 @@ in
 {
   options.${namespace}.services.changedetection = mkServiceOptions {
     name = "changedetection";
+    description = "Changedetection.io";
     port = 5000;
     monitor = {
       protocol = "http";
@@ -30,9 +31,7 @@ in
   };
 
   config = mkIf cfg.enable (mkServiceContainer {
-    name = "changedetection";
     service = cfg;
-    ports = [ cfg.port ];
     resources = {
       CPUQuota = "400%";
       MemoryMax = "4G";

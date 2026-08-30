@@ -15,6 +15,7 @@ in
   options.${namespace}.services.redis =
     mkServiceOptions {
       name = "redis";
+      description = "Redis server";
       port = 6379;
       monitor = {
         protocol = "tcp";
@@ -26,9 +27,7 @@ in
     });
 
   config = mkIf cfg.enable (mkServiceContainer {
-    name = "redis";
     service = cfg;
-    ports = [ cfg.port ];
 
     secrets.password = {
       file = "secrets/redis/password";

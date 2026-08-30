@@ -15,6 +15,7 @@ in
 {
   options.${namespace}.services.mathesar = mkServiceOptions {
     name = "mathesar";
+    description = "Web viewer for databases";
     port = 5001;
     monitor = {
       protocol = "http";
@@ -22,10 +23,7 @@ in
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "mathesar";
-    description = "Mathesar";
     service = cfg;
-    ports = [ cfg.port ];
     package = pkgs.${namespace}.mathesar;
     exec = "/bin/mathesar run --no-venv --port ${toString cfg.port}";
 

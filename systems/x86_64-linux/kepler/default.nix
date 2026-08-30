@@ -183,6 +183,11 @@ in
         volumes = [ "loki" ];
       };
 
+      alloy-syslog = enabled // {
+        vlan = 50;
+        runtimeId = 30344;
+      };
+
       gatus = disabled // {
         vlan = 50;
         runtimeId = 36924;

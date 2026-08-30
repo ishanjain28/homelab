@@ -15,14 +15,12 @@ in
 {
   options.${namespace}.services.pvr-movies-monitor = mkServiceOptions {
     name = "pvr-movies-monitor";
+    description = "PVR Movies Monitoring Service";
     port = 3000;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "pvr-movies-monitor";
-    description = "PVR Movies Monitoring Service";
     service = cfg;
-    ports = [ cfg.port ];
     package = pkgs.${namespace}.pvr-movies-monitor;
     secrets.env = {
       file = "secrets/pvr-movies-monitor.env";

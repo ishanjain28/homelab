@@ -7,6 +7,7 @@ let
     mapAttrsToList
     mkMerge
     mkForce
+    optional
     types
     ;
   containerUidOffset = 131072;
@@ -140,9 +141,8 @@ let
   # Default homelab service container: minimal NixOS guest plus arbitrary inner config.
   genServiceContainer =
     {
-      name,
       service,
-      ports ? [ ],
+      ports ? optional (service.port != null) service.port,
       secrets ? { },
       containerConfig ? { },
       isolationProfile ? "unprivileged",
@@ -150,7 +150,12 @@ let
     }:
     let
       repoRoot = ../..;
-      inherit (service) runtimeId runtimeUser vlan;
+      inherit (service)
+        name
+        runtimeId
+        runtimeUser
+        vlan
+        ;
       effectiveRuntimeUser = runtimeUser // {
         uid = if runtimeUser.uid != null then runtimeUser.uid else runtimeId;
         gid = if runtimeUser.gid != null then runtimeUser.gid else runtimeId;
@@ -230,6 +235,7 @@ let
   genServiceOptions =
     {
       name,
+      description ? name,
       port ? null,
       monitor ? { },
     }:
@@ -238,6 +244,10 @@ let
     in
     {
       enable = mkEnableOption name;
+
+      name = mkOpt types.str name "Canonical service/container name.";
+
+      description = mkOpt types.str description "Human-readable service description.";
 
       port = mkOpt (types.nullOr types.port) port "Primary listener port for this service container.";
 
@@ -296,15 +306,13 @@ let
   # Convenience wrapper for the common one-container/one-systemd-service case.
   genSingleServiceContainer =
     {
-      name,
       package ? null,
       command ? null,
       service,
-      ports ? [ ],
+      ports ? optional (service.port != null) service.port,
       secrets ? { },
-      description ? name,
-      exec ? "/bin/${name}",
-      serviceName ? name,
+      exec ? "/bin/${service.name}",
+      serviceName ? service.name,
       environment ? { },
       serviceConfig ? { },
       containerConfig ? { },
@@ -315,6 +323,7 @@ let
       resources ? { },
     }:
     let
+      inherit (service) name;
       inherit (service) runtimeUser;
       hardeningConfig = getNspawnHardeningProfile hardeningProfile;
       execStart =
@@ -327,7 +336,6 @@ let
     in
     genServiceContainer {
       inherit
-        name
         service
         ports
         isolationProfile
@@ -337,7 +345,7 @@ let
       containerConfig = mkMerge [
         {
           systemd.services.${serviceName} = {
-            inherit description;
+            inherit (service) description;
             inherit after wants;
             wantedBy = [ "multi-user.target" ];
             inherit environment;

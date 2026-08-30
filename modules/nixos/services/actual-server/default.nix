@@ -15,14 +15,12 @@ in
 {
   options.${namespace}.services.actual-server = mkServiceOptions {
     name = "actual-server";
+    description = "Actual Budget";
     port = 5006;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "actual-server";
-    description = "Actual Budget";
     service = cfg;
-    ports = [ cfg.port ];
     package = pkgs.actual-server;
     exec = "/bin/actual-server";
     secrets.conf = {

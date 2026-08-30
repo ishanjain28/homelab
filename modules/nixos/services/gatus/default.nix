@@ -16,6 +16,7 @@ in
   options.${namespace}.services.gatus =
     mkServiceOptions {
       name = "gatus";
+      description = "Monitoring service for homelab";
       port = 8080;
       monitor = {
         protocol = "http";
@@ -69,10 +70,7 @@ in
     }
 
     (mkSingleServiceContainer {
-      name = "gatus";
-      description = "Monitoring service for homelab";
       service = cfg;
-      ports = [ cfg.port ];
       package = pkgs.gatus;
       exec = "/bin/gatus";
       hardeningProfile = "network-monitor";

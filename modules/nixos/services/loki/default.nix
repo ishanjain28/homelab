@@ -13,6 +13,7 @@ in
 {
   options.${namespace}.services.loki = mkServiceOptions {
     name = "loki";
+    description = "Loki log storage";
     port = 3100;
     monitor = {
       protocol = "http";
@@ -21,9 +22,7 @@ in
   };
 
   config = mkIf cfg.enable (mkServiceContainer {
-    name = "loki";
     service = cfg;
-    ports = [ cfg.port ];
     resources = {
       CPUQuota = "400%";
       MemoryMax = "2G";
