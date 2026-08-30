@@ -12,6 +12,7 @@ let
   cfg = srv.changedetection;
   browserPort = 3000;
   datastorePath = "/var/lib/changedetection-io";
+  chromiumPath = "${datastorePath}/chromium";
   changedetectionPackage = pkgs.changedetection-io.overrideAttrs (old: {
     meta = old.meta // {
       # The pinned 0.53.6 release is Apache-2.0; nixpkgs still marks it unfree.
@@ -57,7 +58,7 @@ in
           ALLOW_IANA_RESTRICTED_ADDRESSES = "true";
           DEFAULT_FETCH_BACKEND = "html_webdriver";
           HOME = datastorePath;
-          PLAYWRIGHT_DRIVER_URL = "ws://127.0.0.1:${toString browserPort}/?stealth=1&--disable-web-security=true";
+          PLAYWRIGHT_DRIVER_URL = "ws://127.0.0.1:${toString browserPort}/?stealth=1&--disable-web-security=true&--disable-crashpad=true&--disable-crash-reporter=true&--crash-dumps-dir=${chromiumPath}/crashes";
         };
         serviceConfig = {
           Restart = mkForce "always";
@@ -78,7 +79,10 @@ in
           HOST = "127.0.0.1";
           LANG = "C.UTF-8";
           NODE_ENV = "production";
+          HOME = chromiumPath;
           PORT = toString browserPort;
+          XDG_CACHE_HOME = "${chromiumPath}/cache";
+          XDG_CONFIG_HOME = "${chromiumPath}/config";
           WORKSPACE_DIR = "/run/browserless";
         };
         serviceConfig = {

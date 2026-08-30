@@ -25,52 +25,33 @@ in
     volumes = {
       actual-server = {
         uuid = "7adaa473-69d9-46cd-9328-0ad971095e62";
-        host = hostName;
-        ownerService = "actual-server";
-        mountPath = "/var/lib/actual-server";
         size = "512M";
-        migratable = true;
-        mode = "0700";
       };
 
       grafana = {
         uuid = "ad555d93-40a2-40ae-90eb-e3c6c591ef65";
-        host = hostName;
-        ownerService = "grafana";
-        mountPath = "/var/lib/grafana";
         size = "256M";
-        migratable = true;
-        mode = "0700";
       };
 
       seerr = {
         uuid = "51b42873-9fd6-47d2-aa7c-71af578c4f05";
-        host = hostName;
-        ownerService = "seerr";
-        mountPath = "/var/lib/seerr";
         size = "5G";
-        migratable = true;
-        mode = "0700";
       };
 
       loki = {
         uuid = "9f67c61c-3d4c-45d2-b4df-6f1775331d9b";
-        host = hostName;
-        ownerService = "loki";
-        mountPath = "/var/lib/loki";
         size = "20G";
-        migratable = true;
-        mode = "0700";
       };
 
       changedetection = {
         uuid = "3aa2b73b-be43-4239-85e5-933ed3559282";
-        host = hostName;
-        ownerService = "changedetection";
         mountPath = "/var/lib/changedetection-io";
-        size = "5G";
-        migratable = true;
-        mode = "0700";
+        size = "1G";
+      };
+
+      openvscode-server = {
+        uuid = "6baec4af-fa52-4153-9e1d-c612777fdf9e";
+        size = "10G";
       };
     };
 
@@ -138,6 +119,57 @@ in
         vlan = 50;
         runtimeId = 30344;
         volumes = [ "changedetection" ];
+      };
+
+      openvscode-server = enabled // {
+        vlan = 50;
+        runtimeId = 30345;
+        volumes = [ "openvscode-server" ];
+      };
+
+      vlan10-debug = enabled // {
+        vlan = 10;
+        runtimeId = 31010;
+      };
+
+      vlan20-debug = enabled // {
+        vlan = 20;
+        runtimeId = 31020;
+      };
+
+      vlan30-debug = enabled // {
+        vlan = 30;
+        runtimeId = 31030;
+      };
+
+      vlan40-debug = enabled // {
+        vlan = 40;
+        runtimeId = 31040;
+      };
+
+      vlan50-debug = enabled // {
+        vlan = 50;
+        runtimeId = 31050;
+      };
+
+      vlan99-debug = enabled // {
+        vlan = 99;
+        runtimeId = 31099;
+      };
+
+      vlan140-debug = enabled // {
+        vlan = 140;
+        runtimeId = 31140;
+      };
+
+      vlan150-debug = enabled // {
+        vlan = 150;
+        runtimeId = 31150;
+      };
+
+      vlan160-debug = enabled // {
+        vlan = 160;
+        runtimeId = 31160;
       };
 
       tracearr = enabled // {

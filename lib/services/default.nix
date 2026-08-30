@@ -30,9 +30,7 @@ let
       vlan,
       config,
       isolationProfile ? "unprivileged",
-      macAddress ? mkContainerMacAddress name,
       resources ? { },
-      specialArgs ? { },
     }:
     let
       isolationConfig = getNspawnIsolationProfile isolationProfile;
@@ -42,12 +40,11 @@ let
       containers.${name} = isolationConfig // {
         autoStart = true;
         privateNetwork = true;
-        localMacAddress = macAddress;
+        localMacAddress = mkContainerMacAddress name;
         # Plug into host bridge
         hostBridge = "br0";
 
         inherit config;
-        inherit specialArgs;
       };
 
       # Container Trunk Port (Host-side of the vbridge)
@@ -100,7 +97,7 @@ let
       services.getty = disabled;
       services.timesyncd = disabled;
       system.nssModules = mkForce [ ];
-      systemd.oomd = disabled;
+      systemd.oomd = enabled;
       systemd.services."console-getty" = disabled;
       systemd.services.systemd-networkd-persistent-storage = disabled;
       systemd.services.systemd-update-utmp = disabled;
@@ -149,9 +146,7 @@ let
       secrets ? { },
       containerConfig ? { },
       isolationProfile ? "unprivileged",
-      macAddress ? mkContainerMacAddress name,
       resources ? { },
-      specialArgs ? { },
     }:
     let
       repoRoot = ../..;
@@ -160,28 +155,27 @@ let
         uid = if runtimeUser.uid != null then runtimeUser.uid else runtimeId;
         gid = if runtimeUser.gid != null then runtimeUser.gid else runtimeId;
       };
-      mkSecretName = secretName: _secret: "${name}-${secretName}";
-      mkContainerUid = secret: secret.uid or effectiveRuntimeUser.uid;
-      mkContainerGid = secret: secret.gid or (mkContainerUid secret);
-      mkHostUid = secret: containerUidOffset + mkContainerUid secret;
-      mkHostGid = secret: containerUidOffset + mkContainerGid secret;
+      mkSecretName = secretName: "${name}-${secretName}";
+      mkHostUid = uid: containerUidOffset + uid;
+      mkHostGid = gid: containerUidOffset + gid;
       mkSecretHostPath = secretName: "/run/homelab-container-secrets/${name}/${secretName}";
+      secretHostUid = mkHostUid effectiveRuntimeUser.uid;
+      secretHostGid = mkHostGid effectiveRuntimeUser.gid;
       mkSecretPrepareLine =
-        secretName: secret:
+        secretName: _secret:
         let
-          sopsName = mkSecretName secretName secret;
-          sourcePath = secret.path or "/run/secrets/${sopsName}";
+          sopsName = mkSecretName secretName;
           hostPath = mkSecretHostPath secretName;
         in
         ''
           install -d -m 0700 -o root -g root ${escapeShellArg "/run/homelab-container-secrets/${name}"}
-          install -m ${secret.mode or "0400"} -o ${toString (mkHostUid secret)} -g ${toString (mkHostGid secret)} ${escapeShellArg sourcePath} ${escapeShellArg hostPath}
+          install -m 0400 -o ${toString secretHostUid} -g ${toString secretHostGid} /run/secrets/${sopsName} ${escapeShellArg hostPath}
         '';
       secretConfig = mkMerge (
         mapAttrsToList (
           secretName: secret:
           let
-            sopsName = mkSecretName secretName secret;
+            sopsName = mkSecretName secretName;
             inherit (secret) mountPath;
             hostPath = mkSecretHostPath secretName;
           in
@@ -193,9 +187,8 @@ let
               owner = "root";
               group = "root";
               mode = "0400";
-              restartUnits = secret.restartUnits or [ "container@${name}.service" ];
-            }
-            // optionalAttrs (secret ? path) { inherit (secret) path; };
+              restartUnits = [ "container@${name}.service" ];
+            };
 
             containers.${name}.bindMounts.${mountPath} = {
               inherit hostPath;
@@ -207,19 +200,17 @@ let
     in
     mkMerge [
       secretConfig
-      {
+      (mkIf (secrets != { }) {
         systemd.services."container@${name}".preStart = concatStringsSep "\n" (
           mapAttrsToList mkSecretPrepareLine secrets
         );
-      }
+      })
       (genContainerBase {
         inherit
           name
           vlan
           isolationProfile
-          macAddress
           resources
-          specialArgs
           ;
         config = mkMerge [
           (genContainerDefaults { inherit name ports; })
@@ -319,11 +310,9 @@ let
       containerConfig ? { },
       isolationProfile ? "unprivileged",
       hardeningProfile ? "default",
-      macAddress ? mkContainerMacAddress name,
       after ? [ ],
       wants ? [ ],
       resources ? { },
-      specialArgs ? { },
     }:
     let
       inherit (service) runtimeUser;
@@ -342,13 +331,9 @@ let
         service
         ports
         isolationProfile
-        macAddress
         resources
         secrets
         ;
-      specialArgs = specialArgs // {
-        inherit package macAddress;
-      };
       containerConfig = mkMerge [
         {
           systemd.services.${serviceName} = {

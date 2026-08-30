@@ -6,7 +6,6 @@
         options = {
           volumeId = lib.mkOption { type = lib.types.str; };
           uuid = lib.mkOption { type = lib.types.str; };
-          host = lib.mkOption { type = lib.types.str; };
           ownerService = lib.mkOption { type = lib.types.str; };
           mountPath = lib.mkOption { type = lib.types.str; };
           size = lib.mkOption { type = lib.types.str; };
