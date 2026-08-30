@@ -62,6 +62,16 @@ in
         migratable = true;
         mode = "0700";
       };
+
+      changedetection = {
+        uuid = "3aa2b73b-be43-4239-85e5-933ed3559282";
+        host = hostName;
+        ownerService = "changedetection";
+        mountPath = "/var/lib/changedetection-io";
+        size = "5G";
+        migratable = true;
+        mode = "0700";
+      };
     };
 
     services = {
@@ -122,6 +132,12 @@ in
         vlan = 50;
         runtimeId = 30341;
         volumes = [ "actual-server" ];
+      };
+
+      changedetection = enabled // {
+        vlan = 50;
+        runtimeId = 30344;
+        volumes = [ "changedetection" ];
       };
 
       tracearr = enabled // {

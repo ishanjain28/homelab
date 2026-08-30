@@ -20,8 +20,6 @@ in
       services = {
         chrony = enabled;
       };
-
-      virtualisation = disabled;
     };
 
     environment.systemPackages = with pkgs; [
