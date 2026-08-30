@@ -15,13 +15,12 @@ in
 {
   options.${namespace}.services.huawei-sms-telegram = mkServiceOptions {
     name = "huawei-sms-telegram";
+    description = "Huawei 5G Modem messages to Telegram";
     # No way to monitor it yet
     monitor = disabled;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "huawei-sms-telegram";
-    description = "Huawei 5G Modem messages to Telegram";
     service = cfg;
     secrets.env = {
       file = "secrets/huawei-sms-telegram.env";

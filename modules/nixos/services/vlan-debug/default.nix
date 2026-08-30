@@ -29,9 +29,7 @@ let
       cfg = srv.${name};
     in
     mkIf cfg.enable (mkServiceContainer {
-      inherit name;
       service = cfg;
-      ports = [ 22 ];
 
       resources = {
         CPUQuota = "100%";
@@ -85,6 +83,7 @@ in
       vlan:
       nameValuePair (mkName vlan) (mkServiceOptions {
         name = mkName vlan;
+        description = "VLAN ${toString vlan} debug container";
         port = 22;
         monitor = {
           enable = false;

@@ -15,6 +15,7 @@ in
 {
   options.${namespace}.services.tracearr = mkServiceOptions {
     name = "tracearr";
+    description = "Tracearr media server monitoring";
     port = 3000;
     monitor = {
       inherit (cfg) port;
@@ -23,10 +24,7 @@ in
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "tracearr";
-    description = "Tracearr media server monitoring";
     service = cfg;
-    ports = [ cfg.port ];
     package = pkgs.${namespace}.tracearr;
     after = [
       "network-online.target"

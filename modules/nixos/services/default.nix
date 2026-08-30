@@ -104,7 +104,11 @@ in
   config = mkMerge [
     (mkIf logging.enable {
       services.alloy = enabled // {
-        extraFlags = [ "--disable-reporting" ];
+        extraFlags = [
+          "--disable-reporting"
+          "--server.http.listen-addr=127.0.0.1:0"
+          "--server.http.enable-pprof=false"
+        ];
       };
 
       systemd.services.alloy.serviceConfig.SupplementaryGroups = mkAfter [ "adm" ];
@@ -114,7 +118,11 @@ in
       containers = mapAttrs (name: _service: {
         config = {
           services.alloy = enabled // {
-            extraFlags = [ "--disable-reporting" ];
+            extraFlags = [
+              "--disable-reporting"
+              "--server.http.listen-addr=127.0.0.1:0"
+              "--server.http.enable-pprof=false"
+            ];
           };
 
           systemd.services.alloy.serviceConfig.SupplementaryGroups = mkAfter [

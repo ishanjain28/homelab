@@ -15,6 +15,7 @@ in
 {
   options.${namespace}.services.authelia = mkServiceOptions {
     name = "authelia";
+    description = "Authelia authentication and authorization server";
     port = 9091;
     monitor = {
       inherit (cfg) port;
@@ -31,11 +32,7 @@ in
     }
 
     (mkServiceContainer {
-      name = "authelia";
       service = cfg;
-      ports = [
-        cfg.port
-      ];
       secrets = {
         conf = {
           file = "secrets/authelia.yml";

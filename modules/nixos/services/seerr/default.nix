@@ -15,14 +15,12 @@ in
 {
   options.${namespace}.services.seerr = mkServiceOptions {
     name = "seerr";
+    description = "Seerr for requesting media content";
     port = 5055;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
-    name = "seerr";
-    description = "Seerr for requesting media content";
     service = cfg;
-    ports = [ cfg.port ];
     package = pkgs.${namespace}.seerr;
     secrets.env = {
       file = "secrets/seerr.env";
