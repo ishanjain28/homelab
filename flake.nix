@@ -192,6 +192,7 @@
 
       outputs-builder = channels: {
         formatter = (treefmtModule channels.nixpkgs ./treefmt.nix).config.build.wrapper;
+        packages.volume = channels.nixpkgs.callPackage ./packages/volume { };
       };
 
       templates = {
