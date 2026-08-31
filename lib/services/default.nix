@@ -3,6 +3,7 @@ with lib;
 with lib.${namespace};
 let
   inherit (lib)
+    mkOption
     mkEnableOption
     mapAttrsToList
     mkMerge
@@ -304,7 +305,7 @@ let
       };
 
       monitor = {
-        enable = mkBoolOpt (monitor.enable or true) "Whether to generate a Gatus check for this service.";
+        enable = mkBoolOpt monitor.enable "Whether to generate a Gatus check for this service.";
         name = mkOpt types.str (monitor.name or name) "Gatus endpoint name.";
         group = mkOpt types.str (monitor.group or "services") "Gatus endpoint group.";
         protocol = mkOpt (types.enum [

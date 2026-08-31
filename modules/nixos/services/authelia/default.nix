@@ -17,7 +17,7 @@ in
     name = "authelia";
     description = "Authelia authentication and authorization server";
     port.number = 9091;
-    monitor = {
+    monitor = enabled // {
       port = cfg.port.number;
       protocol = "http";
     };

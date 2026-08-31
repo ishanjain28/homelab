@@ -43,6 +43,7 @@ in
     name = "openvscode-server";
     description = "OpenVSCode Server";
     port.number = 3000;
+    monitor = enabled;
   };
 
   config = mkIf cfg.enable (mkMerge [

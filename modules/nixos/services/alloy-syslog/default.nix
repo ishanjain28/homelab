@@ -21,7 +21,7 @@ in
       number = 514; # Primary listener
       protocol = "tcp-and-udp";
     };
-    monitor = {
+    monitor = enabled // {
       protocol = "tcp";
     };
   };

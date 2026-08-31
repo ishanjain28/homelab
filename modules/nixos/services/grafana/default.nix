@@ -18,7 +18,7 @@ in
     name = "grafana";
     description = "Grafana dashboard service";
     port.number = 3000;
-    monitor = {
+    monitor = enabled // {
       protocol = "http";
     };
   };

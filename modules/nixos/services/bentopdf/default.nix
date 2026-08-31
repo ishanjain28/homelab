@@ -16,7 +16,7 @@ in
     name = "bentopdf";
     description = "Bentopdf";
     port.number = 8080;
-    monitor = {
+    monitor = enabled // {
       protocol = "http";
     };
   };

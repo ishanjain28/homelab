@@ -15,7 +15,7 @@ in
     name = "loki";
     description = "Loki log storage";
     port.number = 3100;
-    monitor = {
+    monitor = enabled // {
       protocol = "http";
       path = "/ready";
     };

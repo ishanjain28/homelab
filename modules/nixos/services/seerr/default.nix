@@ -17,6 +17,7 @@ in
     name = "seerr";
     description = "Seerr for requesting media content";
     port.number = 5055;
+    monitor = enabled;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
