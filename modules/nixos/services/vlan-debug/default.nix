@@ -33,47 +33,106 @@ let
 
       resources = {
         CPUQuota = "100%";
-        MemoryMax = "256M";
-        TasksMax = 256;
+        MemoryMax = "1G";
+        TasksMax = 512;
       };
 
       containerConfig = {
-        environment.systemPackages = with pkgs; [
-          bashInteractive
-          bind
-          curl
-          ethtool
-          inetutils
-          iperf3
-          iproute2
-          iputils
-          jq
-          mtr
-          netcat-openbsd
-          nftables
-          nmap
-          openssl
-          socat
-          tcpdump
-          traceroute
-          wget
-          whois
+        environment.systemPackages = mkForce (
+          with pkgs;
+          [
+            bashInteractive
+            fish
+            bind
+            coreutils
+            curl
+            ethtool
+            inetutils
+            iperf3
+            iproute2
+            iputils
+            jq
+            mtr
+            netcat-openbsd
+            nftables
+            nmap
+            openssl
+            socat
+            tcpdump
+            traceroute
+            wget
+            whois
+          ]
+        );
+        i18n = {
+          defaultLocale = "en_US.UTF-8";
+          supportedLocales = [
+            "en_US.UTF-8/UTF-8"
+            "en_IN/UTF-8"
+          ];
+        };
+
+        security.sudo.extraRules = [
+          {
+            users = [ "ishan" ];
+            commands = [
+              {
+                command = "ALL";
+                options = [ "NOPASSWD" ];
+              }
+            ];
+          }
         ];
+
+        security.wrappers.ping = {
+          source = "${pkgs.iputils}/bin/ping";
+          owner = "root";
+          group = "root";
+          capabilities = "cap_net_raw+ep";
+        };
+
+        security.wrappers.traceroute = {
+          source = "${pkgs.traceroute}/bin/traceroute";
+          owner = "root";
+          group = "root";
+          capabilities = "cap_net_raw+ep";
+        };
 
         services.openssh = enabled // {
           inherit (ssh) package;
           openFirewall = true;
+          generateHostKeys = true;
           settings = {
-            PasswordAuthentication = false;
+            PasswordAuthentication = mkForce false;
             PermitRootLogin = "prohibit-password";
             X11Forwarding = false;
           };
         };
 
-        users.users.root = {
-          shell = pkgs.bashInteractive;
-          openssh.authorizedKeys.keys = ssh.keys;
+        users = {
+          mutableUsers = false;
+          defaultUserShell = pkgs.fish;
+          groups.ishan.gid = 1000;
+          users.ishan = {
+            isNormalUser = true;
+            uid = 1000;
+            group = "ishan";
+            extraGroups = [ "wheel" ];
+            createHome = true;
+            home = "/home/ishan";
+            homeMode = "700";
+            useDefaultShell = true;
+            hashedPassword = config.users.users.ishan.hashedPassword;
+            openssh.authorizedKeys.keys = ssh.keys;
+          };
         };
+
+        programs.fish.enable = true;
+
+        environment.shells = with pkgs; [
+          bashInteractive
+          fish
+        ];
       };
     });
 in
