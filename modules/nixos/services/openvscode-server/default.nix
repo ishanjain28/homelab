@@ -43,46 +43,52 @@ in
     port.number = 3000;
   };
 
-  config = mkIf cfg.enable (mkSingleServiceContainer {
-    service = cfg;
-    package = pkgs.openvscode-server;
-    command = concatStringsSep " " [
-      "${pkgs.openvscode-server}/bin/openvscode-server"
-      "--accept-server-license-terms"
-      "--host=0.0.0.0"
-      "--port=${toString cfg.port.number}"
-      "--without-connection-token"
-      "--telemetry-level=off"
-      "--user-data-dir=${stateDir}/user-data"
-      "--server-data-dir=${stateDir}/server-data"
-      "--extensions-dir=${stateDir}/extensions"
-      "${stateDir}/workspace"
-    ];
+  config = mkIf cfg.enable (mkMerge [
+    {
+      nix.settings.allowed-users = [ "vu-openvscode-server-${toString cfg.runtimeId}" ];
+    }
 
-    resources = {
-      CPUQuota = "400%";
-      MemoryMax = "4G";
-      TasksMax = 1024;
-    };
+    (mkSingleServiceContainer {
+      service = cfg;
+      package = pkgs.openvscode-server;
+      command = concatStringsSep " " [
+        "${pkgs.openvscode-server}/bin/openvscode-server"
+        "--accept-server-license-terms"
+        "--host=0.0.0.0"
+        "--port=${toString cfg.port.number}"
+        "--without-connection-token"
+        "--telemetry-level=off"
+        "--user-data-dir=${stateDir}/user-data"
+        "--server-data-dir=${stateDir}/server-data"
+        "--extensions-dir=${stateDir}/extensions"
+        "${stateDir}/workspace"
+      ];
 
-    environment = {
-      HOME = stateDir;
-      SHELL = "${pkgs.fish}/bin/fish";
-    };
+      resources = {
+        CPUQuota = "400%";
+        MemoryMax = "4G";
+        TasksMax = 1024;
+      };
 
-    serviceConfig = {
-      StateDirectory = "openvscode-server";
-      StateDirectoryMode = "0700";
-      RestartSec = "5s";
-    };
+      environment = {
+        HOME = stateDir;
+        SHELL = "${pkgs.fish}/bin/fish";
+      };
 
-    containerConfig = {
-      systemd.services.openvscode-server.path = shellPackages;
+      serviceConfig = {
+        StateDirectory = "openvscode-server";
+        StateDirectoryMode = "0700";
+        RestartSec = "5s";
+      };
 
-      environment.systemPackages = mkForce shellPackages;
+      containerConfig = {
+        systemd.services.openvscode-server.path = shellPackages;
 
-      nix = mkForce enabled;
-      users.users.${cfg.runtimeUser.name}.shell = pkgs.bashInteractive;
-    };
-  });
+        environment.systemPackages = mkForce shellPackages;
+
+        nix = mkForce enabled;
+        users.users.${cfg.runtimeUser.name}.shell = pkgs.bashInteractive;
+      };
+    })
+  ]);
 }
