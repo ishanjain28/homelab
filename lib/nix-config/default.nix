@@ -29,7 +29,7 @@
         keep-going = true;
         log-lines = 20;
         max-jobs = "auto";
-        sandbox = lib.mkForce (!pkgs.stdenv.isDarwin);
+        sandbox = lib.mkForce (!pkgs.stdenv.hostPlatform.isDarwin);
         substitute = false;
         trusted-users = [
           "root"

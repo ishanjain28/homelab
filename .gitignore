@@ -2,3 +2,4 @@ doo
 result
 result/*
 .cache/*
+**/target/**
