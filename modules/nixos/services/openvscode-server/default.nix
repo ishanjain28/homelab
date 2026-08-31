@@ -11,6 +11,8 @@ let
   srv = config.${namespace}.services;
   cfg = srv.openvscode-server;
   stateDir = "/var/lib/openvscode-server";
+  hostNixUser = "openvscode-server-nix";
+  hostNixUid = containerUidOffset + cfg.runtimeId;
   shellPackages = with pkgs; [
     bashInteractive
     coreutils
@@ -45,7 +47,14 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     {
-      nix.settings.allowed-users = [ "vu-openvscode-server-${toString cfg.runtimeId}" ];
+      users.groups.${hostNixUser}.gid = hostNixUid;
+      users.users.${hostNixUser} = {
+        isSystemUser = true;
+        uid = hostNixUid;
+        group = hostNixUser;
+      };
+
+      nix.settings.allowed-users = [ hostNixUser ];
     }
 
     (mkSingleServiceContainer {
