@@ -17,7 +17,7 @@ in
     name = "mathesar";
     description = "Web viewer for databases";
     port.number = 5001;
-    monitor = {
+    monitor = enabled // {
       protocol = "http";
     };
   };

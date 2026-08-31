@@ -18,14 +18,10 @@ in
       name = "gatus";
       description = "Monitoring service for homelab";
       port.number = 8080;
-      monitor = {
-        protocol = "http";
-      };
+      monitor = disabled;
     }
     // (with types; {
-      enable = mkBoolOpt true "Whether to enable Gatus.";
       openFirewall = mkBoolOpt true "Whether to open the Gatus web UI port.";
-      address = mkOpt str "0.0.0.0" "Bind address";
       defaultInterval = mkOpt str "30s" "Default interval for generated service checks.";
       externalEndpoints =
         mkOpt (listOf attrs) [ ]
@@ -37,7 +33,7 @@ in
       services.gatus = disabled // {
         settings = {
           web = {
-            inherit (cfg) address;
+            address = "0.0.0.0";
             port = cfg.port.number;
           };
 

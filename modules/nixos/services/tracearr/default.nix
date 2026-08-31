@@ -17,7 +17,7 @@ in
     name = "tracearr";
     description = "Tracearr media server monitoring";
     port.number = 3000;
-    monitor = {
+    monitor = enabled // {
       port = cfg.port.number;
       protocol = "http";
     };

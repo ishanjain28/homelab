@@ -17,6 +17,7 @@ in
     name = "actual-server";
     description = "Actual Budget";
     port.number = 5006;
+    monitor = enabled;
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {

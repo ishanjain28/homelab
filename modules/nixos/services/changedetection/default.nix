@@ -25,7 +25,7 @@ in
     name = "changedetection";
     description = "Changedetection.io";
     port.number = 5000;
-    monitor = {
+    monitor = enabled // {
       protocol = "http";
     };
   };

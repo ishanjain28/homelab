@@ -18,7 +18,7 @@ in
     mkServiceOptions {
       name = "lldap";
       description = "LDAP server";
-      monitor = {
+      monitor = enabled // {
         port = cfg.httpPort;
         protocol = "http";
       };
