@@ -17,6 +17,8 @@ in
 
   config = mkIf cfg.enable {
     homelab = {
+      system.remoteRescue = enabled;
+
       services = {
         chrony = enabled;
       };
