@@ -1,8 +1,3 @@
-pub fn print_host_header(host: &str) {
-    println!();
-    println!("{host}");
-}
-
 pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
     let mut widths = headers.iter().map(|header| header.len()).collect::<Vec<_>>();
 
@@ -48,4 +43,3 @@ fn print_separator(widths: &[usize]) {
     }
     println!();
 }
-
