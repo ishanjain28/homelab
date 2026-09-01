@@ -16,8 +16,7 @@ in
   ];
 
   homelab = {
-    server = enabled;
-    secrets = enabled;
+    profiles.server = enabled;
     logging = enabled // {
       lokiPushUrl = "http://10.0.50.23:3100/loki/api/v1/push";
     };
@@ -311,47 +310,9 @@ in
     };
   };
 
-  # Enable passwordless sudo.
-  security.sudo.extraRules = [
-    {
-      users = [ "ishan" ];
-      commands = [
-        {
-          command = "ALL";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
-
-  systemd.targets.multi-user = enabled;
-
   nix = mkNixConfig { inherit lib pkgs; } // {
     optimise.automatic = true;
   };
-
-  users = {
-    mutableUsers = false;
-    users.ishan = {
-      uid = 1000;
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-      ];
-      isSystemUser = true;
-      group = "users";
-      createHome = true;
-      home = "/home/ishan";
-      homeMode = "700";
-      useDefaultShell = true;
-      isNormalUser = false;
-      ignoreShellProgramCheck = true;
-      shell = pkgs.fish;
-      hashedPassword = "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
-    };
-  };
-
-  environment.shells = with pkgs; [ fish ];
 
   sops.secrets.tailscale-auth-key = {
     sopsFile = ../../../secrets/tailscale/auth-key;
