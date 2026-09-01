@@ -8,7 +8,9 @@
 with lib;
 with lib.${namespace};
 let
-  utils = import "${pkgs.path}/nixos/lib/utils.nix" { inherit lib config pkgs; };
+  json = pkgs.formats.json { };
+  volumePackage = pkgs.callPackage ../../../packages/volume { };
+  volumeStateFile = json.generate "homelab-volumes.json" config.system.homelab.volumes;
   inherit (lib)
     attrNames
     attrValues
@@ -31,7 +33,11 @@ let
   enabledServices = filterAttrs (_name: srv: srv.enable or false) volumeServices;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
-  volumeMountUnit = volume: "${utils.escapeSystemdPath (volumeHostPath volume)}.mount";
+  volumeApplyUnit = volumeId: "homelab-volume-${volumeId}.service";
+  volumeMountOptions = [
+    "nofail"
+    "x-systemd.device-timeout=10s"
+  ];
   serviceVolumeIds = srv: srv.volumes;
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
   serviceVolumes = srv: map (volumeId: volumes.${volumeId}) (existingServiceVolumeIds srv);
@@ -101,10 +107,7 @@ let
         type = "filesystem";
         format = volume.fsType;
         mountpoint = volumeHostPath volume;
-        mountOptions = [
-          "nofail"
-          "x-systemd.device-timeout=10s"
-        ];
+        mountOptions = volumeMountOptions;
         extraArgs = [
           "-U"
           volume.uuid
@@ -134,6 +137,34 @@ let
         hostUid = ownerHostUid volume;
         hostGid = ownerHostGid volume;
       };
+    };
+  };
+
+  mkVolumeApplyService = volumeId: _volume: {
+    "homelab-volume-${volumeId}" = {
+      description = "Apply homelab volume '${volumeId}'";
+      wantedBy = [ "multi-user.target" ];
+      path = with pkgs; [
+        coreutils
+        e2fsprogs
+        lvm2
+        util-linux
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${volumePackage}/bin/volume apply --yes ${escapeShellArg volumeId}";
+      };
+    };
+  };
+
+  mkVolumeMountOrdering = volumeId: volume: {
+    what = volumeLvPath volume;
+    where = volumeHostPath volume;
+    type = volume.fsType;
+    options = concatStringsSep "," volumeMountOptions;
+    unitConfig = {
+      After = [ (volumeApplyUnit volumeId) ];
+      Requires = [ (volumeApplyUnit volumeId) ];
     };
   };
 
@@ -167,9 +198,8 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          requires = map volumeMountUnit attachedVolumes;
-          after = map volumeMountUnit attachedVolumes;
-          bindsTo = map volumeMountUnit attachedVolumes;
+          requires = map volumeApplyUnit (existingServiceVolumeIds srv);
+          after = map volumeApplyUnit (existingServiceVolumeIds srv);
         };
       }
     else
@@ -271,6 +301,19 @@ in
 
     {
       system.homelab.volumes = mkMerge (mapAttrsToList mkVolumeMigration volumes);
+    }
+
+    {
+      environment.systemPackages = [ volumePackage ];
+      environment.etc."homelab/volumes.json".source = volumeStateFile;
+    }
+
+    {
+      systemd.services = mkMerge (mapAttrsToList mkVolumeApplyService volumes);
+    }
+
+    {
+      systemd.mounts = mapAttrsToList mkVolumeMountOrdering volumes;
     }
 
     {

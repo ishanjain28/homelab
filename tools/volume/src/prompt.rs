@@ -6,11 +6,6 @@ pub fn confirm(prompt: &str) -> Result<bool, String> {
     Ok(reply == "yes")
 }
 
-pub fn confirm_exact(prompt: &str, expected: &str) -> Result<bool, String> {
-    let reply = prompt_tty(&format!("{prompt}\nType exactly: {expected}\n> "))?;
-    Ok(reply == expected)
-}
-
 fn prompt_tty(prompt: &str) -> Result<String, String> {
     let mut tty = File::options()
         .read(true)
@@ -35,4 +30,3 @@ fn prompt_tty(prompt: &str) -> Result<String, String> {
     }
     Ok(reply.trim().to_string())
 }
-
