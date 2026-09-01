@@ -14,7 +14,7 @@ with lib.${namespace};
   };
 
   programs.nh = enabled // {
-    clean.enable = config.${namespace}.server.enable;
+    clean.enable = config.${namespace}.profiles.server.enable;
     flake = "$HOME/dotfiles";
   };
 

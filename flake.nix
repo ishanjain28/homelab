@@ -186,6 +186,7 @@
           ];
         };
         hosts = {
+          copernicus.modules = [ ];
           kepler.modules = [ ];
         };
       };
