@@ -62,13 +62,28 @@ in
         permitRootLogin = false;
       };
 
+      tailscale = {
+        advertiseRoutes = [
+          "10.0.10.0/24"
+          "10.0.20.0/24"
+          "10.0.30.0/24"
+          "10.0.40.0/24"
+          "10.0.50.0/24"
+          "10.0.60.0/24"
+          "10.0.70.0/24"
+          "10.0.99.0/24"
+          "10.0.140.0/24"
+          "10.0.150.0/24"
+          "10.0.160.0/24"
+        ];
+      };
+
       pvr-movies-monitor = enabled // {
         vlan = 50;
         runtimeId = 20691;
         monitor = enabled // {
           protocol = "tcp";
         };
-        # volumes = [ "pvr-movies-monitor" ];
       };
 
       huawei-sms-telegram = enabled // {
@@ -337,6 +352,11 @@ in
   };
 
   environment.shells = with pkgs; [ fish ];
+
+  sops.secrets.tailscale-auth-key = {
+    sopsFile = ../../../secrets/tailscale/auth-key;
+    format = "binary";
+  };
 
   system.stateVersion = "26.05";
 }
