@@ -1,5 +1,12 @@
-{ pkgs, ... }:
 {
+  lib,
+  namespace,
+  pkgs,
+  ...
+}:
+{
+  home.shellAliases = lib.${namespace}.shellAliases;
+
   home.packages = with pkgs; [
     cachix
     curl
@@ -7,6 +14,7 @@
     difftastic
     diskus
     fd
+    git
     just
     jq
     nixfmt

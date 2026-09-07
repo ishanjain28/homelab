@@ -60,4 +60,13 @@ rec {
     #@ false
     enable = false;
   };
+
+  shellAliases = {
+    g = "git";
+    gst = "git status";
+    gds = "git diff --staged";
+    gp = "git pull";
+    gd = "git diff";
+    gcp = "git cherry-pick";
+  };
 }

@@ -100,6 +100,7 @@ in
         environment.systemPackages = mkForce shellPackages;
 
         nix = mkForce enabled;
+        programs.fish = enabled;
         users.users.${cfg.runtimeUser.name}.shell = pkgs.bashInteractive;
       };
     })
