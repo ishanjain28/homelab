@@ -1,12 +1,10 @@
 use crate::models::{Volume, VolumeSet};
 use crate::prompt::confirm;
 use crate::table::print_table;
-use crate::util::{parse_size, trim_octal};
-use std::ffi::CString;
+use crate::util::parse_size;
 use std::fs;
 use std::os::fd::AsRawFd;
-use std::os::unix::ffi::OsStrExt;
-use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt};
+use std::os::unix::fs::FileTypeExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -27,12 +25,11 @@ pub fn run_apply(state_file: &Path, assume_yes: bool, volume_ids: &[String]) -> 
                 volume.id.clone(),
                 volume.uuid.clone(),
                 volume.lv.clone(),
-                volume.path.clone(),
                 volume.size.clone(),
             ]
         })
         .collect::<Vec<_>>();
-    print_table(&["volume", "uuid", "lv", "mount", "size"], &rows);
+    print_table(&["volume", "uuid", "lv", "size"], &rows);
 
     for volume in volumes {
         apply_volume(&volume, assume_yes)?;
@@ -71,11 +68,9 @@ fn apply_volume(volume: &Volume, assume_yes: bool) -> Result<(), String> {
     let lv_name = lv_name(volume)?;
 
     ensure_vg(volume)?;
-    ensure_lv(volume, &lv_name, assume_yes)?;
-    ensure_filesystem(volume, assume_yes)?;
+    let lv_created = ensure_lv(volume, &lv_name, assume_yes)?;
+    ensure_filesystem(volume, assume_yes, lv_created)?;
     ensure_size(volume, expected_size, assume_yes)?;
-    ensure_mount(volume, assume_yes)?;
-    ensure_owner(volume, assume_yes)?;
 
     println!("[{}] ok", volume.id);
     Ok(())
@@ -89,9 +84,9 @@ fn ensure_vg(volume: &Volume) -> Result<(), String> {
     }
 }
 
-fn ensure_lv(volume: &Volume, lv_name: &str, assume_yes: bool) -> Result<(), String> {
+fn ensure_lv(volume: &Volume, lv_name: &str, assume_yes: bool) -> Result<bool, String> {
     if is_block_device(Path::new(&volume.lv)) {
-        return Ok(());
+        return Ok(false);
     }
 
     confirm_or_assume(
@@ -101,16 +96,20 @@ fn ensure_lv(volume: &Volume, lv_name: &str, assume_yes: bool) -> Result<(), Str
     run_command(
         "lvcreate",
         &["--yes", "--size", &volume.size, "--name", lv_name, VG_NAME],
-    )
+    )?;
+    Ok(true)
 }
 
-fn ensure_filesystem(volume: &Volume, assume_yes: bool) -> Result<(), String> {
-    let actual_type = command_stdout("blkid", &["-s", "TYPE", "-o", "value", &volume.lv])
-        .unwrap_or_default()
-        .trim()
-        .to_string();
+fn ensure_filesystem(volume: &Volume, assume_yes: bool, lv_created: bool) -> Result<(), String> {
+    let mut filesystem = probe_filesystem(volume)?;
 
-    if actual_type.is_empty() {
+    if filesystem.is_none() {
+        if assume_yes && !lv_created {
+            return Err(format!(
+                "[{}] no filesystem detected on existing LV {}; refusing to format unattended. Run volume apply {} interactively to confirm",
+                volume.id, volume.lv, volume.id
+            ));
+        }
         confirm_or_assume(
             assume_yes,
             &format!(
@@ -122,31 +121,88 @@ fn ensure_filesystem(volume: &Volume, assume_yes: bool) -> Result<(), String> {
             &format!("mkfs.{}", volume.fs_type),
             &["-F", "-U", &volume.uuid, &volume.lv],
         )?;
-    } else if actual_type != volume.fs_type {
+        filesystem = probe_filesystem(volume)?;
+    }
+
+    let (actual_type, actual_uuid) = filesystem.ok_or_else(|| {
+        format!(
+            "[{}] no filesystem detected on {} after formatting",
+            volume.id, volume.lv
+        )
+    })?;
+    if actual_type != volume.fs_type {
         return Err(format!(
             "[{}] filesystem type mismatch: expected {}, got {}",
             volume.id, volume.fs_type, actual_type
         ));
     }
-
-    let actual_uuid = command_stdout("blkid", &["-s", "UUID", "-o", "value", &volume.lv])
-        .unwrap_or_default()
-        .trim()
-        .to_string();
-    if actual_uuid != volume.uuid {
+    if actual_uuid.as_deref() != Some(volume.uuid.as_str()) {
         return Err(format!(
             "[{}] UUID mismatch: expected {}, got {}",
             volume.id,
             volume.uuid,
-            if actual_uuid.is_empty() {
-                "missing"
-            } else {
-                &actual_uuid
-            }
+            actual_uuid.as_deref().unwrap_or("missing")
         ));
     }
 
     Ok(())
+}
+
+fn probe_filesystem(volume: &Volume) -> Result<Option<(String, Option<String>)>, String> {
+    let output = Command::new("blkid")
+        .args(["--probe", "--output", "export", &volume.lv])
+        .output()
+        .map_err(|error| format!("[{}] failed to run blkid: {error}", volume.id))?;
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    classify_filesystem_probe(
+        &volume.id,
+        &volume.lv,
+        output.status.code(),
+        &stdout,
+        &stderr,
+    )
+}
+
+fn classify_filesystem_probe(
+    volume_id: &str,
+    volume_path: &str,
+    status: Option<i32>,
+    stdout: &str,
+    stderr: &str,
+) -> Result<Option<(String, Option<String>)>, String> {
+    if status == Some(0) {
+        let value = |key: &str| {
+            stdout
+                .lines()
+                .find_map(|line| line.strip_prefix(&format!("{key}=")))
+                .map(str::to_string)
+        };
+        let fs_type = value("TYPE").ok_or_else(|| {
+            format!(
+                "[{}] blkid succeeded for {} but returned no filesystem type",
+                volume_id, volume_path
+            )
+        })?;
+        return Ok(Some((fs_type, value("UUID"))));
+    }
+
+    if status == Some(2) && stdout.trim().is_empty() && stderr.trim().is_empty() {
+        return Ok(None);
+    }
+
+    Err(format!(
+        "[{}] failed to probe filesystem on {} with blkid (status {}): {}",
+        volume_id,
+        volume_path,
+        status.map_or_else(|| "signal".to_string(), |code| code.to_string()),
+        if stderr.trim().is_empty() {
+            "no error output"
+        } else {
+            stderr.trim()
+        }
+    ))
 }
 
 fn ensure_size(volume: &Volume, expected_size: u64, assume_yes: bool) -> Result<(), String> {
@@ -166,50 +222,9 @@ fn ensure_size(volume: &Volume, expected_size: u64, assume_yes: bool) -> Result<
         println!("[{}] declared size is smaller than current LV", volume.id);
         println!("  current:  {actual_size} bytes");
         println!("  declared: {expected_size} bytes ({})", volume.size);
-        if is_mountpoint(Path::new(&volume.path)) {
-            let _ = Command::new("df").args(["-h", &volume.path]).status();
-        }
         return Err(format!("[{}] refusing to shrink automatically", volume.id));
     }
 
-    Ok(())
-}
-
-fn ensure_mount(volume: &Volume, assume_yes: bool) -> Result<(), String> {
-    let mount_path = Path::new(&volume.path);
-    if is_mountpoint(mount_path) {
-        return Ok(());
-    }
-
-    confirm_or_assume(assume_yes, &format!("[{}] mount {}", volume.id, volume.path))?;
-    fs::create_dir_all(mount_path)
-        .map_err(|error| format!("[{}] failed to create {}: {error}", volume.id, volume.path))?;
-    run_command("mount", &[&volume.lv, &volume.path])
-}
-
-fn ensure_owner(volume: &Volume, assume_yes: bool) -> Result<(), String> {
-    let path = Path::new(&volume.path);
-    let metadata = fs::metadata(path)
-        .map_err(|error| format!("[{}] failed to stat {}: {error}", volume.id, volume.path))?;
-    let actual_mode = metadata.permissions().mode() & 0o7777;
-    let expected_mode = u32::from_str_radix(&trim_octal(&volume.owner.mode), 8)
-        .map_err(|error| format!("[{}] invalid mode {}: {error}", volume.id, volume.owner.mode))?;
-
-    if metadata.uid() == volume.owner.host_uid && metadata.gid() == volume.owner.host_gid && actual_mode == expected_mode {
-        return Ok(());
-    }
-
-    confirm_or_assume(
-        assume_yes,
-        &format!(
-            "[{}] set {} owner={}:{} mode={}",
-            volume.id, volume.path, volume.owner.host_uid, volume.owner.host_gid, volume.owner.mode
-        ),
-    )?;
-
-    chown(path, volume.owner.host_uid, volume.owner.host_gid)?;
-    fs::set_permissions(path, fs::Permissions::from_mode(expected_mode))
-        .map_err(|error| format!("[{}] failed to chmod {}: {error}", volume.id, volume.path))?;
     Ok(())
 }
 
@@ -234,18 +249,6 @@ fn command_status(program: &str, args: &[&str]) -> Result<bool, String> {
         .status()
         .map(|status| status.success())
         .map_err(|error| format!("failed to run {program}: {error}"))
-}
-
-fn command_stdout(program: &str, args: &[&str]) -> Result<String, String> {
-    let output = Command::new(program)
-        .args(args)
-        .output()
-        .map_err(|error| format!("failed to run {program}: {error}"))?;
-    if output.status.success() {
-        Ok(String::from_utf8_lossy(&output.stdout).into_owned())
-    } else {
-        Err(String::from_utf8_lossy(&output.stderr).trim().to_string())
-    }
 }
 
 fn run_command(program: &str, args: &[&str]) -> Result<(), String> {
@@ -277,35 +280,70 @@ fn block_device_size(path: &Path) -> Result<u64, String> {
     }
 }
 
-fn is_mountpoint(path: &Path) -> bool {
-    let Ok(mountinfo) = fs::read_to_string("/proc/self/mountinfo") else {
-        return false;
-    };
-    let wanted = path.to_string_lossy();
-
-    mountinfo.lines().any(|line| {
-        let fields = line.split_whitespace().collect::<Vec<_>>();
-        fields.get(4).is_some_and(|mountpoint| *mountpoint == wanted)
-    })
-}
-
-fn chown(path: &Path, uid: u32, gid: u32) -> Result<(), String> {
-    let c_path = CString::new(path.as_os_str().as_bytes())
-        .map_err(|_| format!("path contains NUL byte: {}", path.display()))?;
-    let result = unsafe { libc::chown(c_path.as_ptr(), uid, gid) };
-    if result == 0 {
-        Ok(())
-    } else {
-        Err(format!(
-            "failed to chown {}: {}",
-            path.display(),
-            std::io::Error::last_os_error()
-        ))
-    }
-}
-
 fn is_block_device(path: &Path) -> bool {
     fs::metadata(path)
         .map(|metadata| metadata.file_type().is_block_device())
         .unwrap_or(false)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::classify_filesystem_probe;
+
+    #[test]
+    fn classifies_detected_filesystem() {
+        let result = classify_filesystem_probe(
+            "data",
+            "/dev/pool/data",
+            Some(0),
+            "DEVNAME=/dev/pool/data\nUUID=test-uuid\nTYPE=ext4\n",
+            "",
+        )
+        .unwrap();
+
+        assert_eq!(result, Some(("ext4".to_string(), Some("test-uuid".to_string()))));
+    }
+
+    #[test]
+    fn classifies_clean_no_signature_result() {
+        assert_eq!(
+            classify_filesystem_probe("data", "/dev/pool/data", Some(2), "", "").unwrap(),
+            None
+        );
+    }
+
+    #[test]
+    fn rejects_probe_errors() {
+        let error = classify_filesystem_probe(
+            "data",
+            "/dev/pool/data",
+            Some(4),
+            "",
+            "permission denied",
+        )
+        .unwrap_err();
+
+        assert!(error.contains("permission denied"));
+    }
+
+    #[test]
+    fn rejects_ambiguous_probe_results() {
+        let error = classify_filesystem_probe("data", "/dev/pool/data", Some(8), "", "").unwrap_err();
+
+        assert!(error.contains("status 8"));
+    }
+
+    #[test]
+    fn rejects_success_without_filesystem_type() {
+        let error = classify_filesystem_probe(
+            "data",
+            "/dev/pool/data",
+            Some(0),
+            "DEVNAME=/dev/pool/data\nUUID=test-uuid\n",
+            "",
+        )
+        .unwrap_err();
+
+        assert!(error.contains("returned no filesystem type"));
+    }
 }

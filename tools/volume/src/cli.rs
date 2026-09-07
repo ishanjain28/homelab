@@ -16,7 +16,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum VolumeCommand {
-    /// Apply local volume state: create, format, grow, mount, and fix ownership.
+    /// Apply local volume state: create, format, verify, and grow.
     Apply {
         /// Apply without interactive prompts. Shrinks are still refused.
         #[arg(long)]

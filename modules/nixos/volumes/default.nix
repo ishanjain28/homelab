@@ -30,13 +30,23 @@ let
   inherit (registry) services volumes;
   inherit (cfg) deletedVolumes;
   enabledServices = filterAttrs (_name: service: service.enable) services;
+  activeVolumeIds = unique (
+    flatten (mapAttrsToList (_name: service: service.volumes) enabledServices)
+  );
+  activeVolumes = filterAttrs (volumeId: _volume: elem volumeId activeVolumeIds) volumes;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
   volumeApplyUnit = volumeId: "homelab-volume-${volumeId}.service";
   volumeMountUnit = volume: "var-lib-volumes-${replaceStrings [ "-" ] [ "\\x2d" ] volume.name}.mount";
+  volumePermissionsUnit = volumeId: "homelab-volume-${volumeId}-permissions.service";
   volumeMountOptions = [
+    "nofail"
     "x-systemd.device-timeout=10s"
   ];
+  volumeState = volumeId: {
+    ${volumeId} = config.system.homelab.volumes.${volumeId};
+  };
+  volumeStatePath = volumeId: json.generate "homelab-volume-${volumeId}.json" (volumeState volumeId);
   serviceVolumeIds = srv: srv.volumes;
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
   serviceVolumes = srv: map (volumeId: volumes.${volumeId}) (existingServiceVolumeIds srv);
@@ -80,64 +90,21 @@ let
   activeDeletedVolumes = filter (volumeId: hasAttr volumeId volumes) (attrNames deletedVolumes);
 
   volumeOwnerService = volume: services.${volume.ownerService};
-  volumeOwner =
-    volume:
-    let
-      service = volumeOwnerService volume;
-    in
-    service.runtimeUser;
+  volumeOwner = volume: (volumeOwnerService volume).runtimeUser;
   ownerHostUid = volume: containerUidOffset + (volumeOwnerService volume).runtimeId;
   ownerHostGid = volume: containerUidOffset + (volumeOwnerService volume).runtimeId;
   volumeLvPath = volume: "/dev/pool/${volume.name}";
 
-  mkVolumeHostTmpfilesRule =
-    _volumeId: volume:
-    "d ${volumeHostPath volume} ${volume.mode} ${toString (ownerHostUid volume)} ${toString (ownerHostGid volume)} -";
-
-  mkVolumeDisko = _volumeId: volume: {
-    lvm_vg.pool.lvs.${volume.name} = {
-      inherit (volume) size;
-      content = {
-        type = "filesystem";
-        format = volume.fsType;
-        mountpoint = volumeHostPath volume;
-        mountOptions = volumeMountOptions;
-        extraArgs = [
-          "-U"
-          volume.uuid
-        ];
-      };
-    };
-  };
-
-  mkVolumeMigration = volumeId: volume: {
-    ${volumeId} = {
-      inherit volumeId;
-      inherit (volume)
-        uuid
-        ownerService
-        mountPath
-        size
-        fsType
-        ;
-      isMigratable = volume.migratable;
-      lvPath = volumeLvPath volume;
-      hostPath = volumeHostPath volume;
-      owner = {
-        inherit (volume) mode;
-        user = (volumeOwner volume).name;
-        inherit (volumeOwner volume) group;
-        namespaceBase = containerUidOffset;
-        hostUid = ownerHostUid volume;
-        hostGid = ownerHostGid volume;
-      };
-    };
+  mkVolumeState = volumeId: volume: {
+    inherit volumeId;
+    inherit (volume) uuid size fsType;
+    lvPath = volumeLvPath volume;
   };
 
   mkVolumeApplyService = volumeId: _volume: {
     "homelab-volume-${volumeId}" = {
       description = "Apply homelab volume '${volumeId}'";
-      wantedBy = [ "multi-user.target" ];
+      unitConfig.StopWhenUnneeded = true;
       path = with pkgs; [
         coreutils
         e2fsprogs
@@ -146,7 +113,25 @@ let
       ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${volumePackage}/bin/volume apply --yes ${escapeShellArg volumeId}";
+        ExecStart = "${volumePackage}/bin/volume --state-file ${volumeStatePath volumeId} apply --yes ${escapeShellArg volumeId}";
+        RemainAfterExit = true;
+      };
+    };
+  };
+
+  mkVolumePermissionsService = volumeId: volume: {
+    "homelab-volume-${volumeId}-permissions" = {
+      description = "Apply permissions for homelab volume '${volumeId}'";
+      requires = [ (volumeMountUnit volume) ];
+      after = [ (volumeMountUnit volume) ];
+      unitConfig.StopWhenUnneeded = true;
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = [
+          "${pkgs.coreutils}/bin/chown ${toString (ownerHostUid volume)}:${toString (ownerHostGid volume)} ${escapeShellArg (volumeHostPath volume)}"
+          "${pkgs.coreutils}/bin/chmod ${volume.mode} ${escapeShellArg (volumeHostPath volume)}"
+        ];
+        RemainAfterExit = true;
       };
     };
   };
@@ -159,7 +144,9 @@ let
     unitConfig = {
       After = [ (volumeApplyUnit volumeId) ];
       Requires = [ (volumeApplyUnit volumeId) ];
+      StopWhenUnneeded = true;
     };
+    mountConfig.DirectoryMode = volume.mode;
   };
 
   mkServiceVolumeConfig =
@@ -192,9 +179,15 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
+          restartTriggers = map volumeStatePath (existingServiceVolumeIds srv);
           requires =
-            map volumeApplyUnit (existingServiceVolumeIds srv) ++ map volumeMountUnit attachedVolumes;
-          after = map volumeApplyUnit (existingServiceVolumeIds srv) ++ map volumeMountUnit attachedVolumes;
+            map volumeApplyUnit (existingServiceVolumeIds srv)
+            ++ map volumeMountUnit attachedVolumes
+            ++ map volumePermissionsUnit (existingServiceVolumeIds srv);
+          after =
+            map volumeApplyUnit (existingServiceVolumeIds srv)
+            ++ map volumeMountUnit attachedVolumes
+            ++ map volumePermissionsUnit (existingServiceVolumeIds srv);
         };
       }
     else
@@ -205,7 +198,7 @@ in
     type = types.attrsOf types.anything;
     default = { };
     internal = true;
-    description = "Evaluated homelab volume metadata for shell tooling.";
+    description = "Evaluated homelab volume metadata.";
   };
 
   options.${namespace} = {
@@ -228,8 +221,6 @@ in
               description = "Logical volume size.";
             };
             fsType = mkOpt (types.enum [ "ext4" ]) "ext4" "Filesystem type.";
-            backend = mkOpt (types.enum [ "lvm" ]) "lvm" "Volume backend.";
-            migratable = mkBoolOpt true "Whether this volume is managed by migration tooling.";
             readOnly = mkBoolOpt false "Whether to bind mount this volume read-only.";
             mode = mkOpt types.str "0700" "Directory mode for the mounted data inside the container.";
           };
@@ -287,15 +278,7 @@ in
     }
 
     {
-      disko.devices = mkMerge (mapAttrsToList mkVolumeDisko volumes);
-    }
-
-    {
-      systemd.tmpfiles.rules = mapAttrsToList mkVolumeHostTmpfilesRule volumes;
-    }
-
-    {
-      system.homelab.volumes = mkMerge (mapAttrsToList mkVolumeMigration volumes);
+      system.homelab.volumes = mapAttrs mkVolumeState volumes;
     }
 
     {
@@ -304,19 +287,14 @@ in
     }
 
     {
-      systemd.services = mkMerge (mapAttrsToList mkVolumeApplyService volumes);
-    }
-
-    {
-      systemd.mounts = mapAttrsToList mkVolumeMountOrdering volumes;
-    }
-
-    {
-      system.migration.volumes = mkMerge (
-        mapAttrsToList (
-          volumeId: volume: mkIf volume.migratable (mkVolumeMigration volumeId volume)
-        ) volumes
+      systemd.services = mkMerge (
+        mapAttrsToList mkVolumeApplyService activeVolumes
+        ++ mapAttrsToList mkVolumePermissionsService activeVolumes
       );
+    }
+
+    {
+      systemd.mounts = mapAttrsToList mkVolumeMountOrdering activeVolumes;
     }
 
     {
