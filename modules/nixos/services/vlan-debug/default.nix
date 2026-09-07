@@ -43,6 +43,7 @@ let
           [
             bashInteractive
             fish
+            git
             bind
             coreutils
             curl

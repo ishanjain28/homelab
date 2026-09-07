@@ -128,28 +128,12 @@
           fileAttr = "services.gatus.configFile";
         })
       ];
-      volumeCommand = pkgs: import ./lib/dev-shell/volume.nix { inherit pkgs; };
-      shellAliasCommands =
-        pkgs:
-        let
-          mkGitAlias =
-            name: args:
-            pkgs.writeShellApplication {
-              inherit name;
-              runtimeInputs = [ pkgs.git ];
-              text = ''
-                exec git ${args} "$@"
-              '';
-            };
-        in
-        [
-          (mkGitAlias "g" "")
-          (mkGitAlias "gst" "status")
-          (mkGitAlias "gds" "diff --staged")
-          (mkGitAlias "gp" "pull")
-          (mkGitAlias "gd" "diff")
-          (mkGitAlias "gcp" "cherry-pick")
-        ];
+      inherit ((import ./lib/module/default.nix { lib = inputs.nixpkgs.lib; })) shellAliases;
+      shellAliasHook = inputs.nixpkgs.lib.concatStringsSep "\n" (
+        inputs.nixpkgs.lib.mapAttrsToList (
+          name: command: "alias ${name}=${inputs.nixpkgs.lib.escapeShellArg command}"
+        ) shellAliases
+      );
     in
     lib.mkFlake {
       inherit inputs;
@@ -166,15 +150,13 @@
           pkgs = import inputs.nixpkgs { system = "aarch64-linux"; };
         in
         pkgs.mkShell {
-          packages =
-            (generatedConfigCommands pkgs)
-            ++ (shellAliasCommands pkgs)
-            ++ [
-              (volumeCommand pkgs)
-              pkgs.age
-              inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
-              pkgs.sops
-            ];
+          packages = (generatedConfigCommands pkgs) ++ [
+            pkgs.age
+            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
+            pkgs.git
+            pkgs.sops
+          ];
+          shellHook = shellAliasHook;
         };
 
       devShells.x86_64-linux.default =
@@ -182,15 +164,13 @@
           pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
         in
         pkgs.mkShell {
-          packages =
-            (generatedConfigCommands pkgs)
-            ++ (shellAliasCommands pkgs)
-            ++ [
-              (volumeCommand pkgs)
-              pkgs.age
-              inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
-              pkgs.sops
-            ];
+          packages = (generatedConfigCommands pkgs) ++ [
+            pkgs.age
+            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
+            pkgs.git
+            pkgs.sops
+          ];
+          shellHook = shellAliasHook;
         };
 
       systems = with inputs; {

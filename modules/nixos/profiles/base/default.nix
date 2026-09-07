@@ -14,6 +14,7 @@ in
   options.${namespace}.profiles.base.enable = mkEnableOption "common NixOS defaults";
 
   config = mkIf cfg.enable {
+    environment.shellAliases = shellAliases;
     programs.fish = enabled;
     users.defaultUserShell = pkgs.fish;
 

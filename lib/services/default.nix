@@ -115,6 +115,7 @@ let
 
       documentation = disabled;
       environment.defaultPackages = mkForce [ ];
+      environment.shellAliases = shellAliases;
       environment.systemPackages = mkForce [ ];
       nix = disabled;
       programs.command-not-found = disabled;
@@ -130,14 +131,12 @@ let
       systemd.services.systemd-update-utmp = disabled;
       systemd.services.systemd-update-utmp-runlevel = disabled;
       systemd.services.systemd-user-sessions = disabled;
-      services.journald = {
-        storage = "persistent";
-        extraConfig = ''
-          SplitMode=none
-          MaxRetentionSec=1week
-          SystemMaxUse=256M
-          RuntimeMaxUse=64M
-        '';
+      services.journald.settings.Journal = {
+        Storage = "persistent";
+        SplitMode = "none";
+        MaxRetentionSec = "1week";
+        SystemMaxUse = "256M";
+        RuntimeMaxUse = "64M";
       };
 
       systemd.network = enabled // {

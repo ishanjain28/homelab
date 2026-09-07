@@ -15,7 +15,9 @@ in
     enable = mkBoolOpt false "Whether or not to enable booting";
     timeout = mkOpt types.int 60 "Timeout for the bootloader";
     bootCounting = {
-      enable = mkBoolOpt true "Enable systemd-boot automatic boot assessment.";
+      # Broken after upgrade. need to fix
+      # systemd-bless-boot[338121]: Can't find boot counter source file for '/loader/entries/nixos-82f6f67f502649183b2fac43185c0b2eb18afbd42510615da1ccbbcf01097895.conf'.
+      enable = mkBoolOpt false "Enable systemd-boot automatic boot assessment.";
       tries =
         mkOpt types.ints.positive 1
           "Number of times a new generation may fail before systemd-boot skips it.";
@@ -57,6 +59,16 @@ in
     };
 
     systemd.services = {
+      systemd-bless-boot = {
+        # A stale LoaderBootCountPath EFI variable can runtime-enable this unit
+        # even after boot counting has been disabled in the configuration.
+        enable = cfg.bootCounting.enable;
+
+        # Blessing is tied to the loader entry selected for this boot. It must
+        # not be rerun merely because its unit or systemd changed in a switch.
+        restartIfChanged = false;
+      };
+
       homelab-remote-boot-ready = mkIf cfg.bootCounting.enable {
         description = "Verify remote access before blessing this boot";
         wantedBy = [ "boot-complete.target" ];
