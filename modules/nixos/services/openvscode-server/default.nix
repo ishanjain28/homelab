@@ -42,8 +42,11 @@ in
   options.${namespace}.services.openvscode-server = mkServiceOptions {
     name = "openvscode-server";
     description = "OpenVSCode Server";
-    port.number = 3000;
-    monitor = enabled;
+    endpoints.web.port = 3000;
+    monitor = enabled // {
+      endpoint = "web";
+      protocol = "tcp";
+    };
   };
 
   config = mkIf cfg.enable (mkMerge [
@@ -65,7 +68,7 @@ in
         "${pkgs.openvscode-server}/bin/openvscode-server"
         "--accept-server-license-terms"
         "--host=0.0.0.0"
-        "--port=${toString cfg.port.number}"
+        "--port=${toString cfg.endpoints.web.port}"
         "--without-connection-token"
         "--telemetry-level=off"
         "--user-data-dir=${stateDir}/user-data"

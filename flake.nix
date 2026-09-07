@@ -80,6 +80,23 @@
         };
       };
       treefmtModule = inputs.treefmt-nix.lib.evalModule;
+      hostWorkloads = {
+        copernicus = import ./systems/x86_64-linux/copernicus/workloads.nix { };
+        kepler = import ./systems/x86_64-linux/kepler/workloads.nix {
+          inherit lib;
+          namespace = "homelab";
+        };
+      };
+      hostVolumes = {
+        copernicus = import ./systems/x86_64-linux/copernicus/volumes.nix;
+        kepler = import ./systems/x86_64-linux/kepler/volumes.nix;
+      };
+      hostRegistries = builtins.mapAttrs (
+        _hostName: machine: machine.config.system.homelab.registry
+      ) self.nixosConfigurations;
+      fleetRegistry = lib.mkFleetRegistry {
+        inherit hostRegistries hostVolumes hostWorkloads;
+      };
       mkGeneratedConfigCommand =
         pkgs:
         { name, fileAttr }:
@@ -202,5 +219,9 @@
     }
     // {
       inherit (inputs) self;
+      lib = lib // {
+        homelabWorkloads = hostWorkloads;
+        homelabRegistry = fleetRegistry;
+      };
     };
 }

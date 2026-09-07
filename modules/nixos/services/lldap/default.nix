@@ -14,26 +14,21 @@ let
   containerKeyPath = "/run/container-secrets/server-key";
 in
 {
-  options.${namespace}.services.lldap =
-    mkServiceOptions {
-      name = "lldap";
-      description = "LDAP server";
-      monitor = enabled // {
-        port = cfg.httpPort;
-        protocol = "http";
-      };
-    }
-    // (with types; {
-      ldapPort = mkOpt port 389 "LLDAP LDAP listener port.";
-      httpPort = mkOpt port 17170 "LLDAP HTTP listener port.";
-    });
+  options.${namespace}.services.lldap = mkServiceOptions {
+    name = "lldap";
+    description = "LDAP server";
+    endpoints = {
+      ldap.port = 389;
+      web.port = 17170;
+    };
+    monitor = enabled // {
+      endpoint = "web";
+      protocol = "http";
+    };
+  };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
-    ports = [
-      { number = cfg.ldapPort; }
-      { number = cfg.httpPort; }
-    ];
     package = pkgs.lldap;
     exec = "/bin/lldap run -c ${confPath}";
     secrets = {

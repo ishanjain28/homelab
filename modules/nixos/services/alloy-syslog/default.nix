@@ -17,11 +17,15 @@ in
   options.${namespace}.services.alloy-syslog = mkServiceOptions {
     name = serviceName;
     description = "Alloy syslog receiver";
-    port = {
-      number = 514; # Primary listener
-      protocol = "tcp-and-udp";
+    endpoints = {
+      rfc3164 = {
+        port = 514;
+        transport = "tcp-and-udp";
+      };
+      rfc5424.port = 601;
     };
     monitor = enabled // {
+      endpoint = "rfc3164";
       protocol = "tcp";
     };
   };
@@ -29,13 +33,6 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.grafana-alloy;
-    ports = [
-      cfg.port
-      {
-        number = 601; # Port for senders using RFC5424
-        protocol = "tcp";
-      }
-    ];
     exec = "/bin/alloy run /etc/alloy-syslog --disable-reporting --server.http.listen-addr=127.0.0.1:23456 --server.http.enable-pprof=false";
     resources = {
       CPUQuota = "100%";

@@ -15,13 +15,12 @@ let
     mkMerge
     ;
 
-  allServices = config.${namespace}.services or { };
-  enabledServices = filterAttrs (_name: srv: srv.enable or false) allServices;
+  registry = config.system.homelab.registry;
+  allServices = registry.services;
+  enabledServices = filterAttrs (_name: service: service.enable) allServices;
   logging = config.${namespace}.logging;
-  loggedServices = filterAttrs (
-    _name: service: (service.enable or false) && (service ? logging) && service.logging.enable
-  ) allServices;
-  gatus = allServices.gatus or { };
+  loggedServices = filterAttrs (_name: service: service.enable && service.logging.enable) allServices;
+  gatus = config.${namespace}.services.gatus;
 
   alloyConfig = name: ''
     logging {
@@ -67,6 +66,7 @@ let
     let
       inherit (srv) monitor;
       inherit (monitor)
+        endpoint
         group
         protocol
         path
@@ -76,7 +76,7 @@ let
       domain = config.${namespace}.hardware.networking.domain;
       defaultAddress = if domain != "" then "${serviceName}.${domain}" else serviceName;
       address = if monitor.address != "" then monitor.address else defaultAddress;
-      port = if monitor.port != null then monitor.port else srv.port.number;
+      port = srv.endpoints.${endpoint}.port;
       url =
         if protocol == "http" || protocol == "https" then
           "${protocol}://${address}:${toString port}${path}"
@@ -90,6 +90,16 @@ let
     }
   ) (filterAttrs (_name: srv: (srv ? monitor) && srv.monitor.enable) enabledServices);
 
+  invalidMonitorEndpoints =
+    mapAttrsToList (serviceName: srv: "${serviceName}:${toString srv.monitor.endpoint}")
+      (
+        filterAttrs (
+          _name: srv:
+          srv.monitor.enable
+          && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.endpoints))
+        ) enabledServices
+      );
+
   gatusSettings.endpoints = serviceEndpoints ++ gatus.externalEndpoints;
 in
 {
@@ -102,6 +112,15 @@ in
   };
 
   config = mkMerge [
+    {
+      assertions = [
+        {
+          assertion = invalidMonitorEndpoints == [ ];
+          message = "Monitored services reference missing endpoints: ${concatStringsSep ", " invalidMonitorEndpoints}";
+        }
+      ];
+    }
+
     (mkIf logging.enable {
       services.alloy = enabled // {
         extraFlags = [
@@ -134,8 +153,7 @@ in
     })
 
     {
-      # Everything must run in nspawn containers and gatus as a service is redefined in modules/nixos/services/gatus to operate that way.
-      # The default nixos gatus pkg is forcefully disabled here to prevent it from running on on the host.
+      # Gatus runs in its dedicated nspawn container, never directly on the host.
       services.gatus = disabled // {
         settings = gatusSettings;
       };

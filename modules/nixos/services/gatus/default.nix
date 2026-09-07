@@ -17,7 +17,7 @@ in
     mkServiceOptions {
       name = "gatus";
       description = "Monitoring service for homelab";
-      port.number = 8080;
+      endpoints.web.port = 8080;
       monitor = disabled;
     }
     // (with types; {
@@ -34,7 +34,7 @@ in
         settings = {
           web = {
             address = "0.0.0.0";
-            port = cfg.port.number;
+            port = cfg.endpoints.web.port;
           };
 
           ui = {

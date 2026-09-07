@@ -16,9 +16,9 @@ in
   options.${namespace}.services.authelia = mkServiceOptions {
     name = "authelia";
     description = "Authelia authentication and authorization server";
-    port.number = 9091;
+    endpoints.web.port = 9091;
     monitor = enabled // {
-      port = cfg.port.number;
+      endpoint = "web";
       protocol = "http";
     };
   };
@@ -52,7 +52,7 @@ in
           settingsFiles = [ containerConfPath ];
           secrets.manual = true;
           environmentVariables = {
-            AUTHELIA_SERVER_ADDRESS = "tcp://0.0.0.0:${toString cfg.port.number}";
+            AUTHELIA_SERVER_ADDRESS = "tcp://0.0.0.0:${toString cfg.endpoints.web.port}";
           };
         };
 

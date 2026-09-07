@@ -8,6 +8,8 @@ with lib;
 with lib.${namespace};
 let
   hostName = "copernicus";
+  volumes = import ./volumes.nix;
+  workloads = import ./workloads.nix { };
 in
 {
   imports = [
@@ -17,6 +19,8 @@ in
 
   homelab = {
     profiles.server = enabled;
+    inherit volumes;
+    services = workloads;
 
     logging = enabled // {
       lokiPushUrl = "http://10.0.50.23:3100/loki/api/v1/push";

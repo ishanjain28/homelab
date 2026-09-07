@@ -16,7 +16,11 @@ in
   options.${namespace}.services.pvr-movies-monitor = mkServiceOptions {
     name = "pvr-movies-monitor";
     description = "PVR Movies Monitoring Service";
-    port.number = 3000;
+    endpoints.app.port = 3000;
+    monitor = enabled // {
+      endpoint = "app";
+      protocol = "tcp";
+    };
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
@@ -34,7 +38,7 @@ in
     };
     environment = {
       HOST = "0.0.0.0";
-      PORT = toString cfg.port.number;
+      PORT = toString cfg.endpoints.app.port;
       RUST_LOG = "info";
       TOKIO_WORKER_THREADS = "2";
     };

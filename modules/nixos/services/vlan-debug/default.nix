@@ -127,7 +127,7 @@ let
           };
         };
 
-        programs.fish.enable = true;
+        programs.fish = enabled;
 
         environment.shells = with pkgs; [
           bashInteractive
@@ -143,9 +143,10 @@ in
       nameValuePair (mkName vlan) (mkServiceOptions {
         name = mkName vlan;
         description = "VLAN ${toString vlan} debug container";
-        port.number = 22;
+        endpoints.ssh.port = 22;
         monitor = {
           enable = false;
+          endpoint = "ssh";
           protocol = "tcp";
         };
       })
