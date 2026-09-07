@@ -16,8 +16,9 @@ in
     mkServiceOptions {
       name = "redis";
       description = "Redis server";
-      port.number = 6379;
-      monitor = {
+      endpoints.redis.port = 6379;
+      monitor = enabled // {
+        endpoint = "redis";
         protocol = "tcp";
       };
     }
@@ -42,10 +43,9 @@ in
     };
 
     containerConfig = {
-      services.redis.servers."" = {
-        enable = true;
+      services.redis.servers."" = enabled // {
         inherit (cfg) bind;
-        port = cfg.port.number;
+        port = cfg.endpoints.redis.port;
         openFirewall = true;
         requirePassFile = containerPasswordPath;
 

@@ -26,16 +26,15 @@ let
     ;
 
   cfg = config.${namespace};
-  inherit (cfg) volumes;
+  registry = config.system.homelab.registry;
+  inherit (registry) services volumes;
   inherit (cfg) deletedVolumes;
-  inherit (cfg) services;
-  volumeServices = filterAttrs (_name: srv: srv ? volumes) services;
-  enabledServices = filterAttrs (_name: srv: srv.enable or false) volumeServices;
+  enabledServices = filterAttrs (_name: service: service.enable) services;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
   volumeApplyUnit = volumeId: "homelab-volume-${volumeId}.service";
+  volumeMountUnit = volume: "var-lib-volumes-${replaceStrings [ "-" ] [ "\\x2d" ] volume.name}.mount";
   volumeMountOptions = [
-    "nofail"
     "x-systemd.device-timeout=10s"
   ];
   serviceVolumeIds = srv: srv.volumes;
@@ -53,7 +52,7 @@ let
       map (volumeId: "${serviceName}:${volumeId}") (
         filter (volumeId: !(hasAttr volumeId volumes)) (serviceVolumeIds srv)
       )
-    ) volumeServices
+    ) services
   );
 
   wrongOwnerRefs = flatten (
@@ -68,7 +67,7 @@ let
           "${serviceName}:${volumeId} is owned by ${volume.ownerService}"
         )
         (filter (volumeId: volumes.${volumeId}.ownerService != serviceName) (existingServiceVolumeIds srv))
-    ) volumeServices
+    ) services
   );
 
   missingOwnerServices = flatten (
@@ -85,15 +84,10 @@ let
     volume:
     let
       service = volumeOwnerService volume;
-      inherit (service) runtimeId runtimeUser;
     in
-    runtimeUser
-    // {
-      uid = if runtimeUser.uid != null then runtimeUser.uid else runtimeId;
-      gid = if runtimeUser.gid != null then runtimeUser.gid else runtimeId;
-    };
-  ownerHostUid = volume: containerUidOffset + (volumeOwner volume).uid;
-  ownerHostGid = volume: containerUidOffset + (volumeOwner volume).gid;
+    service.runtimeUser;
+  ownerHostUid = volume: containerUidOffset + (volumeOwnerService volume).runtimeId;
+  ownerHostGid = volume: containerUidOffset + (volumeOwnerService volume).runtimeId;
   volumeLvPath = volume: "/dev/pool/${volume.name}";
 
   mkVolumeHostTmpfilesRule =
@@ -132,7 +126,7 @@ let
       owner = {
         inherit (volume) mode;
         user = (volumeOwner volume).name;
-        inherit (volumeOwner volume) uid group gid;
+        inherit (volumeOwner volume) group;
         namespaceBase = containerUidOffset;
         hostUid = ownerHostUid volume;
         hostGid = ownerHostGid volume;
@@ -198,8 +192,9 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          requires = map volumeApplyUnit (existingServiceVolumeIds srv);
-          after = map volumeApplyUnit (existingServiceVolumeIds srv);
+          requires =
+            map volumeApplyUnit (existingServiceVolumeIds srv) ++ map volumeMountUnit attachedVolumes;
+          after = map volumeApplyUnit (existingServiceVolumeIds srv) ++ map volumeMountUnit attachedVolumes;
         };
       }
     else
@@ -219,7 +214,7 @@ in
         { name, ... }:
         {
           options = {
-            name = mkOpt types.str name "LVM logical volume name.";
+            name = mkOpt (types.strMatching "[a-z0-9][a-z0-9-]*") name "LVM logical volume name.";
             uuid = mkOption {
               type = types.str;
               description = "Filesystem UUID. This is the stable identity of the volume.";

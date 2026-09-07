@@ -16,8 +16,11 @@ in
   options.${namespace}.services.actual-server = mkServiceOptions {
     name = "actual-server";
     description = "Actual Budget";
-    port.number = 5006;
-    monitor = enabled;
+    endpoints.web.port = 5006;
+    monitor = enabled // {
+      endpoint = "web";
+      protocol = "tcp";
+    };
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
@@ -38,7 +41,7 @@ in
       ACTUAL_CONFIG_PATH = confPath;
       ACTUAL_DATA_DIR = "/var/lib/actual-server";
       ACTUAL_HOSTNAME = "0.0.0.0";
-      ACTUAL_PORT = toString cfg.port.number;
+      ACTUAL_PORT = toString cfg.endpoints.web.port;
       LOG_LEVEL = "info";
       NODE_ENV = "production";
     };

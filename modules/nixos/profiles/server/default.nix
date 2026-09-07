@@ -43,13 +43,13 @@ in
           "wheel"
           "networkmanager"
         ];
-        isSystemUser = true;
+        isSystemUser = false;
         group = "users";
         createHome = true;
         home = "/home/ishan";
         homeMode = "700";
         useDefaultShell = true;
-        isNormalUser = false;
+        isNormalUser = true;
         hashedPassword = "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
       };
     };

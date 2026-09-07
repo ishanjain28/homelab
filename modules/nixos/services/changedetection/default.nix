@@ -24,8 +24,9 @@ in
   options.${namespace}.services.changedetection = mkServiceOptions {
     name = "changedetection";
     description = "Changedetection.io";
-    port.number = 5000;
+    endpoints.web.port = 5000;
     monitor = enabled // {
+      endpoint = "web";
       protocol = "http";
     };
   };
@@ -44,7 +45,7 @@ in
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
         listenAddress = "0.0.0.0";
-        port = cfg.port.number;
+        port = cfg.endpoints.web.port;
         inherit datastorePath;
         playwrightSupport = false;
         webDriverSupport = false;

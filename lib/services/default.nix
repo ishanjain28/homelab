@@ -8,7 +8,6 @@ let
     mapAttrsToList
     mkMerge
     mkForce
-    optional
     types
     ;
   containerUidOffset = 131072;
@@ -17,31 +16,29 @@ let
     getNspawnHardeningProfile
     getNspawnIsolationProfile
     ;
-  portWithProtocol = types.submodule {
+  endpointType = types.submodule {
     options = {
-      number = mkOption {
+      port = mkOption {
         type = types.port;
         description = "Port number.";
       };
 
-      protocol = mkOpt (types.enum [
+      transport = mkOpt (types.enum [
         "tcp"
         "udp"
         "tcp-and-udp"
       ]) "tcp" "Transport protocol exposed through the container firewall.";
+
+      expose = mkBoolOpt true "Whether to expose this endpoint through the container firewall.";
     };
   };
 
   portNumbersFor =
-    protocol: ports:
-    map (port: port.number) (
+    protocol: endpoints:
+    map (endpoint: endpoint.port) (
       filter (
-        port:
-        let
-          portProtocol = port.protocol or "tcp";
-        in
-        portProtocol == protocol || portProtocol == "tcp-and-udp"
-      ) ports
+        endpoint: endpoint.expose && (endpoint.transport == protocol || endpoint.transport == "tcp-and-udp")
+      ) (attrValues endpoints)
     );
 
   mkContainerMacAddress =
@@ -101,15 +98,15 @@ let
   genContainerDefaults =
     {
       name,
-      ports ? [ ],
+      endpoints,
     }:
     {
       networking = {
         networkmanager = disabled;
         useHostResolvConf = false;
         firewall = enabled // {
-          allowedTCPPorts = portNumbersFor "tcp" ports;
-          allowedUDPPorts = portNumbersFor "udp" ports;
+          allowedTCPPorts = portNumbersFor "tcp" endpoints;
+          allowedUDPPorts = portNumbersFor "udp" endpoints;
         };
       };
 
@@ -171,7 +168,6 @@ let
   genServiceContainer =
     {
       service,
-      ports ? optional (service.port != null) service.port,
       secrets ? { },
       containerConfig ? { },
       isolationProfile ? "unprivileged",
@@ -185,16 +181,12 @@ let
         runtimeUser
         vlan
         ;
-      effectiveRuntimeUser = runtimeUser // {
-        uid = if runtimeUser.uid != null then runtimeUser.uid else runtimeId;
-        gid = if runtimeUser.gid != null then runtimeUser.gid else runtimeId;
-      };
       mkSecretName = secretName: "${name}-${secretName}";
       mkHostUid = uid: containerUidOffset + uid;
       mkHostGid = gid: containerUidOffset + gid;
       mkSecretHostPath = secretName: "/run/homelab-container-secrets/${name}/${secretName}";
-      secretHostUid = mkHostUid effectiveRuntimeUser.uid;
-      secretHostGid = mkHostGid effectiveRuntimeUser.gid;
+      secretHostUid = mkHostUid runtimeId;
+      secretHostGid = mkHostGid runtimeId;
       mkSecretPrepareLine =
         secretName: _secret:
         let
@@ -247,13 +239,16 @@ let
           resources
           ;
         config = mkMerge [
-          (genContainerDefaults { inherit name ports; })
+          (genContainerDefaults {
+            inherit name;
+            inherit (service) endpoints;
+          })
           {
-            users.groups.${effectiveRuntimeUser.group}.gid = mkForce effectiveRuntimeUser.gid;
-            users.users.${effectiveRuntimeUser.name} = {
+            users.groups.${runtimeUser.group}.gid = mkForce runtimeId;
+            users.users.${runtimeUser.name} = {
               isSystemUser = true;
-              uid = mkForce effectiveRuntimeUser.uid;
-              group = mkForce effectiveRuntimeUser.group;
+              uid = mkForce runtimeId;
+              group = mkForce runtimeUser.group;
             };
           }
           containerConfig
@@ -265,8 +260,8 @@ let
     {
       name,
       description ? name,
-      port ? null,
-      monitor ? { },
+      endpoints ? { },
+      monitor ? disabled,
     }:
     let
       protocol = monitor.protocol or "tcp";
@@ -278,9 +273,9 @@ let
 
       description = mkOpt types.str description "Human-readable service description.";
 
-      port =
-        mkOpt (types.nullOr portWithProtocol) port
-          "Primary listener port for this service container.";
+      endpoints =
+        mkOpt (types.attrsOf endpointType) endpoints
+          "Named listener endpoints for this service.";
 
       vlan = mkOption {
         type = types.port;
@@ -295,17 +290,13 @@ let
 
       runtimeUser = {
         name = mkOpt types.str name "User that runs this service inside the container.";
-        uid =
-          mkOpt (types.nullOr types.int) null
-            "Stable numeric UID for this service inside the container.";
         group = mkOpt types.str name "Group that runs this service inside the container.";
-        gid =
-          mkOpt (types.nullOr types.int) null
-            "Stable numeric GID for this service inside the container.";
       };
 
       monitor = {
         enable = mkBoolOpt monitor.enable "Whether to generate a Gatus check for this service.";
+        endpoint = mkOpt (types.nullOr types.str) (monitor.endpoint or null
+        ) "Named endpoint checked by Gatus.";
         name = mkOpt types.str (monitor.name or name) "Gatus endpoint name.";
         group = mkOpt types.str (monitor.group or "services") "Gatus endpoint group.";
         protocol = mkOpt (types.enum [
@@ -317,7 +308,6 @@ let
           "icmpv6"
         ]) protocol "Gatus check protocol.";
         address = mkOpt types.str (monitor.address or "") "Gatus check address.";
-        port = mkOpt (types.nullOr types.port) (monitor.port or null) "Gatus check port.";
         path = mkOpt types.str (monitor.path or "/") "Gatus HTTP path.";
         interval = mkOpt types.str (monitor.interval or "30s") "Gatus check interval.";
         conditions = mkOpt (types.listOf types.str) (monitor.conditions or (
@@ -340,7 +330,6 @@ let
       package ? null,
       command ? null,
       service,
-      ports ? optional (service.port != null) service.port,
       secrets ? { },
       exec ? "/bin/${service.name}",
       serviceName ? service.name,
@@ -368,7 +357,6 @@ let
     genServiceContainer {
       inherit
         service
-        ports
         isolationProfile
         resources
         secrets

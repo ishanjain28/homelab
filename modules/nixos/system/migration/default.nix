@@ -14,9 +14,7 @@
           lvPath = lib.mkOption { type = lib.types.str; };
           owner = {
             user = lib.mkOption { type = lib.types.str; };
-            uid = lib.mkOption { type = lib.types.int; };
             group = lib.mkOption { type = lib.types.str; };
-            gid = lib.mkOption { type = lib.types.int; };
             mode = lib.mkOption { type = lib.types.str; };
             namespaceBase = lib.mkOption { type = lib.types.int; };
             hostUid = lib.mkOption { type = lib.types.int; };
