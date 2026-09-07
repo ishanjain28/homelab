@@ -1,12 +1,3 @@
-pub fn trim_octal(value: &str) -> String {
-    let trimmed = value.trim_start_matches('0');
-    if trimmed.is_empty() {
-        "0".to_string()
-    } else {
-        trimmed.to_string()
-    }
-}
-
 pub fn parse_size(value: &str) -> Result<u64, String> {
     let value = value.trim();
     let split_at = value

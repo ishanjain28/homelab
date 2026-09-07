@@ -37,7 +37,7 @@ _: {
     };
     lvm_vg.pool = {
       type = "lvm_vg";
-      lvs = { }; # Filled dynamically by service calls
+      lvs = { };
     };
   };
 }
