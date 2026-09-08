@@ -37,7 +37,7 @@ in
       TasksMax = 256;
     };
     environment = {
-      RUST_LOG = "trace";
+      RUST_LOG = "info";
       TOKIO_WORKER_THREADS = "2";
     };
     serviceConfig.WorkingDirectory = configDirectory;
