@@ -1,11 +1,9 @@
 {
   lib,
   modulesPath,
-  namespace,
   ...
 }:
 with lib;
-with lib.${namespace};
 {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 

@@ -52,7 +52,7 @@ in
       inherit (cfg) vlans;
       inherit (cfg) interfaces;
 
-      hostId = lib.mkDefault (
+      hostId = mkDefault (
         builtins.substring 0 8 (builtins.hashString "sha256" config.networking.hostName)
       );
 

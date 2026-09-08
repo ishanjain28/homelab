@@ -11,20 +11,6 @@ let
   json = pkgs.formats.json { };
   volumePackage = pkgs.callPackage ../../../packages/volume { };
   volumeStateFile = json.generate "homelab-volumes.json" config.system.homelab.volumes;
-  inherit (lib)
-    attrNames
-    attrValues
-    filter
-    filterAttrs
-    flatten
-    hasAttr
-    length
-    mapAttrsToList
-    mkMerge
-    optional
-    unique
-    ;
-
   cfg = config.${namespace};
   registry = config.system.homelab.registry;
   inherit (registry) services volumes;

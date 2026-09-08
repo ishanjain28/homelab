@@ -75,6 +75,10 @@
         };
       };
       treefmtModule = inputs.treefmt-nix.lib.evalModule;
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
       hostRegistries = builtins.mapAttrs (
         _hostName: machine: machine.config.system.homelab.registry
       ) self.nixosConfigurations;
@@ -134,15 +138,13 @@
     lib.mkFlake {
       inherit inputs;
       src = ./.;
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
+      inherit supportedSystems;
 
       deploy = lib.mkDeploy { inherit (inputs) self; };
 
-      devShells.aarch64-linux.default = mkDevShell "aarch64-linux";
-      devShells.x86_64-linux.default = mkDevShell "x86_64-linux";
+      devShells = inputs.nixpkgs.lib.genAttrs supportedSystems (system: {
+        default = mkDevShell system;
+      });
 
       systems = with inputs; {
         modules = {

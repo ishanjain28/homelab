@@ -2,14 +2,6 @@
 with lib;
 with lib.${namespace};
 let
-  inherit (lib)
-    mkOption
-    mkEnableOption
-    mapAttrsToList
-    mkMerge
-    mkForce
-    types
-    ;
   containerUidOffset = 131072;
   containerProfiles = import ../containers/default.nix;
   inherit (containerProfiles)
