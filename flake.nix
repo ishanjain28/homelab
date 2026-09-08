@@ -54,11 +54,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    devshell = {
-      url = "github:numtide/devshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -80,23 +75,10 @@
         };
       };
       treefmtModule = inputs.treefmt-nix.lib.evalModule;
-      hostWorkloads = {
-        copernicus = import ./systems/x86_64-linux/copernicus/workloads.nix { };
-        kepler = import ./systems/x86_64-linux/kepler/workloads.nix {
-          inherit lib;
-          namespace = "homelab";
-        };
-      };
-      hostVolumes = {
-        copernicus = import ./systems/x86_64-linux/copernicus/volumes.nix;
-        kepler = import ./systems/x86_64-linux/kepler/volumes.nix;
-      };
       hostRegistries = builtins.mapAttrs (
         _hostName: machine: machine.config.system.homelab.registry
       ) self.nixosConfigurations;
-      fleetRegistry = lib.mkFleetRegistry {
-        inherit hostRegistries hostVolumes hostWorkloads;
-      };
+      fleetRegistry = lib.mkFleetRegistry hostRegistries;
       mkGeneratedConfigCommand =
         pkgs:
         { name, fileAttr }:
@@ -134,6 +116,20 @@
           name: command: "alias ${name}=${inputs.nixpkgs.lib.escapeShellArg command}"
         ) shellAliases
       );
+      mkDevShell =
+        system:
+        let
+          pkgs = import inputs.nixpkgs { inherit system; };
+        in
+        pkgs.mkShell {
+          packages = (generatedConfigCommands pkgs) ++ [
+            pkgs.age
+            inputs.deploy-rs.packages.${system}.deploy-rs
+            pkgs.git
+            pkgs.sops
+          ];
+          shellHook = shellAliasHook;
+        };
     in
     lib.mkFlake {
       inherit inputs;
@@ -145,33 +141,8 @@
 
       deploy = lib.mkDeploy { inherit (inputs) self; };
 
-      devShells.aarch64-linux.default =
-        let
-          pkgs = import inputs.nixpkgs { system = "aarch64-linux"; };
-        in
-        pkgs.mkShell {
-          packages = (generatedConfigCommands pkgs) ++ [
-            pkgs.age
-            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
-            pkgs.git
-            pkgs.sops
-          ];
-          shellHook = shellAliasHook;
-        };
-
-      devShells.x86_64-linux.default =
-        let
-          pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
-        in
-        pkgs.mkShell {
-          packages = (generatedConfigCommands pkgs) ++ [
-            pkgs.age
-            inputs.deploy-rs.packages.${pkgs.stdenv.hostPlatform.system}.deploy-rs
-            pkgs.git
-            pkgs.sops
-          ];
-          shellHook = shellAliasHook;
-        };
+      devShells.aarch64-linux.default = mkDevShell "aarch64-linux";
+      devShells.x86_64-linux.default = mkDevShell "x86_64-linux";
 
       systems = with inputs; {
         modules = {
@@ -200,7 +171,6 @@
     // {
       inherit (inputs) self;
       lib = lib // {
-        homelabWorkloads = hostWorkloads;
         homelabRegistry = fleetRegistry;
       };
     };
