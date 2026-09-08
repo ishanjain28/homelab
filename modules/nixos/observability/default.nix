@@ -7,14 +7,6 @@
 with lib;
 with lib.${namespace};
 let
-  inherit (lib)
-    filterAttrs
-    mapAttrs
-    mapAttrsToList
-    mkAfter
-    mkMerge
-    ;
-
   registry = config.system.homelab.registry;
   allServices = registry.services;
   enabledServices = filterAttrs (_name: service: service.enable) allServices;

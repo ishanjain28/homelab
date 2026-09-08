@@ -15,7 +15,7 @@ in
 
   config = mkIf cfg.enable {
     boot.loader.grub = {
-      enable = lib.mkDefault true;
+      enable = mkDefault true;
       devices = [ "nodev" ];
       efiSupport = true;
       useOSProber = true;

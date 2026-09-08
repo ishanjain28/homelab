@@ -30,12 +30,12 @@ in
       inherit hostName;
       domain = "direct.home.ishanjain.me";
 
-      netdevs = lib.mkMerge [
+      netdevs = mkMerge [
         (mkBridgeIf "br0")
         (mkTaggedVlanIf 99)
       ];
 
-      networks = lib.mkMerge [
+      networks = mkMerge [
         {
           "30-uplinks" = {
             matchConfig.Name = [

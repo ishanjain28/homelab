@@ -37,14 +37,14 @@ in
         macAddress = "DC:24:11:DE:01:EF";
       };
 
-      netdevs = lib.mkMerge [
+      netdevs = mkMerge [
         # Creates a VLAN aware bridge on the host
         (mkBridgeIf "br0")
         # A interface on VLAN99 on the host bridge for accessing the host.
         (mkTaggedVlanIf 99)
       ];
 
-      networks = lib.mkMerge [
+      networks = mkMerge [
         {
           # Add PHYs to the Bridge
           "30-uplinks" = {
