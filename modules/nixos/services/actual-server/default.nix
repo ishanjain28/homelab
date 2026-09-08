@@ -26,7 +26,6 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.actual-server;
-    exec = "/bin/actual-server";
     secrets.conf = {
       file = "secrets/actual-server.json";
       format = "json";

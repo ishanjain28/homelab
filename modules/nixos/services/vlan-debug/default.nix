@@ -148,11 +148,7 @@ in
         name = mkName vlan;
         description = "VLAN ${toString vlan} debug container";
         endpoints.ssh.port = 22;
-        monitor = {
-          enable = false;
-          endpoint = "ssh";
-          protocol = "tcp";
-        };
+        logging = disabled;
       })
     ) vlanIds
   );

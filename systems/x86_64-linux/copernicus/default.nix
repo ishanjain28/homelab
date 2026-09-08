@@ -1,9 +1,4 @@
-{
-  lib,
-  pkgs,
-  namespace,
-  ...
-}:
+{ lib, namespace, ... }:
 with lib;
 with lib.${namespace};
 let
@@ -21,10 +16,6 @@ in
     profiles.server = enabled;
     inherit volumes;
     services = workloads;
-
-    logging = enabled // {
-      lokiPushUrl = "http://10.0.50.23:3100/loki/api/v1/push";
-    };
 
     hardware.networking = enabled // {
       inherit hostName;
@@ -99,10 +90,6 @@ in
       secure = disabled;
       timeout = 5;
     };
-  };
-
-  nix = mkNixConfig { inherit lib pkgs; } // {
-    optimise.automatic = true;
   };
 
   sops.secrets.tailscale-auth-key = {

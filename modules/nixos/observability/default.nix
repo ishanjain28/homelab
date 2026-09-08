@@ -14,7 +14,21 @@ let
   loggedServices = filterAttrs (_name: service: service.enable && service.logging.enable) allServices;
   gatus = config.${namespace}.services.gatus;
 
-  alloyConfig = name: ''
+  serviceLokiPushUrl =
+    name: service:
+    let
+      configuredVlans = filter (vlan: hasAttr (toString vlan) logging.lokiPushUrls) service.vlans;
+    in
+    if configuredVlans == [ ] then
+      throw "No Loki push URL configured for ${name} on VLANs ${
+        concatMapStringsSep ", " toString service.vlans
+      }"
+    else
+      logging.lokiPushUrls.${toString (head configuredVlans)};
+
+  hostLokiPushUrl = head (attrValues logging.lokiPushUrls);
+
+  alloyConfig = name: lokiPushUrl: ''
     logging {
       level = "warn"
     }
@@ -48,7 +62,7 @@ let
 
     loki.write "local" {
       endpoint {
-        url = "${logging.lokiPushUrl}"
+        url = "${lokiPushUrl}"
       }
     }
   '';
@@ -97,10 +111,10 @@ in
 {
   options.${namespace}.logging = {
     enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
-    lokiPushUrl = mkOption {
-      type = types.str;
-      description = "Loki push API URL used by Alloy.";
-    };
+    lokiPushUrls = mkOpt (types.attrsOf types.str) {
+      "50" = "http://10.0.50.23:3100/loki/api/v1/push";
+      "70" = "http://10.0.70.11:3100/loki/api/v1/push";
+    } "Loki push API URLs keyed by VLAN.";
   };
 
   config = mkMerge [
@@ -123,9 +137,9 @@ in
 
       systemd.services.alloy.serviceConfig.SupplementaryGroups = mkAfter [ "adm" ];
 
-      environment.etc."alloy/config.alloy".text = alloyConfig "host";
+      environment.etc."alloy/config.alloy".text = alloyConfig "host" hostLokiPushUrl;
 
-      containers = mapAttrs (name: _service: {
+      containers = mapAttrs (name: service: {
         config = {
           services.alloy = enabled // {
             extraFlags = [
@@ -139,7 +153,7 @@ in
             "systemd-journal"
           ];
 
-          environment.etc."alloy/config.alloy".text = alloyConfig name;
+          environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl name service);
         };
       }) loggedServices;
     })

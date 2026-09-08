@@ -18,7 +18,6 @@ in
       name = "gatus";
       description = "Monitoring service for homelab";
       endpoints.web.port = 8080;
-      monitor = disabled;
     }
     // (with types; {
       openFirewall = mkBoolOpt true "Whether to open the Gatus web UI port.";
@@ -68,7 +67,6 @@ in
     (mkSingleServiceContainer {
       service = cfg;
       package = pkgs.gatus;
-      exec = "/bin/gatus";
       hardeningProfile = "network-monitor";
       secrets.env = {
         file = "secrets/gatus.env";
@@ -79,7 +77,6 @@ in
         GATUS_CONFIG_PATH = "${config.services.gatus.configFile}";
       };
       serviceConfig = {
-        Restart = "always";
         StateDirectory = "gatus";
         EnvironmentFile = containerSecretPath;
       };
