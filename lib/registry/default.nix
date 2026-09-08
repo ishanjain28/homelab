@@ -1,24 +1,20 @@
 { lib, ... }:
 {
   mkFleetRegistry =
-    {
-      hostRegistries,
-      hostVolumes,
-      hostWorkloads,
-    }:
+    hostRegistries:
     let
       mkFleetEntries =
-        hostDeclarations: select:
+        select:
         builtins.concatLists (
           lib.mapAttrsToList (
-            hostName: declarations:
-            lib.mapAttrsToList (name: _declaration: {
+            hostName: registry:
+            lib.mapAttrsToList (name: declaration: {
               inherit name;
-              value = (select hostRegistries.${hostName}).${name} // {
+              value = declaration // {
                 host = hostName;
               };
-            }) declarations
-          ) hostDeclarations
+            }) (select registry)
+          ) hostRegistries
         );
 
       mkUniqueFleetAttrs =
@@ -36,17 +32,10 @@
         else
           builtins.listToAttrs entries;
 
-      enabledHostWorkloads = builtins.mapAttrs (
-        hostName: workloads:
-        lib.filterAttrs (
-          name: _workload:
-          builtins.hasAttr name hostRegistries.${hostName}.services
-          && hostRegistries.${hostName}.services.${name}.enable
-        ) workloads
-      ) hostWorkloads;
-
-      serviceEntries = mkFleetEntries enabledHostWorkloads (registry: registry.services);
-      volumeEntries = mkFleetEntries hostVolumes (registry: registry.volumes);
+      serviceEntries = mkFleetEntries (
+        registry: lib.filterAttrs (_name: service: service.enable) registry.services
+      );
+      volumeEntries = mkFleetEntries (registry: registry.volumes);
     in
     {
       schemaVersion = 1;

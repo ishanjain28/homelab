@@ -191,7 +191,11 @@ let
         };
       }
     else
-      { };
+      {
+        containers = { };
+        systemd.services = { };
+      };
+  serviceVolumeConfigs = mapAttrsToList mkServiceVolumeConfig enabledServices;
 in
 {
   options.system.homelab.volumes = mkOption {
@@ -298,19 +302,8 @@ in
     }
 
     {
-      containers = mkMerge (
-        mapAttrsToList (
-          serviceName: srv: (mkServiceVolumeConfig serviceName srv).containers or { }
-        ) enabledServices
-      );
-    }
-
-    {
-      systemd.services = mkMerge (
-        mapAttrsToList (
-          serviceName: srv: (mkServiceVolumeConfig serviceName srv).systemd.services or { }
-        ) enabledServices
-      );
+      containers = mkMerge (map (fragment: fragment.containers) serviceVolumeConfigs);
+      systemd.services = mkMerge (map (fragment: fragment.systemd.services) serviceVolumeConfigs);
     }
   ];
 }
