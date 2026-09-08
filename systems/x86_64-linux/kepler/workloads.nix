@@ -157,6 +157,12 @@ with lib.${namespace};
     runtimeId = 30346;
   };
 
+  cups = enabled // {
+    vlan = 70;
+    runtimeId = 30347;
+    volumes = [ "cups" ];
+  };
+
   gatus = disabled // {
     vlan = 50;
     runtimeId = 36924;

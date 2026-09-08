@@ -29,4 +29,10 @@
     uuid = "6baec4af-fa52-4153-9e1d-c612777fdf9e";
     size = "10G";
   };
+
+  cups = {
+    uuid = "e564a94b-273c-4e42-a918-184648476394";
+    size = "5G";
+    mode = "0755";
+  };
 }
