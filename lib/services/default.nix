@@ -242,8 +242,8 @@ let
           {
             sops.secrets.${sopsName} = {
               sopsFile = repoRoot + "/${secret.file}";
-              format = secret.format or "binary";
-              key = "";
+              inherit (secret) format;
+              key = secret.key or "";
               owner = "root";
               group = "root";
               mode = "0400";

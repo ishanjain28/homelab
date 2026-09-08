@@ -35,4 +35,16 @@
     size = "5G";
     mode = "0755";
   };
+
+  ripe-atlas-primary = {
+    uuid = "ce89f069-d9bf-49be-b318-f409d1162fae";
+    mountPath = "/var/lib/ripe-atlas";
+    size = "64M";
+  };
+
+  ripe-atlas-lte = {
+    uuid = "a6a437a0-cb17-46c5-bd8b-c0a5ce983325";
+    mountPath = "/var/lib/ripe-atlas";
+    size = "64M";
+  };
 }

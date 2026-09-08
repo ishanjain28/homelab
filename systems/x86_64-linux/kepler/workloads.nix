@@ -169,4 +169,16 @@ with lib.${namespace};
     ];
     runtimeId = 36925;
   };
+
+  ripe-atlas-primary = enabled // {
+    vlans = [ 150 ];
+    runtimeId = 36926;
+    volumes = [ "ripe-atlas-primary" ];
+  };
+
+  ripe-atlas-lte = enabled // {
+    vlans = [ 160 ];
+    runtimeId = 36927;
+    volumes = [ "ripe-atlas-lte" ];
+  };
 }
