@@ -45,7 +45,7 @@ let
   genContainerBase =
     {
       name,
-      vlan,
+      vlans,
       config,
       isolationProfile ? "unprivileged",
       resources ? { },
@@ -74,9 +74,7 @@ let
         linkConfig.RequiredForOnline = "no";
         bridgeVLANs = [
           {
-            VLAN = vlan;
-            PVID = vlan;
-            EgressUntagged = vlan;
+            VLAN = vlans;
           }
         ];
       };
@@ -91,7 +89,53 @@ let
     {
       name,
       endpoints,
+      vlans,
     }:
+    let
+      vlanInterface = vlan: "eth${toString vlan}";
+      vlanNetdevs = listToAttrs (
+        map (
+          vlan:
+          nameValuePair "20-${vlanInterface vlan}" {
+            netdevConfig = {
+              Name = vlanInterface vlan;
+              Kind = "vlan";
+            };
+            vlanConfig.Id = vlan;
+          }
+        ) vlans
+      );
+      vlanNetworks = listToAttrs (
+        imap0 (
+          index: vlan:
+          nameValuePair "40-${vlanInterface vlan}" {
+            matchConfig.Name = vlanInterface vlan;
+            networkConfig = {
+              Description = "${name} service container VLAN ${toString vlan}";
+              DHCP = "ipv4";
+              LinkLocalAddressing = "ipv6";
+              IPv6LinkLocalAddressGenerationMode = "eui64";
+              IPv6PrivacyExtensions = "no";
+              IPv6AcceptRA = "yes";
+              LLDP = "no";
+              EmitLLDP = "no";
+              LLMNR = "no";
+            };
+            dhcpV4Config = {
+              RouteMetric = 100 + index;
+              UseDNS = index == 0;
+              UseNTP = index == 0;
+            };
+            ipv6AcceptRAConfig = {
+              DHCPv6Client = false;
+              RouteMetric = 100 + index;
+              Token = "eui64";
+              UseDNS = index == 0;
+            };
+          }
+        ) vlans
+      );
+    in
     {
       networking = {
         networkmanager = disabled;
@@ -132,22 +176,21 @@ let
       };
 
       systemd.network = enabled // {
-        networks."30-eth0" = {
-          matchConfig.Name = "eth0";
-          networkConfig = {
-            Description = "${name} service container interface";
-            DHCP = "ipv4";
-            LinkLocalAddressing = "ipv6";
-            IPv6LinkLocalAddressGenerationMode = "eui64";
-            IPv6PrivacyExtensions = "no";
-            IPv6AcceptRA = "yes";
-            LLDP = "no";
-            EmitLLDP = "no";
-            LLMNR = "no";
-          };
-          ipv6AcceptRAConfig = {
-            DHCPv6Client = false;
-            Token = "eui64";
+        netdevs = vlanNetdevs;
+        networks = vlanNetworks // {
+          "30-eth0" = {
+            matchConfig.Name = "eth0";
+            linkConfig.RequiredForOnline = "carrier";
+            networkConfig = {
+              Description = "${name} service container VLAN trunk";
+              DHCP = "no";
+              LinkLocalAddressing = "no";
+              IPv6AcceptRA = "no";
+              LLDP = "no";
+              EmitLLDP = "no";
+              LLMNR = "no";
+            };
+            vlan = map vlanInterface vlans;
           };
         };
       };
@@ -170,7 +213,7 @@ let
         name
         runtimeId
         runtimeUser
-        vlan
+        vlans
         ;
       mkSecretName = secretName: "${name}-${secretName}";
       mkHostUid = uid: containerUidOffset + uid;
@@ -225,13 +268,13 @@ let
       (genContainerBase {
         inherit
           name
-          vlan
+          vlans
           isolationProfile
           resources
           ;
         config = mkMerge [
           (genContainerDefaults {
-            inherit name;
+            inherit name vlans;
             inherit (service) endpoints;
           })
           {
@@ -268,9 +311,11 @@ let
         mkOpt (types.attrsOf endpointType) endpoints
           "Named listener endpoints for this service.";
 
-      vlan = mkOption {
-        type = types.port;
-        description = "VLAN ID for this service container.";
+      vlans = mkOption {
+        type = types.addCheck (types.nonEmptyListOf (types.ints.between 1 4094)) (
+          vlans: length vlans == length (unique vlans)
+        );
+        description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
       };
 
       volumes = mkOpt (types.listOf types.str) [ ] "Volume IDs to attach to this service container.";
