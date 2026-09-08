@@ -68,5 +68,7 @@ rec {
     gp = "git pull";
     gd = "git diff";
     gcp = "git cherry-pick";
+    vim = "nvim";
+    tfirefox = "firefox -no-remote -new-instance -profile $(mktemp -d -p /tmp)";
   };
 }
