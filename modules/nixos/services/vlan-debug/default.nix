@@ -42,17 +42,20 @@ let
           with pkgs;
           [
             bashInteractive
-            fish
-            git
             bind
             coreutils
             curl
             ethtool
+            fish
+            git
+            iftop
             inetutils
             iperf3
             iproute2
+            iptraf-ng
             iputils
             jq
+            kitty.terminfo
             mtr
             netcat-openbsd
             nftables
