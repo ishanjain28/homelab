@@ -24,7 +24,7 @@ with lib.${namespace};
   };
 
   pvr-movies-monitor = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 20691;
     monitor = enabled // {
       protocol = "tcp";
@@ -32,139 +32,139 @@ with lib.${namespace};
   };
 
   huawei-sms-telegram = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 27777;
     monitor = disabled;
   };
 
   bentopdf = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 50715;
   };
 
   lldap = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 25457;
   };
 
   authelia = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 20001;
   };
 
   grafana = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 31918;
     volumes = [ "grafana" ];
   };
 
   mathesar = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30339;
   };
 
   seerr = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30340;
     volumes = [ "seerr" ];
   };
 
   actual-server = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30341;
     volumes = [ "actual-server" ];
   };
 
   changedetection = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30344;
     volumes = [ "changedetection" ];
   };
 
   openvscode-server = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30345;
     volumes = [ "openvscode-server" ];
   };
 
   vlan10-debug = enabled // {
-    vlan = 10;
+    vlans = [ 10 ];
     runtimeId = 31010;
     logging = disabled;
   };
 
   vlan20-debug = enabled // {
-    vlan = 20;
+    vlans = [ 20 ];
     runtimeId = 31020;
     logging = disabled;
   };
 
   vlan30-debug = enabled // {
-    vlan = 30;
+    vlans = [ 30 ];
     runtimeId = 31030;
     logging = disabled;
   };
 
   vlan40-debug = enabled // {
-    vlan = 40;
+    vlans = [ 40 ];
     runtimeId = 31040;
     logging = disabled;
   };
 
   vlan50-debug = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 31050;
     logging = disabled;
   };
 
   vlan99-debug = enabled // {
-    vlan = 99;
+    vlans = [ 99 ];
     runtimeId = 31099;
     logging = disabled;
   };
 
   vlan140-debug = enabled // {
-    vlan = 140;
+    vlans = [ 140 ];
     runtimeId = 31140;
     logging = disabled;
   };
 
   vlan150-debug = enabled // {
-    vlan = 150;
+    vlans = [ 150 ];
     runtimeId = 31150;
     logging = disabled;
   };
 
   vlan160-debug = enabled // {
-    vlan = 160;
+    vlans = [ 160 ];
     runtimeId = 31160;
     logging = disabled;
   };
 
   tracearr = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30342;
   };
 
   loki = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30343;
     volumes = [ "loki" ];
   };
 
   alloy-syslog = enabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 30346;
   };
 
   cups = enabled // {
-    vlan = 70;
+    vlans = [ 70 ];
     runtimeId = 30347;
     volumes = [ "cups" ];
   };
 
   gatus = disabled // {
-    vlan = 50;
+    vlans = [ 50 ];
     runtimeId = 36924;
     externalEndpoints = [ ];
   };

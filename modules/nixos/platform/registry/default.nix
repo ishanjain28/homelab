@@ -25,7 +25,7 @@ let
       monitor
       name
       runtimeId
-      vlan
+      vlans
       volumes
       ;
     inherit (service) runtimeUser;
