@@ -280,6 +280,7 @@ in
       systemd.services = mkMerge (
         mapAttrsToList mkVolumeApplyService activeVolumes
         ++ mapAttrsToList mkVolumePermissionsService activeVolumes
+        ++ map (fragment: fragment.systemd.services) serviceVolumeConfigs
       );
     }
 
@@ -289,7 +290,6 @@ in
 
     {
       containers = mkMerge (map (fragment: fragment.containers) serviceVolumeConfigs);
-      systemd.services = mkMerge (map (fragment: fragment.systemd.services) serviceVolumeConfigs);
     }
   ];
 }
