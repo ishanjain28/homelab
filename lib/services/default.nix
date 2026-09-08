@@ -296,6 +296,7 @@ let
       description ? name,
       endpoints ? { },
       monitor ? disabled,
+      logging ? enabled,
     }:
     let
       protocol = monitor.protocol or "tcp";
@@ -356,7 +357,7 @@ let
       };
 
       logging = {
-        enable = mkBoolOpt true "Whether this service container should push journald logs to Loki.";
+        enable = mkBoolOpt logging.enable "Whether this service container should push journald logs to Loki.";
       };
     };
 

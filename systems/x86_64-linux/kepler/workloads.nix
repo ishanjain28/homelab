@@ -26,15 +26,11 @@ with lib.${namespace};
   pvr-movies-monitor = enabled // {
     vlans = [ 50 ];
     runtimeId = 20691;
-    monitor = enabled // {
-      protocol = "tcp";
-    };
   };
 
   huawei-sms-telegram = enabled // {
     vlans = [ 50 ];
     runtimeId = 27777;
-    monitor = disabled;
   };
 
   bentopdf = enabled // {
@@ -90,55 +86,46 @@ with lib.${namespace};
   vlan10-debug = enabled // {
     vlans = [ 10 ];
     runtimeId = 31010;
-    logging = disabled;
   };
 
   vlan20-debug = enabled // {
     vlans = [ 20 ];
     runtimeId = 31020;
-    logging = disabled;
   };
 
   vlan30-debug = enabled // {
     vlans = [ 30 ];
     runtimeId = 31030;
-    logging = disabled;
   };
 
   vlan40-debug = enabled // {
     vlans = [ 40 ];
     runtimeId = 31040;
-    logging = disabled;
   };
 
   vlan50-debug = enabled // {
     vlans = [ 50 ];
     runtimeId = 31050;
-    logging = disabled;
   };
 
   vlan99-debug = enabled // {
     vlans = [ 99 ];
     runtimeId = 31099;
-    logging = disabled;
   };
 
   vlan140-debug = enabled // {
     vlans = [ 140 ];
     runtimeId = 31140;
-    logging = disabled;
   };
 
   vlan150-debug = enabled // {
     vlans = [ 150 ];
     runtimeId = 31150;
-    logging = disabled;
   };
 
   vlan160-debug = enabled // {
     vlans = [ 160 ];
     runtimeId = 31160;
-    logging = disabled;
   };
 
   tracearr = enabled // {
@@ -147,7 +134,10 @@ with lib.${namespace};
   };
 
   loki = enabled // {
-    vlans = [ 50 ];
+    vlans = [
+      50
+      70
+    ];
     runtimeId = 30343;
     volumes = [ "loki" ];
   };
@@ -167,5 +157,16 @@ with lib.${namespace};
     vlans = [ 50 ];
     runtimeId = 36924;
     externalEndpoints = [ ];
+  };
+
+  multicaster = enabled // {
+    vlans = [
+      10
+      20
+      30
+      40
+      70
+    ];
+    runtimeId = 36925;
   };
 }

@@ -107,7 +107,7 @@ in
 
         loki.write "syslog" {
           endpoint {
-            url = "${logging.lokiPushUrl}"
+            url = "${logging.lokiPushUrls.${toString (head cfg.vlans)}}"
           }
         }
       '';

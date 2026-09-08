@@ -58,7 +58,6 @@ in
     };
 
     serviceConfig = {
-      Restart = "always";
       RestartSec = "5s";
       RuntimeDirectory = "grafana";
       StateDirectory = "grafana";

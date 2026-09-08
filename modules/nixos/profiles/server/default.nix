@@ -19,6 +19,7 @@ in
       secrets = enabled;
       system.remoteRescue = enabled;
       services.chrony = enabled;
+      logging = enabled;
     };
 
     security.sudo.extraRules = [
@@ -43,7 +44,6 @@ in
           "wheel"
           "networkmanager"
         ];
-        isSystemUser = false;
         group = "users";
         createHome = true;
         home = "/home/ishan";
