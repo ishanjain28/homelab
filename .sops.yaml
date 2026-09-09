@@ -1,4 +1,4 @@
 creation_rules:
   - path_regex: .*secrets/.*
     age: >-
-      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise, ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIINs3U2S45hS0I8RbB+JSUFwCJ+81k5cX+74GO2ZWuh+ root@kepler, ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILwzjCJkv4WiRN6ettLmllv+t5KiaTh3M5Kl4zfQkB+w root@copernicus
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise, age13ks0vqf5dnavpq29ukkuhwgk4a2r5cdk52g9ls0aalcd0wg6yy2sq2fpwc, age1kgs4gjppn0vcs2244ftdgkhjalhcavrvrgg0t4kt74enp9pu6snszervl0

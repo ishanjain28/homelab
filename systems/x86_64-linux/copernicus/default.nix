@@ -4,7 +4,7 @@ with lib.${namespace};
 let
   hostName = "copernicus";
   volumes = import ./volumes.nix;
-  workloads = import ./workloads.nix { };
+  workloads = import ./workloads.nix { inherit lib namespace; };
 in
 {
   imports = [
