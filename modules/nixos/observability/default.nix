@@ -28,7 +28,25 @@ let
 
   hostLokiPushUrl = head (attrValues logging.lokiPushUrls);
 
-  alloyConfig = name: lokiPushUrl: ''
+  fileSourceConfig =
+    name: files:
+    optionalString (files != [ ]) ''
+      local.file_match "logs" {
+        path_targets = [
+          ${concatMapStringsSep "\n" (
+            path:
+            ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "source" = "file" },''
+          ) files}
+        ]
+      }
+
+      loki.source.file "logs" {
+        targets    = local.file_match.logs.targets
+        forward_to = [loki.write.local.receiver]
+      }
+    '';
+
+  alloyConfig = name: lokiPushUrl: files: ''
     logging {
       level = "warn"
     }
@@ -59,6 +77,8 @@ let
       labels        = {container = "${name}", source = "journald"}
       max_age       = "24h"
     }
+
+    ${fileSourceConfig name files}
 
     loki.write "local" {
       endpoint {
@@ -138,7 +158,7 @@ in
 
       systemd.services.alloy.serviceConfig.SupplementaryGroups = mkAfter [ "adm" ];
 
-      environment.etc."alloy/config.alloy".text = alloyConfig "host" hostLokiPushUrl;
+      environment.etc."alloy/config.alloy".text = alloyConfig "host" hostLokiPushUrl [ ];
 
       containers = mapAttrs (name: service: {
         config = {
@@ -149,12 +169,21 @@ in
             ];
           };
 
-          systemd.services.alloy.serviceConfig.SupplementaryGroups = mkAfter [
-            "adm"
-            "systemd-journal"
-          ];
+          systemd.services.alloy.serviceConfig = {
+            SupplementaryGroups = mkAfter [
+              "adm"
+              "systemd-journal"
+            ];
+          }
+          // optionalAttrs (service.logging.files != [ ]) {
+            DynamicUser = mkForce false;
+            User = service.runtimeUser.name;
+            Group = service.runtimeUser.group;
+          };
 
-          environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl name service);
+          environment.etc."alloy/config.alloy".text =
+            alloyConfig name (serviceLokiPushUrl name service)
+              service.logging.files;
         };
       }) loggedServices;
     })

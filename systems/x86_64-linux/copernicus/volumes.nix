@@ -14,6 +14,6 @@
   omada = {
     uuid = "3aade38f-2d35-4e93-9c68-c303ef36572e";
     mountPath = "/var/lib/omada";
-    size = "1G";
+    size = "2G";
   };
 }
