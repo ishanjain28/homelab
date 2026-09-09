@@ -140,6 +140,13 @@
       src = ./.;
       inherit supportedSystems;
 
+      channels-config.allowUnfreePredicate =
+        package:
+        builtins.elem (inputs.nixpkgs.lib.getName package) [
+          "mongodb-ce"
+          "omada-controller"
+        ];
+
       deploy = lib.mkDeploy { inherit (inputs) self; };
 
       devShells = inputs.nixpkgs.lib.genAttrs supportedSystems (system: {

@@ -137,6 +137,7 @@ with lib.${namespace};
     vlans = [
       50
       70
+      99
     ];
     runtimeId = 30343;
     volumes = [ "loki" ];

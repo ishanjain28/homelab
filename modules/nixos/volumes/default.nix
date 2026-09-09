@@ -86,7 +86,6 @@ let
   mkVolumeApplyService = volumeId: _volume: {
     "homelab-volume-${volumeId}" = {
       description = "Apply homelab volume '${volumeId}'";
-      unitConfig.StopWhenUnneeded = true;
       path = with pkgs; [
         coreutils
         e2fsprogs
@@ -104,9 +103,9 @@ let
   mkVolumePermissionsService = volumeId: volume: {
     "homelab-volume-${volumeId}-permissions" = {
       description = "Apply permissions for homelab volume '${volumeId}'";
+      wantedBy = [ "multi-user.target" ];
       requires = [ (volumeMountUnit volume) ];
       after = [ (volumeMountUnit volume) ];
-      unitConfig.StopWhenUnneeded = true;
       serviceConfig = {
         Type = "oneshot";
         ExecStart = [
@@ -123,10 +122,10 @@ let
     where = volumeHostPath volume;
     type = volume.fsType;
     options = concatStringsSep "," volumeMountOptions;
+    wantedBy = [ "local-fs.target" ];
     unitConfig = {
       After = [ (volumeApplyUnit volumeId) ];
       Requires = [ (volumeApplyUnit volumeId) ];
-      StopWhenUnneeded = true;
     };
     mountConfig.DirectoryMode = volume.mode;
   };
