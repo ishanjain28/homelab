@@ -321,6 +321,10 @@ let
 
       volumes = mkOpt (types.listOf types.str) [ ] "Volume IDs to attach to this service container.";
 
+      shares =
+        mkOpt (types.listOf types.str) [ ]
+          "Shared host storage attached to this service container.";
+
       runtimeId =
         mkOpt (types.nullOr types.int) null
           "Stable numeric UID/GID for this service inside the container.";
@@ -414,6 +418,9 @@ let
               Group = runtimeUser.group;
             }
             // hardeningConfig
+            // optionalAttrs (service.shares != [ ]) {
+              UMask = "0007";
+            }
             // serviceConfig;
           };
         }
