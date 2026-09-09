@@ -186,6 +186,13 @@ fn classify_filesystem_probe(
 fn ensure_size(volume: &Volume, expected_size: u64, assume_yes: bool) -> Result<(), String> {
     let actual_size = block_device_size(Path::new(&volume.lv))?;
 
+    if is_mounted(&volume.lv)? {
+        return Err(format!(
+            "[{}] refusing to reconcile the size of mounted volume {}; stop its service and unmount it first",
+            volume.id, volume.lv
+        ));
+    }
+
     if actual_size < expected_size {
         confirm_or_assume(
             assume_yes,
@@ -195,15 +202,70 @@ fn ensure_size(volume: &Volume, expected_size: u64, assume_yes: bool) -> Result<
             ),
         )?;
         run_command("lvextend", &["--yes", "--size", &volume.size, &volume.lv])?;
-        run_command("resize2fs", &[&volume.lv])?;
     } else if actual_size > expected_size {
-        println!("[{}] declared size is smaller than current LV", volume.id);
+        println!(
+            "[{}] LV is larger than its declared minimum; leaving it unchanged",
+            volume.id
+        );
         println!("  current:  {actual_size} bytes");
         println!("  declared: {expected_size} bytes ({})", volume.size);
-        return Err(format!("[{}] refusing to shrink automatically", volume.id));
     }
 
-    Ok(())
+    grow_ext4_to_device(volume)
+}
+
+fn grow_ext4_to_device(volume: &Volume) -> Result<(), String> {
+    let first_attempt = run_command("resize2fs", &[&volume.lv]);
+    let error = match first_attempt {
+        Ok(()) => return Ok(()),
+        Err(error) => error,
+    };
+
+    if !error.contains("e2fsck -f") {
+        return Err(error);
+    }
+
+    println!(
+        "[{}] filesystem requires a check before resize; running e2fsck",
+        volume.id
+    );
+    run_e2fsck(volume)?;
+    run_command("resize2fs", &[&volume.lv])
+}
+
+fn is_mounted(device: &str) -> Result<bool, String> {
+    let output = Command::new("findmnt")
+        .args(["--noheadings", "--source", device])
+        .output()
+        .map_err(|error| format!("failed to run findmnt: {error}"))?;
+
+    match output.status.code() {
+        Some(0) => Ok(true),
+        Some(1) => Ok(false),
+        status => Err(format!(
+            "findmnt failed while checking {device} (status {}): {}",
+            status.map_or_else(|| "signal".to_string(), |code| code.to_string()),
+            String::from_utf8_lossy(&output.stderr).trim()
+        )),
+    }
+}
+
+fn run_e2fsck(volume: &Volume) -> Result<(), String> {
+    let output = Command::new("e2fsck")
+        .args(["-f", "-p", &volume.lv])
+        .output()
+        .map_err(|error| format!("failed to run e2fsck: {error}"))?;
+
+    match output.status.code() {
+        Some(0 | 1) => Ok(()),
+        status => Err(format!(
+            "[{}] e2fsck failed for {} (status {}): {}",
+            volume.id,
+            volume.lv,
+            status.map_or_else(|| "signal".to_string(), |code| code.to_string()),
+            command_output(&output)
+        )),
+    }
 }
 
 fn lv_name(volume: &Volume) -> Result<String, String> {
@@ -237,8 +299,18 @@ fn run_command(program: &str, args: &[&str]) -> Result<(), String> {
     if output.status.success() {
         Ok(())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).trim().to_string())
+        Err(command_output(&output))
     }
+}
+
+fn command_output(output: &std::process::Output) -> String {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    [stdout.trim(), stderr.trim()]
+        .into_iter()
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn block_device_size(path: &Path) -> Result<u64, String> {

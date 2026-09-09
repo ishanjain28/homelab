@@ -1,12 +1,33 @@
 { pkgs, ... }:
 let
   version = "6.3.0.45";
-  mongodb = pkgs.mongodb-ce.overrideAttrs (_old: {
-    version = "8.0.29";
+  openssl11 = pkgs.stdenvNoCC.mkDerivation {
+    pname = "openssl-runtime";
+    version = "1.1.1w-debian11";
+
     src = pkgs.fetchurl {
-      url = "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2404-8.0.29.tgz";
-      hash = "sha256-yJe+lr3aAy3jiIH2Gt2YNIrbACK9l2amlWFglRuW7QA=";
+      url = "https://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1w-0+deb11u8_amd64.deb";
+      hash = "sha256-3MaKVD3my5VaVwd7ZtzbFfYdHjHgcvLGzECCw32hsA0=";
     };
+
+    nativeBuildInputs = [ pkgs.dpkg ];
+    unpackPhase = "dpkg-deb --extract $src .";
+    installPhase = ''
+      mkdir -p "$out/lib"
+      cp usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 "$out/lib/"
+      cp usr/lib/x86_64-linux-gnu/libssl.so.1.1 "$out/lib/"
+    '';
+  };
+  mongodb = pkgs.mongodb-ce.overrideAttrs (old: {
+    version = "5.0.26";
+    src = pkgs.fetchurl {
+      url = "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian11-5.0.26.tgz";
+      hash = "sha256-gZai6ZhL1824oQuTAL/f1CDUnsK6jWJQrc/6BHccRgc=";
+    };
+    buildInputs = old.buildInputs ++ [
+      openssl11
+      pkgs.xz
+    ];
   });
   launcher = pkgs.writeShellScript "omada-controller" ''
     set -euo pipefail
