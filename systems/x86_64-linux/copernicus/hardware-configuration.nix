@@ -1,9 +1,4 @@
-{
-  lib,
-  modulesPath,
-  ...
-}:
-{
+{ lib, modulesPath, ... }: {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
   boot.initrd.availableKernelModules = [
@@ -11,7 +6,6 @@
     "uhci_hcd"
     "ahci"
     "virtio_pci"
-    "virtio_scsi"
     "sd_mod"
     "sr_mod"
   ];

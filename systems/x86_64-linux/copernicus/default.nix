@@ -21,6 +21,13 @@ in
       inherit hostName;
       domain = "direct.home.ishanjain.me";
 
+      # Rename PHYs to values I like using the permanent
+      # MAC address as reference.
+      links = mkIfLink {
+        name = "eth0";
+        macAddress = "BC:24:11:94:DD:90";
+      };
+
       netdevs = mkMerge [
         (mkBridgeIf "br0")
         (mkTaggedVlanIf 99)

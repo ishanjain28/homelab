@@ -1,10 +1,4 @@
-{
-  lib,
-  modulesPath,
-  ...
-}:
-with lib;
-{
+{ lib, modulesPath, ... }: {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
   boot.initrd.availableKernelModules = [
@@ -25,5 +19,5 @@ with lib;
   #   fsType = "ext4";
   # };
 
-  nixpkgs.hostPlatform = mkDefault "x86_64-linux";
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }
