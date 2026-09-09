@@ -53,6 +53,19 @@
           ) registry.volumes
         ) hostRegistries
       );
+      shareEntries = builtins.concatLists (
+        lib.mapAttrsToList (
+          hostName: registry:
+          lib.mapAttrsToList (
+            shareId: share:
+            share
+            // {
+              host = hostName;
+              inherit shareId;
+            }
+          ) registry.shares
+        ) hostRegistries
+      );
       volumeIds = lib.unique (map (volume: volume.volumeId) volumeEntries);
       immutableVolumeFields = [
         "fsType"
@@ -80,9 +93,10 @@
       ) volumeIds;
     in
     {
-      schemaVersion = 2;
+      schemaVersion = 3;
       hosts = builtins.mapAttrs (_hostName: registry: registry.host) hostRegistries;
       services = mkUniqueFleetAttrs "service" serviceEntries;
+      shares = shareEntries;
       volumes =
         if conflictingVolumeIds != [ ] then
           throw "Conflicting homelab volume declarations across hosts: ${builtins.concatStringsSep ", " conflictingVolumeIds}"

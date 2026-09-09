@@ -10,6 +10,7 @@ with lib.${namespace};
 let
   json = pkgs.formats.json { };
   hostName = config.networking.hostName;
+  shares = config.${namespace}.shares;
   volumes = config.${namespace}.volumes;
   volumeOwnerServices = unique (map (volume: volume.ownerService) (attrValues volumes));
   services = filterAttrs (
@@ -25,6 +26,7 @@ let
       monitor
       name
       runtimeId
+      shares
       vlans
       volumes
       ;
@@ -32,13 +34,13 @@ let
   };
 
   registry = {
-    schemaVersion = 1;
+    schemaVersion = 2;
     host = {
       name = hostName;
       system = pkgs.stdenv.hostPlatform.system;
     };
     services = mapAttrs mkService services;
-    inherit volumes;
+    inherit shares volumes;
   };
 
   registryFile = json.generate "homelab-registry-${hostName}.json" registry;
