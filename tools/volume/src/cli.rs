@@ -1,4 +1,5 @@
 use crate::apply::run_apply;
+use crate::snapshot::{run_snapshot_create, run_snapshot_list, run_snapshot_remove};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
@@ -25,6 +26,40 @@ enum VolumeCommand {
         /// Volume IDs to apply. Defaults to all declared volumes.
         volume_ids: Vec<String>,
     },
+
+    /// Manage temporary LVM snapshots of declared volumes.
+    Snapshot {
+        #[command(subcommand)]
+        command: SnapshotCommand,
+    },
+}
+
+#[derive(Subcommand)]
+enum SnapshotCommand {
+    /// Create a temporary snapshot.
+    Create {
+        volume_id: String,
+
+        /// COW space allocated to the snapshot.
+        #[arg(long)]
+        size: String,
+
+        /// Override the generated snapshot LV name.
+        #[arg(long)]
+        name: Option<String>,
+    },
+
+    /// List snapshots belonging to declared volumes.
+    List { volume_ids: Vec<String> },
+
+    /// Remove an unmounted snapshot.
+    Remove {
+        volume_id: String,
+
+        /// Override the generated snapshot LV name.
+        #[arg(long)]
+        name: Option<String>,
+    },
 }
 
 pub fn run() -> Result<(), String> {
@@ -32,5 +67,16 @@ pub fn run() -> Result<(), String> {
 
     match cli.command {
         VolumeCommand::Apply { yes, volume_ids } => run_apply(&cli.state_file, yes, &volume_ids),
+        VolumeCommand::Snapshot { command } => match command {
+            SnapshotCommand::Create {
+                volume_id,
+                size,
+                name,
+            } => run_snapshot_create(&cli.state_file, &volume_id, &size, name.as_deref()),
+            SnapshotCommand::List { volume_ids } => run_snapshot_list(&cli.state_file, &volume_ids),
+            SnapshotCommand::Remove { volume_id, name } => {
+                run_snapshot_remove(&cli.state_file, &volume_id, name.as_deref())
+            }
+        },
     }
 }
