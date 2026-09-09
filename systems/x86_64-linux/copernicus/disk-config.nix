@@ -17,7 +17,7 @@ _: {
             };
           };
           root = {
-            size = "60G";
+            size = "25G";
             content = {
               type = "filesystem";
               format = "ext4";
@@ -34,7 +34,6 @@ _: {
         };
       };
     };
-
     lvm_vg.pool = {
       type = "lvm_vg";
       lvs = { };

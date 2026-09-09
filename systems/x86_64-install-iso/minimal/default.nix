@@ -16,6 +16,8 @@ with lib.${namespace};
   networking.wireless.enable = mkForce false;
   networking.hostName = mkForce "nixos-bootstrap";
 
+  boot.zfs.forceImportRoot = false;
+
   homelab.profiles.bootstrap = enabled;
 
   system.stateVersion = "26.05";
