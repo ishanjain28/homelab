@@ -104,6 +104,7 @@ let
     "homelab-volume-${volumeId}-permissions" = {
       description = "Apply permissions for homelab volume '${volumeId}'";
       wantedBy = [ "multi-user.target" ];
+      partOf = [ (volumeMountUnit volume) ];
       requires = [ (volumeMountUnit volume) ];
       after = [ (volumeMountUnit volume) ];
       serviceConfig = {
@@ -125,6 +126,7 @@ let
     wantedBy = [ "local-fs.target" ];
     unitConfig = {
       After = [ (volumeApplyUnit volumeId) ];
+      PartOf = [ (volumeApplyUnit volumeId) ];
       Requires = [ (volumeApplyUnit volumeId) ];
     };
     mountConfig.DirectoryMode = volume.mode;
@@ -161,6 +163,7 @@ let
 
         systemd.services."container@${serviceName}" = {
           restartTriggers = map volumeStatePath (existingServiceVolumeIds srv);
+          partOf = map volumeMountUnit attachedVolumes;
           requires =
             map volumeApplyUnit (existingServiceVolumeIds srv)
             ++ map volumeMountUnit attachedVolumes

@@ -56,7 +56,10 @@ in
       TasksMax = 1024;
     };
 
-    containerConfig.systemd.services.omada.path = [ pkgs.bash ];
+    containerConfig.systemd.services.omada.path = [
+      pkgs.bash
+      pkgs.procps
+    ];
 
     serviceConfig = {
       StateDirectory = "omada";
@@ -64,7 +67,7 @@ in
       Restart = "on-failure";
       RestartSec = "10s";
       TimeoutStopSec = "2min";
-      LimitNOFILE = 8192;
+      LimitNOFILE = 65536;
       UMask = "0077";
     };
   });
