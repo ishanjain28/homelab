@@ -2,6 +2,7 @@ mod apply;
 mod cli;
 mod models;
 mod prompt;
+mod snapshot;
 mod table;
 mod util;
 

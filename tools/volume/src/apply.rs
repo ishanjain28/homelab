@@ -1,4 +1,4 @@
-use crate::models::{Volume, VolumeSet};
+use crate::models::{load_volumes, Volume};
 use crate::prompt::confirm;
 use crate::table::print_table;
 use crate::util::parse_size;
@@ -36,28 +36,6 @@ pub fn run_apply(state_file: &Path, assume_yes: bool, volume_ids: &[String]) -> 
     }
 
     Ok(())
-}
-
-fn load_volumes(state_file: &Path, volume_ids: &[String]) -> Result<Vec<Volume>, String> {
-    let contents = fs::read_to_string(state_file)
-        .map_err(|error| format!("failed to read {}: {error}", state_file.display()))?;
-    let state = serde_json::from_str::<VolumeSet>(&contents)
-        .map_err(|error| format!("failed to parse {}: {error}", state_file.display()))?;
-
-    if volume_ids.is_empty() {
-        return Ok(state.volumes.into_values().collect());
-    }
-
-    volume_ids
-        .iter()
-        .map(|id| {
-            state
-                .volumes
-                .get(id)
-                .cloned()
-                .ok_or_else(|| format!("volume {id:?} is not declared in {}", state_file.display()))
-        })
-        .collect()
 }
 
 fn apply_volume(volume: &Volume, assume_yes: bool) -> Result<(), String> {

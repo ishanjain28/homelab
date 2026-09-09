@@ -16,10 +16,6 @@ let
   inherit (registry) services volumes;
   inherit (cfg) deletedVolumes;
   enabledServices = filterAttrs (_name: service: service.enable) services;
-  activeVolumeIds = unique (
-    flatten (mapAttrsToList (_name: service: service.volumes) enabledServices)
-  );
-  activeVolumes = filterAttrs (volumeId: _volume: elem volumeId activeVolumeIds) volumes;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
   volumeApplyUnit = volumeId: "homelab-volume-${volumeId}.service";
@@ -194,8 +190,7 @@ in
   options.${namespace} = {
     volumes = mkOpt (types.attrsOf (
       types.submodule (
-        { name, ... }:
-        {
+        { name, ... }: {
           options = {
             name = mkOpt (types.strMatching "[a-z0-9][a-z0-9-]*") name "LVM logical volume name.";
             uuid = mkOption {
@@ -213,6 +208,26 @@ in
             fsType = mkOpt (types.enum [ "ext4" ]) "ext4" "Filesystem type.";
             readOnly = mkBoolOpt false "Whether to bind mount this volume read-only.";
             mode = mkOpt types.str "0700" "Directory mode for the mounted data inside the container.";
+            backup = mkOption {
+              type = types.nullOr (
+                types.submodule {
+                  options = {
+                    target = mkOption {
+                      type = types.str;
+                      description = "Named homelab backup target.";
+                    };
+                    onCalendar = mkOpt types.str "daily" "systemd calendar expression for this backup.";
+                    randomizedDelaySec = mkOpt types.str "1h" "Maximum randomized delay applied to the backup timer.";
+                    snapshotSize = mkOption {
+                      type = types.str;
+                      description = "LVM COW space allocated to the temporary backup snapshot.";
+                    };
+                  };
+                }
+              );
+              default = null;
+              description = "Backup policy. Declaring this attribute opts the volume into backups.";
+            };
           };
         }
       )
@@ -267,9 +282,7 @@ in
       ];
     }
 
-    {
-      system.homelab.volumes = mapAttrs mkVolumeState volumes;
-    }
+    { system.homelab.volumes = mapAttrs mkVolumeState volumes; }
 
     {
       environment.systemPackages = [ volumePackage ];
@@ -278,15 +291,13 @@ in
 
     {
       systemd.services = mkMerge (
-        mapAttrsToList mkVolumeApplyService activeVolumes
-        ++ mapAttrsToList mkVolumePermissionsService activeVolumes
+        mapAttrsToList mkVolumeApplyService volumes
+        ++ mapAttrsToList mkVolumePermissionsService volumes
         ++ map (fragment: fragment.systemd.services) serviceVolumeConfigs
       );
     }
 
-    {
-      systemd.mounts = mapAttrsToList mkVolumeMountOrdering activeVolumes;
-    }
+    { systemd.mounts = mapAttrsToList mkVolumeMountOrdering volumes; }
 
     {
       containers = mkMerge (map (fragment: fragment.containers) serviceVolumeConfigs);
