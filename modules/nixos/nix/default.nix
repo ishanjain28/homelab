@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   namespace,
@@ -14,7 +13,9 @@ with lib.${namespace};
   };
 
   programs.nh = enabled // {
-    clean.enable = config.${namespace}.profiles.server.enable;
+    clean = enabled // {
+      extraArgs = "--keep 10";
+    };
     flake = "$HOME/dotfiles";
   };
 

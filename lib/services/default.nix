@@ -49,6 +49,7 @@ let
       config,
       isolationProfile ? "unprivileged",
       resources ? { },
+      containerTimeout ? null,
     }:
     let
       isolationConfig = getNspawnIsolationProfile isolationProfile;
@@ -80,7 +81,8 @@ let
       };
 
       systemd.services."container@${name}".serviceConfig = {
-        TimeoutStopSec = "25s";
+        TimeoutStartSec = mkForce (if containerTimeout == null then "1min" else containerTimeout);
+        TimeoutStopSec = mkForce (if containerTimeout == null then "25s" else containerTimeout);
       }
       // resources;
     };
@@ -137,6 +139,11 @@ let
       );
     in
     {
+      time = {
+        timeZone = "Asia/Kolkata";
+        hardwareClockInLocalTime = false;
+      };
+
       networking = {
         networkmanager = disabled;
         useHostResolvConf = false;
@@ -206,6 +213,7 @@ let
       containerConfig ? { },
       isolationProfile ? "unprivileged",
       resources ? { },
+      containerTimeout ? null,
     }:
     let
       repoRoot = ../..;
@@ -271,6 +279,7 @@ let
           vlans
           isolationProfile
           resources
+          containerTimeout
           ;
         config = mkMerge [
           (genContainerDefaults {
@@ -385,6 +394,7 @@ let
       after ? [ ],
       wants ? [ ],
       resources ? { },
+      containerTimeout ? null,
     }:
     let
       inherit (service) name;
@@ -403,6 +413,7 @@ let
         service
         isolationProfile
         resources
+        containerTimeout
         secrets
         ;
       containerConfig = mkMerge [
