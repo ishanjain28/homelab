@@ -50,6 +50,7 @@ in
     service = cfg;
     inherit package;
     exec = "/bin/omada-controller";
+    containerTimeout = "3min";
     resources = {
       CPUQuota = "400%";
       MemoryMax = "4G";
@@ -66,7 +67,6 @@ in
       StateDirectoryMode = "0700";
       Restart = "on-failure";
       RestartSec = "10s";
-      TimeoutStopSec = "2min";
       LimitNOFILE = 65536;
       UMask = "0077";
     };
