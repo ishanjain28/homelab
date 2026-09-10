@@ -8,7 +8,7 @@ with lib.${namespace};
 {
   documentation = enabled // {
     doc = disabled;
-    man = enabled;
+    man = disabled;
     dev = disabled;
   };
 

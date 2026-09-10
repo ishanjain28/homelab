@@ -26,7 +26,7 @@ in
     documentation = enabled // {
       doc = disabled;
       dev = disabled;
-      man = enabled;
+      man = disabled;
     };
   };
 }

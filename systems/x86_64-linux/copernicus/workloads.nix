@@ -15,4 +15,9 @@ with lib.${namespace};
     runtimeId = 30349;
     volumes = [ "omada" ];
   };
+
+  prowlarr = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30350;
+  };
 }
