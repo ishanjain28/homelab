@@ -20,4 +20,9 @@ with lib.${namespace};
     vlans = [ 50 ];
     runtimeId = 30350;
   };
+
+  nitter = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30351;
+  };
 }
