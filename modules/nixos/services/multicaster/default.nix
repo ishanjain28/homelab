@@ -40,6 +40,8 @@ in
       RUST_LOG = "info";
       TOKIO_WORKER_THREADS = "2";
     };
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
     serviceConfig.WorkingDirectory = configDirectory;
   });
 }

@@ -34,12 +34,19 @@ let
     );
 
   mkContainerMacAddress =
-    name:
+    seed:
     let
-      hash = builtins.hashString "sha256" name;
+      hash = builtins.hashString "sha256" seed;
       octet = offset: builtins.substring offset 2 hash;
     in
     "02:${octet 0}:${octet 2}:${octet 4}:${octet 6}:${octet 8}";
+
+  mkContainerVethName =
+    name: vlan:
+    let
+      hash = builtins.substring 0 9 (builtins.hashString "sha256" "${name}:${toString vlan}");
+    in
+    "v${hash}-${toString vlan}";
 
   # Container mechanics only: nspawn, bridge/VLAN, stable MAC, and host limits.
   genContainerBase =
@@ -53,32 +60,39 @@ let
     }:
     let
       isolationConfig = getNspawnIsolationProfile isolationProfile;
+      containerVethFlags = map (
+        vlan: "--network-veth-extra=${mkContainerVethName name vlan}:eth${toString vlan}"
+      ) vlans;
+      hostVethNetworks = listToAttrs (
+        map (
+          vlan:
+          nameValuePair "30-container-${name}-${toString vlan}" {
+            matchConfig.Name = mkContainerVethName name vlan;
+            networkConfig.Bridge = "br0";
+            linkConfig.RequiredForOnline = "no";
+            bridgeVLANs = [
+              {
+                VLAN = vlan;
+                PVID = vlan;
+                EgressUntagged = vlan;
+              }
+            ];
+          }
+        ) vlans
+      );
     in
     {
       # Generate the container entry
       containers.${name} = isolationConfig // {
         autoStart = true;
         privateNetwork = true;
-        localMacAddress = mkContainerMacAddress name;
-        # Plug into host bridge
-        hostBridge = "br0";
+        extraFlags = (isolationConfig.extraFlags or [ ]) ++ containerVethFlags;
 
         inherit config;
       };
 
-      # Container Trunk Port (Host-side of the vbridge)
-      systemd.network.networks."30-container-${name}" = {
-        matchConfig.Name = "vb-${name}";
-        networkConfig = {
-          Bridge = "br0";
-        };
-        linkConfig.RequiredForOnline = "no";
-        bridgeVLANs = [
-          {
-            VLAN = vlans;
-          }
-        ];
-      };
+      # Each host-side veth is an untagged access port for exactly one VLAN.
+      systemd.network.networks = hostVethNetworks;
 
       systemd.services."container@${name}".serviceConfig = {
         TimeoutStartSec = mkForce (if containerTimeout == null then "1min" else containerTimeout);
@@ -95,15 +109,12 @@ let
     }:
     let
       vlanInterface = vlan: "eth${toString vlan}";
-      vlanNetdevs = listToAttrs (
+      vethLinks = listToAttrs (
         map (
           vlan:
           nameValuePair "20-${vlanInterface vlan}" {
-            netdevConfig = {
-              Name = vlanInterface vlan;
-              Kind = "vlan";
-            };
-            vlanConfig.Id = vlan;
+            matchConfig.OriginalName = vlanInterface vlan;
+            linkConfig.MACAddress = mkContainerMacAddress "${name}:${toString vlan}";
           }
         ) vlans
       );
@@ -183,23 +194,8 @@ let
       };
 
       systemd.network = enabled // {
-        netdevs = vlanNetdevs;
-        networks = vlanNetworks // {
-          "30-eth0" = {
-            matchConfig.Name = "eth0";
-            linkConfig.RequiredForOnline = "carrier";
-            networkConfig = {
-              Description = "${name} service container VLAN trunk";
-              DHCP = "no";
-              LinkLocalAddressing = "no";
-              IPv6AcceptRA = "no";
-              LLDP = "no";
-              EmitLLDP = "no";
-              LLMNR = "no";
-            };
-            vlan = map vlanInterface vlans;
-          };
-        };
+        links = vethLinks;
+        networks = vlanNetworks;
       };
 
       system.stateVersion = "26.05";

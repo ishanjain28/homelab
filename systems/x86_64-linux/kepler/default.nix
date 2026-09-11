@@ -46,6 +46,10 @@ in
             networkConfig = {
               Bridge = "br0";
             };
+            # Kepler is temporarily nested inside Proxmox. Mark the VM uplink
+            # as the multicast-router port so IGMP reports cross both bridges.
+            # Remove this when Kepler moves to bare metal.
+            bridgeConfig.MulticastRouter = "permanent";
             linkConfig.RequiredForOnline = "no";
             # Add allowed VLANs to the Trunk Port
             bridgeVLANs = [

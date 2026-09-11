@@ -41,6 +41,10 @@ in
               "eth*"
             ];
             networkConfig.Bridge = "br0";
+            # Copernicus is temporarily nested inside Proxmox. Mark the VM uplink
+            # as the multicast-router port so IGMP reports cross both bridges.
+            # Remove this when Copernicus moves to bare metal.
+            bridgeConfig.MulticastRouter = "permanent";
             linkConfig.RequiredForOnline = "no";
             bridgeVLANs = [
               {
