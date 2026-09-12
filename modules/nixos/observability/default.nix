@@ -20,9 +20,7 @@ let
       configuredVlans = filter (vlan: hasAttr (toString vlan) logging.lokiPushUrls) service.vlans;
     in
     if configuredVlans == [ ] then
-      throw "No Loki push URL configured for ${name} on VLANs ${
-        concatMapStringsSep ", " toString service.vlans
-      }"
+      throw "No Loki push URL configured for ${name} on VLANs ${concatMapStringsSep ", " toString service.vlans}"
     else
       logging.lokiPushUrls.${toString (head configuredVlans)};
 
@@ -34,8 +32,7 @@ let
       local.file_match "logs" {
         path_targets = [
           ${concatMapStringsSep "\n" (
-            path:
-            ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "source" = "file" },''
+            path: ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "source" = "file" },''
           ) files}
         ]
       }
@@ -116,15 +113,11 @@ let
     }
   ) (filterAttrs (_name: srv: (srv ? monitor) && srv.monitor.enable) enabledServices);
 
-  invalidMonitorEndpoints =
-    mapAttrsToList (serviceName: srv: "${serviceName}:${toString srv.monitor.endpoint}")
-      (
-        filterAttrs (
-          _name: srv:
-          srv.monitor.enable
-          && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.endpoints))
-        ) enabledServices
-      );
+  invalidMonitorEndpoints = mapAttrsToList (serviceName: srv: "${serviceName}:${toString srv.monitor.endpoint}") (
+    filterAttrs (
+      _name: srv: srv.monitor.enable && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.endpoints))
+    ) enabledServices
+  );
 
   gatusSettings.endpoints = serviceEndpoints ++ gatus.externalEndpoints;
 in
@@ -181,9 +174,7 @@ in
             Group = service.runtimeUser.group;
           };
 
-          environment.etc."alloy/config.alloy".text =
-            alloyConfig name (serviceLokiPushUrl name service)
-              service.logging.files;
+          environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl name service) service.logging.files;
         };
       }) loggedServices;
     })

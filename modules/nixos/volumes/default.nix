@@ -25,9 +25,7 @@ let
     "nofail"
     "x-systemd.device-timeout=10s"
   ];
-  volumeState = volumeId: {
-    ${volumeId} = config.system.homelab.volumes.${volumeId};
-  };
+  volumeState = volumeId: { ${volumeId} = config.system.homelab.volumes.${volumeId}; };
   volumeStatePath = volumeId: json.generate "homelab-volume-${volumeId}.json" (volumeState volumeId);
   serviceVolumeIds = srv: srv.volumes;
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
@@ -41,31 +39,26 @@ let
   missingVolumeRefs = flatten (
     mapAttrsToList (
       serviceName: srv:
-      map (volumeId: "${serviceName}:${volumeId}") (
-        filter (volumeId: !(hasAttr volumeId volumes)) (serviceVolumeIds srv)
-      )
+      map (volumeId: "${serviceName}:${volumeId}") (filter (volumeId: !(hasAttr volumeId volumes)) (serviceVolumeIds srv))
     ) services
   );
 
   wrongOwnerRefs = flatten (
     mapAttrsToList (
       serviceName: srv:
-      map
-        (
-          volumeId:
-          let
-            volume = volumes.${volumeId};
-          in
-          "${serviceName}:${volumeId} is owned by ${volume.ownerService}"
-        )
-        (filter (volumeId: volumes.${volumeId}.ownerService != serviceName) (existingServiceVolumeIds srv))
+      map (
+        volumeId:
+        let
+          volume = volumes.${volumeId};
+        in
+        "${serviceName}:${volumeId} is owned by ${volume.ownerService}"
+      ) (filter (volumeId: volumes.${volumeId}.ownerService != serviceName) (existingServiceVolumeIds srv))
     ) services
   );
 
   missingOwnerServices = flatten (
     mapAttrsToList (
-      volumeId: volume:
-      optional (!(hasAttr volume.ownerService services)) "${volumeId}:${volume.ownerService}"
+      volumeId: volume: optional (!(hasAttr volume.ownerService services)) "${volumeId}:${volume.ownerService}"
     ) volumes
   );
 
@@ -200,9 +193,7 @@ in
               description = "Filesystem UUID. This is the stable identity of the volume.";
             };
             ownerService = mkOpt types.str name "Service that owns this volume.";
-            mountPath =
-              mkOpt types.str "/var/lib/${name}"
-                "Path where the volume is mounted inside the service container.";
+            mountPath = mkOpt types.str "/var/lib/${name}" "Path where the volume is mounted inside the service container.";
             size = mkOption {
               type = types.str;
               description = "Logical volume size.";
@@ -272,9 +263,9 @@ in
           message = "Volumes reference missing owner services: ${concatStringsSep ", " missingOwnerServices}";
         }
         {
-          assertion = all (
-            volume: hasAttr volume.ownerService services && services.${volume.ownerService} ? runtimeUser
-          ) (attrValues volumes);
+          assertion = all (volume: hasAttr volume.ownerService services && services.${volume.ownerService} ? runtimeUser) (
+            attrValues volumes
+          );
           message = "Every volume ownerService must point at a service with runtimeUser.";
         }
         {
@@ -301,8 +292,6 @@ in
 
     { systemd.mounts = mapAttrsToList mkVolumeMountOrdering volumes; }
 
-    {
-      containers = mkMerge (map (fragment: fragment.containers) serviceVolumeConfigs);
-    }
+    { containers = mkMerge (map (fragment: fragment.containers) serviceVolumeConfigs); }
   ];
 }

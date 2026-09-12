@@ -13,9 +13,7 @@ in
 {
   options.${namespace}.services.tailscale = with types; {
     enable = mkEnableOption "Tailscale";
-    authKeyFile =
-      mkOpt path "/run/secrets/tailscale-auth-key"
-        "Path to a file containing a Tailscale auth key.";
+    authKeyFile = mkOpt path "/run/secrets/tailscale-auth-key" "Path to a file containing a Tailscale auth key.";
     advertiseRoutes = mkOpt (listOf str) [ ] "Subnet routes to advertise through this node.";
     package = mkPackageOption pkgs "tailscale" { };
   };
@@ -26,9 +24,7 @@ in
       openFirewall = true;
       useRoutingFeatures = if cfg.advertiseRoutes == [ ] then "client" else "server";
       inherit (cfg) authKeyFile;
-      extraUpFlags = mkIf (cfg.advertiseRoutes != [ ]) [
-        "--advertise-routes=${concatStringsSep "," cfg.advertiseRoutes}"
-      ];
+      extraUpFlags = mkIf (cfg.advertiseRoutes != [ ]) [ "--advertise-routes=${concatStringsSep "," cfg.advertiseRoutes}" ];
     };
 
     boot.kernel.sysctl = mkIf (cfg.advertiseRoutes != [ ]) {

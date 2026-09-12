@@ -1,5 +1,4 @@
-{ lib, namespace }:
-with lib.${namespace};
+{ lib, namespace }: with lib.${namespace};
 {
   ssh = enabled // {
     addRootKeys = true;

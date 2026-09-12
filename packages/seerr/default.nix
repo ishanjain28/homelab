@@ -3,9 +3,7 @@ let
   pname = "seerr";
   version = "0.1.0";
   nodejs = pkgs.nodejs-slim_22;
-  pnpm = pkgs.pnpm_10.override {
-    nodejs-slim = nodejs;
-  };
+  pnpm = pkgs.pnpm_10.override { nodejs-slim = nodejs; };
 
   src = pkgs.fetchFromGitHub {
     owner = "ishanjain28";

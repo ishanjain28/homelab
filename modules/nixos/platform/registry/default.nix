@@ -41,9 +41,7 @@ let
     inherit shares volumes;
   };
 
-  servicesWithoutRuntimeIds = attrNames (
-    filterAttrs (_name: service: service.runtimeId == null) registry.services
-  );
+  servicesWithoutRuntimeIds = attrNames (filterAttrs (_name: service: service.runtimeId == null) registry.services);
 in
 {
   options.system.homelab.registry = mkOption {

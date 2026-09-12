@@ -21,9 +21,7 @@
         let
           names = map (entry: entry.name) entries;
           duplicateNames = lib.unique (
-            builtins.filter (
-              name: builtins.length (builtins.filter (candidate: candidate == name) names) > 1
-            ) names
+            builtins.filter (name: builtins.length (builtins.filter (candidate: candidate == name) names) > 1) names
           );
         in
         if duplicateNames != [ ] then
@@ -31,9 +29,7 @@
         else
           builtins.listToAttrs entries;
 
-      serviceEntries = mkFleetEntries (
-        registry: lib.filterAttrs (_name: service: service.enable) registry.services
-      );
+      serviceEntries = mkFleetEntries (registry: lib.filterAttrs (_name: service: service.enable) registry.services);
       volumeEntries = builtins.concatLists (
         lib.mapAttrsToList (
           hostName: registry:
@@ -86,9 +82,7 @@
             map (field: lib.nameValuePair field null) immutableVolumeFields
           )) (builtins.head declarations);
         in
-        builtins.any (declaration: builtins.intersectAttrs expected declaration != expected) (
-          builtins.tail declarations
-        )
+        builtins.any (declaration: builtins.intersectAttrs expected declaration != expected) (builtins.tail declarations)
       ) volumeIds;
     in
     {

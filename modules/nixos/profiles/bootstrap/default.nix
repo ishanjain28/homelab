@@ -9,13 +9,10 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.profiles.bootstrap;
-  bootstrapKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise"
-  ];
+  bootstrapKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise" ];
 in
 {
-  options.${namespace}.profiles.bootstrap.enable =
-    mkEnableOption "remote installation and rescue environment";
+  options.${namespace}.profiles.bootstrap.enable = mkEnableOption "remote installation and rescue environment";
 
   config = mkIf cfg.enable {
     homelab.profiles.base = enabled;

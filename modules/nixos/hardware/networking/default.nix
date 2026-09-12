@@ -52,9 +52,7 @@ in
       inherit (cfg) vlans;
       inherit (cfg) interfaces;
 
-      hostId = mkDefault (
-        builtins.substring 0 8 (builtins.hashString "sha256" config.networking.hostName)
-      );
+      hostId = mkDefault (builtins.substring 0 8 (builtins.hashString "sha256" config.networking.hostName));
 
       hostName = mkDefault cfg.hostName;
       useDHCP = mkDefault false;

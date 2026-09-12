@@ -18,9 +18,7 @@ in
       # Broken after upgrade. need to fix
       # systemd-bless-boot[338121]: Can't find boot counter source file for '/loader/entries/nixos-82f6f67f502649183b2fac43185c0b2eb18afbd42510615da1ccbbcf01097895.conf'.
       enable = mkBoolOpt true "Enable systemd-boot automatic boot assessment.";
-      tries =
-        mkOpt types.ints.positive 1
-          "Number of times a new generation may fail before systemd-boot skips it.";
+      tries = mkOpt types.ints.positive 1 "Number of times a new generation may fail before systemd-boot skips it.";
     };
     secure = {
       enable = mkBoolOpt false "Enable Secure Boot";
@@ -50,9 +48,7 @@ in
         };
 
         systemd-boot.enable = mkForce (!cfg.secure.enable);
-        systemd-boot.bootCounting = {
-          inherit (cfg.bootCounting) enable tries;
-        };
+        systemd-boot.bootCounting = { inherit (cfg.bootCounting) enable tries; };
         systemd-boot.configurationLimit = mkDefault 20;
         timeout = mkDefault cfg.timeout;
       };

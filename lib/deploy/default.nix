@@ -8,9 +8,7 @@ in
     { self }:
     let
       hosts = self.nixosConfigurations;
-      hostRegistries = builtins.mapAttrs (
-        _hostName: machine: machine.config.system.homelab.registry
-      ) hosts;
+      hostRegistries = builtins.mapAttrs (_hostName: machine: machine.config.system.homelab.registry) hosts;
       fleetRegistry = registryLib.mkFleetRegistry hostRegistries;
       nodes = builtins.deepSeq fleetRegistry.volumes (
         builtins.mapAttrs (_: machine: {

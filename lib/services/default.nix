@@ -4,10 +4,7 @@ with lib.${namespace};
 let
   containerUidOffset = 131072;
   containerProfiles = import ../containers/default.nix;
-  inherit (containerProfiles)
-    getNspawnHardeningProfile
-    getNspawnIsolationProfile
-    ;
+  inherit (containerProfiles) getNspawnHardeningProfile getNspawnIsolationProfile;
   endpointType = types.submodule {
     options = {
       port = mkOption {
@@ -28,9 +25,9 @@ let
   portNumbersFor =
     protocol: endpoints:
     map (endpoint: endpoint.port) (
-      filter (
-        endpoint: endpoint.expose && (endpoint.transport == protocol || endpoint.transport == "tcp-and-udp")
-      ) (attrValues endpoints)
+      filter (endpoint: endpoint.expose && (endpoint.transport == protocol || endpoint.transport == "tcp-and-udp")) (
+        attrValues endpoints
+      )
     );
 
   mkContainerMacAddress =
@@ -60,9 +57,7 @@ let
     }:
     let
       isolationConfig = getNspawnIsolationProfile isolationProfile;
-      containerVethFlags = map (
-        vlan: "--network-veth-extra=${mkContainerVethName name vlan}:eth${toString vlan}"
-      ) vlans;
+      containerVethFlags = map (vlan: "--network-veth-extra=${mkContainerVethName name vlan}:eth${toString vlan}") vlans;
       hostVethNetworks = listToAttrs (
         map (
           vlan:
@@ -265,9 +260,7 @@ let
     mkMerge [
       secretConfig
       (mkIf (secrets != { }) {
-        systemd.services."container@${name}".preStart = concatStringsSep "\n" (
-          mapAttrsToList mkSecretPrepareLine secrets
-        );
+        systemd.services."container@${name}".preStart = concatStringsSep "\n" (mapAttrsToList mkSecretPrepareLine secrets);
       })
       (genContainerBase {
         inherit
@@ -313,26 +306,18 @@ let
 
       description = mkOpt types.str description "Human-readable service description.";
 
-      endpoints =
-        mkOpt (types.attrsOf endpointType) endpoints
-          "Named listener endpoints for this service.";
+      endpoints = mkOpt (types.attrsOf endpointType) endpoints "Named listener endpoints for this service.";
 
       vlans = mkOption {
-        type = types.addCheck (types.nonEmptyListOf (types.ints.between 1 4094)) (
-          vlans: length vlans == length (unique vlans)
-        );
+        type = types.addCheck (types.nonEmptyListOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
         description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
       };
 
       volumes = mkOpt (types.listOf types.str) [ ] "Volume IDs to attach to this service container.";
 
-      shares =
-        mkOpt (types.listOf types.str) [ ]
-          "Shared host storage attached to this service container.";
+      shares = mkOpt (types.listOf types.str) [ ] "Shared host storage attached to this service container.";
 
-      runtimeId =
-        mkOpt (types.nullOr types.int) null
-          "Stable numeric UID/GID for this service inside the container.";
+      runtimeId = mkOpt (types.nullOr types.int) null "Stable numeric UID/GID for this service inside the container.";
 
       runtimeUser = {
         name = mkOpt types.str name "User that runs this service inside the container.";
@@ -341,8 +326,7 @@ let
 
       monitor = {
         enable = mkBoolOpt monitor.enable "Whether to generate a Gatus check for this service.";
-        endpoint = mkOpt (types.nullOr types.str) (monitor.endpoint or null
-        ) "Named endpoint checked by Gatus.";
+        endpoint = mkOpt (types.nullOr types.str) (monitor.endpoint or null) "Named endpoint checked by Gatus.";
         name = mkOpt types.str (monitor.name or name) "Gatus endpoint name.";
         group = mkOpt types.str (monitor.group or "services") "Gatus endpoint group.";
         protocol = mkOpt (types.enum [
@@ -356,20 +340,14 @@ let
         address = mkOpt types.str (monitor.address or "") "Gatus check address.";
         path = mkOpt types.str (monitor.path or "/") "Gatus HTTP path.";
         interval = mkOpt types.str (monitor.interval or "30s") "Gatus check interval.";
-        conditions = mkOpt (types.listOf types.str) (monitor.conditions or (
-          if protocol == "http" || protocol == "https" then
-            [ "[STATUS] == 200" ]
-          else
-            [ "[CONNECTED] == true" ]
-        )
+        conditions = mkOpt (types.listOf types.str) (monitor.conditions
+          or (if protocol == "http" || protocol == "https" then [ "[STATUS] == 200" ] else [ "[CONNECTED] == true" ])
         ) "Gatus check conditions.";
       };
 
       logging = {
         enable = mkBoolOpt logging.enable "Whether this service container should push journald logs to Loki.";
-        files =
-          mkOpt (types.listOf types.str) [ ]
-            "Log file paths or glob patterns that Alloy should also push to Loki.";
+        files = mkOpt (types.listOf types.str) [ ] "Log file paths or glob patterns that Alloy should also push to Loki.";
       };
     };
 

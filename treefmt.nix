@@ -3,7 +3,11 @@
 
   programs = {
     deadnix.enable = true;
-    nixfmt.enable = true;
+    nixfmt = {
+      enable = true;
+      strict = true;
+      width = 120;
+    };
     shellcheck.enable = true;
     statix.enable = true;
     taplo.enable = true;

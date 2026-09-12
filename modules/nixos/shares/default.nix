@@ -31,9 +31,7 @@ let
   missingShareRefs = flatten (
     mapAttrsToList (
       serviceName: service:
-      map (shareId: "${serviceName}:${shareId}") (
-        filter (shareId: !(hasAttr shareId shares)) (serviceShareIds service)
-      )
+      map (shareId: "${serviceName}:${shareId}") (filter (shareId: !(hasAttr shareId shares)) (serviceShareIds service))
     ) services
   );
   hostGroupName = shareId: "homelab-share-${shareId}";
@@ -69,20 +67,10 @@ let
     else
       {
         containers.${serviceName} = {
-          bindMounts = mkMerge (
-            map (share: {
-              ${share.hostPath} = {
-                inherit (share) hostPath;
-              };
-            }) attachedShares
-          );
+          bindMounts = mkMerge (map (share: { ${share.hostPath} = { inherit (share) hostPath; }; }) attachedShares);
 
           config = {
-            users.groups = mkMerge (
-              map (shareId: {
-                ${shareId}.gid = mkForce shares.${shareId}.gid;
-              }) shareIds
-            );
+            users.groups = mkMerge (map (shareId: { ${shareId}.gid = mkForce shares.${shareId}.gid; }) shareIds);
             users.users.${service.runtimeUser.name}.extraGroups = shareIds;
           };
         };
@@ -94,9 +82,7 @@ let
       };
 in
 {
-  options.${namespace}.shares =
-    mkOpt (types.attrsOf shareType) { }
-      "Host filesystems shared by service containers.";
+  options.${namespace}.shares = mkOpt (types.attrsOf shareType) { } "Host filesystems shared by service containers.";
 
   config = {
     assertions = [
@@ -107,21 +93,14 @@ in
     ];
 
     users.groups = mapAttrs' (
-      shareId: share:
-      nameValuePair (hostGroupName shareId) {
-        gid = containerUidOffset + share.gid;
-      }
+      shareId: share: nameValuePair (hostGroupName shareId) { gid = containerUidOffset + share.gid; }
     ) shares;
 
     systemd.services = mkMerge (
       mapAttrsToList mkShareService shares
-      ++ mapAttrsToList (
-        serviceName: service: (mkServiceConfig serviceName service).systemd.services
-      ) services
+      ++ mapAttrsToList (serviceName: service: (mkServiceConfig serviceName service).systemd.services) services
     );
 
-    containers = mkMerge (
-      mapAttrsToList (serviceName: service: (mkServiceConfig serviceName service).containers) services
-    );
+    containers = mkMerge (mapAttrsToList (serviceName: service: (mkServiceConfig serviceName service).containers) services);
   };
 }

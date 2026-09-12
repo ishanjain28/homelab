@@ -21,9 +21,7 @@ in
     }
     // (with types; {
       defaultInterval = mkOpt str "30s" "Default interval for generated service checks.";
-      externalEndpoints =
-        mkOpt (listOf attrs) [ ]
-          "Additional raw Gatus endpoints for cameras and infrastructure.";
+      externalEndpoints = mkOpt (listOf attrs) [ ] "Additional raw Gatus endpoints for cameras and infrastructure.";
     });
 
   config = mkIf cfg.enable (mkMerge [

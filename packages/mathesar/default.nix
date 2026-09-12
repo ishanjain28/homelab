@@ -128,7 +128,5 @@ pkgs.stdenvNoCC.mkDerivation {
   '';
 
   meta.mainProgram = "mathesar";
-  passthru = {
-    inherit pythonEnv;
-  };
+  passthru = { inherit pythonEnv; };
 }
