@@ -33,6 +33,12 @@ with lib.${namespace};
     runtimeId = 27777;
   };
 
+  gitea-runner = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 36928;
+    giteaURI = "https://git.ishanjain.me";
+  };
+
   bentopdf = enabled // {
     vlans = [ 50 ];
     runtimeId = 50715;

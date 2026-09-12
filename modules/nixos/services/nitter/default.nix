@@ -61,7 +61,6 @@ in
           "NITTER_CONF_FILE=${configPath}"
           "NITTER_SESSIONS_FILE=${sessionsPath}"
         ];
-        ExecStartPre = mkForce [ ];
         StateDirectoryMode = "0700";
       };
     };

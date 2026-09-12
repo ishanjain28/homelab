@@ -31,47 +31,39 @@ in
       };
     }
     // {
-      configFile = mkOpt types.str "" "Repository-relative path to the encrypted Caddy JSON file.";
+      configFile = mkOption {
+        type = types.nonEmptyStr;
+        description = "Repository-relative path to the encrypted Caddy JSON file.";
+      };
     };
 
-  config = mkIf cfg.enable (mkMerge [
-    {
-      assertions = [
-        {
-          assertion = cfg.configFile != "";
-          message = "The Caddy service requires configFile.";
-        }
-      ];
-    }
+  config = mkIf cfg.enable (mkSingleServiceContainer {
+    service = cfg;
+    command = "${pkgs.${namespace}.caddy}/bin/caddy run --config ${configPath}";
 
-    (mkSingleServiceContainer {
-      service = cfg;
-      command = "${pkgs.${namespace}.caddy}/bin/caddy run --config ${configPath}";
+    secrets.config = {
+      file = cfg.configFile;
+      format = "json";
+      mountPath = configPath;
+    };
 
-      secrets.config = {
-        file = cfg.configFile;
-        format = "json";
-        mountPath = configPath;
-      };
+    environment.XDG_DATA_HOME = "/var/lib";
 
-      environment.XDG_DATA_HOME = "/var/lib";
+    resources = {
+      CPUQuota = "400%";
+      MemoryMax = "1G";
+      TasksMax = 1024;
+    };
 
-      resources = {
-        CPUQuota = "400%";
-        MemoryMax = "1G";
-        TasksMax = 1024;
-      };
-
-      serviceConfig = {
-        Restart = "on-failure";
-        RestartSec = "5s";
-        ExecStartPre = "${pkgs.${namespace}.caddy}/bin/caddy validate --config ${configPath}";
-        AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-        CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
-        StateDirectory = "caddy";
-        StateDirectoryMode = "0700";
-        UMask = "0077";
-      };
-    })
-  ]);
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "5s";
+      ExecStartPre = "${pkgs.${namespace}.caddy}/bin/caddy validate --config ${configPath}";
+      AmbientCapabilities = "CAP_NET_BIND_SERVICE";
+      CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+      StateDirectory = "caddy";
+      StateDirectoryMode = "0700";
+      UMask = "0077";
+    };
+  });
 }
