@@ -16,7 +16,7 @@ with lib.${namespace};
     clean = enabled // {
       extraArgs = "--keep 10";
     };
-    flake = "$HOME/dotfiles";
+    flake = "$HOME/nix";
   };
 
   users.users.ishan.packages = with pkgs; [ nix-output-monitor ];
