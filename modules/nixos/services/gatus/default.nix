@@ -20,7 +20,6 @@ in
       endpoints.web.port = 8080;
     }
     // (with types; {
-      openFirewall = mkBoolOpt true "Whether to open the Gatus web UI port.";
       defaultInterval = mkOpt str "30s" "Default interval for generated service checks.";
       externalEndpoints =
         mkOpt (listOf attrs) [ ]
@@ -29,7 +28,7 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     {
-      services.gatus = disabled // {
+      services.gatus = {
         settings = {
           web = {
             address = "0.0.0.0";

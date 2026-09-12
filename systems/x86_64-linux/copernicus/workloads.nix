@@ -25,4 +25,10 @@ with lib.${namespace};
     vlans = [ 50 ];
     runtimeId = 30351;
   };
+
+  caddy = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30352;
+    configFile = "secrets/caddy/home.json";
+  };
 }

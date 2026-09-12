@@ -428,9 +428,7 @@ let
               Group = runtimeUser.group;
             }
             // hardeningConfig
-            // optionalAttrs (service.shares != [ ]) {
-              UMask = "0007";
-            }
+            // optionalAttrs (service.shares != [ ]) { UMask = "0007"; }
             // serviceConfig;
           };
         }
@@ -440,7 +438,6 @@ let
 in
 {
   inherit containerUidOffset;
-  mkContainerBase = genContainerBase;
   mkServiceOptions = genServiceOptions;
   mkServiceContainer = genServiceContainer;
   mkSingleServiceContainer = genSingleServiceContainer;
