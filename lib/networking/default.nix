@@ -4,12 +4,10 @@
 { lib, ... }:
 let
   # Shorthand for generating interface link configuration
-  genIfLink =
-    { name, macAddress }:
-    {
-      matchConfig.PermanentMACAddress = macAddress;
-      linkConfig.Name = name;
-    };
+  genIfLink = { name, macAddress }: {
+    matchConfig.PermanentMACAddress = macAddress;
+    linkConfig.Name = name;
+  };
 
   # Shorthand for generating tagged vlan interfaces
   genTaggedVlanIf = id: {
@@ -37,12 +35,10 @@ let
   };
 
   # Shorthand for generating network configuration
-  genNetworkIf =
-    { config, name }:
-    {
-      matchConfig.Name = name;
-      inherit (config) networkConfig ipv6AcceptRAConfig;
-    };
+  genNetworkIf = { config, name }: {
+    matchConfig.Name = name;
+    inherit (config) networkConfig ipv6AcceptRAConfig;
+  };
 
 in
 {
@@ -55,40 +51,9 @@ in
     {
       "10-${hash}" = genIfLink { inherit name macAddress; };
     };
-  mkIfLinks =
-    data:
-    builtins.listToAttrs (
-      map (
-        { name, macAddress }:
-        let
-          lowerAddress = lib.toLower macAddress;
-          hash = builtins.hashString "sha256" lowerAddress;
-        in
-        {
-          "10-${hash}" = genIfLink { inherit name macAddress; };
-        }
-      ) data
-    );
-
   mkBridgeIf = name: { "20-${name}" = genBridgeIf name; };
-  mkBridgeIfList =
-    params:
-    builtins.listToAttrs (
-      map (param: {
-        name = "20-${param.name}";
-        value = genBridgeIf param.name;
-      }) params
-    );
 
   mkTaggedVlanIf = id: { "20-vlan${toString id}" = genTaggedVlanIf id; };
-  mkTaggedVlanIfList =
-    ids:
-    builtins.listToAttrs (
-      map (id: {
-        name = "20-vlan${toString id}";
-        value = genTaggedVlanIf id;
-      }) ids
-    );
 
   mkNetworkIf =
     { config, name }:
@@ -98,18 +63,4 @@ in
     {
       "40-${hash}" = genNetworkIf { inherit config name; };
     };
-  mkNetworkIfList =
-    data:
-    builtins.listToAttrs (
-      map (
-        { config, name }:
-        let
-          hash = builtins.hashString "sha256" name;
-        in
-        {
-          name = "40-${hash}";
-          value = genNetworkIf { inherit config name; };
-        }
-      ) data
-    );
 }

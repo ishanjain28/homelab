@@ -1,5 +1,4 @@
-{ lib, ... }:
-{
+{ lib, ... }: {
   mkFleetRegistry =
     hostRegistries:
     let
@@ -9,7 +8,7 @@
           lib.mapAttrsToList (
             hostName: registry:
             lib.mapAttrsToList (name: declaration: {
-              inherit name;
+              name = "${hostName}/${name}";
               value = declaration // {
                 host = hostName;
               };
@@ -93,7 +92,6 @@
       ) volumeIds;
     in
     {
-      schemaVersion = 3;
       hosts = builtins.mapAttrs (_hostName: registry: registry.host) hostRegistries;
       services = mkUniqueFleetAttrs "service" serviceEntries;
       shares = shareEntries;

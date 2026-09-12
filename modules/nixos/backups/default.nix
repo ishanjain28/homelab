@@ -198,7 +198,9 @@ let
       };
       pruneOpts = retentionOptions target.retention;
       runCheck = true;
-      checkOpts = optional (target.maintenance.readDataSubset != null) "--read-data-subset=${target.maintenance.readDataSubset}";
+      checkOpts = optional (
+        target.maintenance.readDataSubset != null
+      ) "--read-data-subset=${target.maintenance.readDataSubset}";
       createWrapper = true;
     };
 in

@@ -83,11 +83,19 @@
         _hostName: machine: machine.config.system.homelab.registry
       ) self.nixosConfigurations;
       fleetRegistry = lib.mkFleetRegistry hostRegistries;
-      mkGeneratedConfigCommand =
+      caddyServices = inputs.nixpkgs.lib.filterAttrs (
+        _serviceName: service: service ? ingressProvider && service.ingressProvider.name != ""
+      ) fleetRegistry.services;
+      caddyConfigs = builtins.listToAttrs (
+        inputs.nixpkgs.lib.mapAttrsToList (_serviceName: service: {
+          name = service.ingressProvider.name;
+          value = self.nixosConfigurations.${service.host}.config.homelab.services.caddy.generatedConfigFile;
+        }) caddyServices
+      );
+      configCommand =
         pkgs:
-        { name, fileAttr }:
         pkgs.writeShellApplication {
-          inherit name;
+          name = "config";
           runtimeInputs = with pkgs; [
             coreutils
             nix
@@ -95,25 +103,41 @@
           text = ''
             set -euo pipefail
 
-            host="''${1:-kepler}"
             flake="''${HOMELAB_FLAKE:-.}"
-            base="$flake#nixosConfigurations.$host.config"
 
-            build_path() {
-              nix --option eval-cache false build --no-link --print-out-paths "$base.$1"
+            usage() {
+              echo "usage: config gatus" >&2
+              echo "       config caddy.<ingress-name>" >&2
+              exit 2
             }
 
-            path="$(build_path '${fileAttr}')"
-            printf '##########\n## Host: %s\n##########\n\n' "$host"
+            target="''${1:-}"
+            shift || true
+
+            case "$target" in
+              gatus)
+                [[ $# -eq 0 ]] || usage
+                config_attr="configs.gatus"
+                ;;
+              caddy.*)
+                [[ $# -eq 0 ]] || usage
+                ingress="''${target#caddy.}"
+                [[ "$ingress" =~ ^[a-zA-Z0-9_-]+$ ]] || usage
+                config_attr="configs.caddy.\"$ingress\""
+                ;;
+              *)
+                usage
+                ;;
+            esac
+
+            path="$(
+              nix --option eval-cache false build --no-link --print-out-paths \
+                "$flake#$config_attr"
+            )"
+            printf '##########\n## Config: %s\n##########\n\n' "$target"
             cat "$path"
           '';
         };
-      generatedConfigCommands = pkgs: [
-        (mkGeneratedConfigCommand pkgs {
-          name = "gatus";
-          fileAttr = "services.gatus.configFile";
-        })
-      ];
       inherit ((import ./lib/module/default.nix { lib = inputs.nixpkgs.lib; })) shellAliases;
       shellAliasHook = inputs.nixpkgs.lib.concatStringsSep "\n" (
         inputs.nixpkgs.lib.mapAttrsToList (
@@ -126,7 +150,8 @@
           pkgs = import inputs.nixpkgs { inherit system; };
         in
         pkgs.mkShell {
-          packages = (generatedConfigCommands pkgs) ++ [
+          packages = [
+            (configCommand pkgs)
             pkgs.age
             inputs.deploy-rs.packages.${system}.deploy-rs
             pkgs.git
@@ -179,6 +204,10 @@
     }
     // {
       inherit (inputs) self;
+      configs = {
+        gatus = self.nixosConfigurations.kepler.config.services.gatus.configFile;
+        caddy = caddyConfigs;
+      };
       lib = lib // {
         homelabRegistry = fleetRegistry;
       };

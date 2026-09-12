@@ -8,7 +8,6 @@
 with lib;
 with lib.${namespace};
 let
-  json = pkgs.formats.json { };
   hostName = config.networking.hostName;
   shares = config.${namespace}.shares;
   volumes = config.${namespace}.volumes;
@@ -17,24 +16,29 @@ let
     name: service: service ? runtimeUser && (service.enable || elem name volumeOwnerServices)
   ) config.${namespace}.services;
 
-  mkService = _name: service: {
-    inherit (service)
-      description
-      endpoints
-      enable
-      logging
-      monitor
-      name
-      runtimeId
-      shares
-      vlans
-      volumes
-      ;
-    inherit (service) runtimeUser;
-  };
+  mkService =
+    _name: service:
+    {
+      inherit (service)
+        description
+        endpoints
+        enable
+        logging
+        ingress
+        monitor
+        name
+        runtimeId
+        shares
+        vlans
+        volumes
+        ;
+      inherit (service) runtimeUser;
+    }
+    // optionalAttrs (service ? ingressProvider) {
+      inherit (service) ingressProvider;
+    };
 
   registry = {
-    schemaVersion = 2;
     host = {
       name = hostName;
       system = pkgs.stdenv.hostPlatform.system;
@@ -43,7 +47,6 @@ let
     inherit shares volumes;
   };
 
-  registryFile = json.generate "homelab-registry-${hostName}.json" registry;
   servicesWithoutRuntimeIds = attrNames (
     filterAttrs (_name: service: service.runtimeId == null) registry.services
   );
@@ -53,7 +56,7 @@ in
     type = types.attrsOf types.anything;
     default = { };
     internal = true;
-    description = "Normalized JSON-safe registry of homelab services and volumes on this host.";
+    description = "Normalized registry of homelab services and volumes on this host.";
   };
 
   config = {
@@ -65,6 +68,5 @@ in
     ];
 
     system.homelab.registry = registry;
-    environment.etc."homelab/registry.json".source = registryFile;
   };
 }

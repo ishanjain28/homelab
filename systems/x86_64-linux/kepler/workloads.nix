@@ -26,6 +26,10 @@ with lib.${namespace};
   pvr-movies-monitor = enabled // {
     vlans = [ 50 ];
     runtimeId = 20691;
+    ingress.home = {
+      domains = [ "pvr.ishanjain.me" ];
+      upstreams = [ "10.0.50.36:3000" ];
+    };
   };
 
   huawei-sms-telegram = enabled // {
@@ -36,51 +40,181 @@ with lib.${namespace};
   bentopdf = enabled // {
     vlans = [ 50 ];
     runtimeId = 50715;
+    ingress.home = {
+      domains = [ "pdf.ishanjain.me" ];
+      upstreams = [ "10.0.50.22:8080" ];
+    };
   };
 
   lldap = enabled // {
     vlans = [ 50 ];
     runtimeId = 25457;
+    ingress.home = {
+      domains = [ "ldap.ishanjain.me" ];
+      routes = [
+        {
+          paths = [ "/auth/logout" ];
+          handlers = [
+            {
+              handler = "invoke";
+              name = "authelia-logout";
+            }
+          ];
+          upstreams = [ "10.0.50.18:17170" ];
+        }
+        {
+          handlers = [
+            {
+              handler = "invoke";
+              name = "authelia-integration";
+            }
+          ];
+          upstreams = [ "10.0.50.18:17170" ];
+        }
+      ];
+    };
   };
 
   authelia = enabled // {
     vlans = [ 50 ];
     runtimeId = 20001;
+    ingress.home = {
+      domains = [ "auth.ishanjain.me" ];
+      upstreams = [ "10.0.50.17:9091" ];
+    };
   };
 
   grafana = enabled // {
     vlans = [ 50 ];
     runtimeId = 31918;
     volumes = [ "grafana" ];
+    ingress.home = {
+      domains = [
+        "dash.ishanjain.me"
+        "dash.vax.ovh"
+      ];
+      routes = [
+        {
+          paths = [ "/logout" ];
+          handlers = [
+            {
+              handler = "invoke";
+              name = "authelia-logout";
+            }
+          ];
+          terminal = false;
+        }
+        {
+          matcher.not = [
+            {
+              path = [
+                "/public-dashboards*"
+                "/public*"
+                "/api/public/dashboards*"
+              ];
+            }
+          ];
+          handlers = [
+            {
+              handler = "invoke";
+              name = "authelia-integration";
+            }
+          ];
+          terminal = false;
+        }
+        {
+          upstreams = [ "10.0.50.12:3000" ];
+        }
+      ];
+    };
   };
 
   mathesar = enabled // {
     vlans = [ 50 ];
     runtimeId = 30339;
+    ingress.home = {
+      domains = [ "pg.home.ishanjain.me" ];
+      upstreams = [ "10.0.50.30:5001" ];
+    };
   };
 
   seerr = enabled // {
     vlans = [ 50 ];
     runtimeId = 30340;
     volumes = [ "seerr" ];
+    ingress.home = {
+      domains = [ "request.ishanjain.me" ];
+      routes = [
+        {
+          paths = [ "/api/v1/auth/logout" ];
+          handlers = [
+            {
+              handler = "invoke";
+              name = "authelia-logout";
+            }
+          ];
+          upstreams = [ "10.0.50.24:5055" ];
+          terminal = true;
+        }
+        {
+          handlers = [
+            {
+              handler = "invoke";
+              name = "authelia-integration";
+            }
+          ];
+          upstreams = [ "10.0.50.24:5055" ];
+        }
+      ];
+    };
   };
 
   actual-server = enabled // {
     vlans = [ 50 ];
     runtimeId = 30341;
     volumes = [ "actual-server" ];
+    ingress.home = {
+      domains = [ "money.ishanjain.me" ];
+      handlers = [
+        {
+          handler = "invoke";
+          name = "authelia-integration";
+        }
+      ];
+      upstreams = [ "10.0.50.19:5006" ];
+    };
   };
 
   changedetection = enabled // {
     vlans = [ 50 ];
     runtimeId = 30344;
     volumes = [ "changedetection" ];
+    ingress.home = {
+      domains = [ "change.ishanjain.me" ];
+      handlers = [
+        {
+          handler = "invoke";
+          name = "authelia-integration";
+        }
+      ];
+      upstreams = [ "10.0.50.27:5000" ];
+    };
   };
 
   openvscode-server = enabled // {
     vlans = [ 50 ];
     runtimeId = 30345;
     volumes = [ "openvscode-server" ];
+    ingress.home = {
+      domains = [ "editor.ishanjain.me" ];
+      handlers = [
+        {
+          handler = "invoke";
+          name = "authelia-integration";
+        }
+      ];
+      upstreams = [ "10.0.50.37:3000" ];
+    };
   };
 
   vlan10-debug = enabled // {
@@ -131,6 +265,10 @@ with lib.${namespace};
   tracearr = enabled // {
     vlans = [ 50 ];
     runtimeId = 30342;
+    ingress.home = {
+      domains = [ "jt.ishanjain.me" ];
+      upstreams = [ "10.0.50.31:3000" ];
+    };
   };
 
   loki = enabled // {
@@ -152,6 +290,20 @@ with lib.${namespace};
     vlans = [ 70 ];
     runtimeId = 30347;
     volumes = [ "cups" ];
+    ingress.home = {
+      domains = [ "cups.home.ishanjain.me" ];
+      handlers = [
+        {
+          handler = "invoke";
+          name = "authelia-integration";
+        }
+        {
+          handler = "headers";
+          request.delete = [ "Cookie" ];
+        }
+      ];
+      upstreams = [ "10.0.70.7:631" ];
+    };
   };
 
   gatus = disabled // {

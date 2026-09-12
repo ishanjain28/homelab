@@ -25,6 +25,45 @@ let
     };
   };
 
+  ingressHandleOptions = {
+    handlers =
+      mkOpt (types.listOf types.attrs) [ ]
+        "Caddy handlers emitted before the generated reverse proxy.";
+
+    upstreams = mkOpt (types.listOf types.str) [ ] "Reverse-proxy upstream dial addresses.";
+
+    reverseProxy =
+      mkOpt types.attrs { }
+        "Additional fields added to the generated reverse_proxy handler.";
+  };
+
+  ingressSubrouteType = types.submodule {
+    options = ingressHandleOptions // {
+      paths = mkOpt (types.listOf types.str) [ ] "Caddy path patterns added to this route's matcher.";
+
+      matcher = mkOpt types.attrs { } "Additional fields added to this route's Caddy matcher.";
+
+      terminal =
+        mkOpt (types.nullOr types.bool) null
+          "Whether Caddy should stop route evaluation after this route.";
+    };
+  };
+
+  ingressRouteType = types.submodule {
+    options = ingressHandleOptions // {
+      domains = mkOption {
+        type = types.nonEmptyListOf (types.strMatching ".+");
+        description = "Domains served by this ingress route.";
+      };
+
+      routes =
+        mkOpt (types.listOf ingressSubrouteType) [ ]
+          "Ordered matched routes emitted inside a Caddy subroute.";
+
+      order = mkOpt types.int 0 "Ordering priority when several services share a domain.";
+    };
+  };
+
   portNumbersFor =
     protocol: endpoints:
     map (endpoint: endpoint.port) (
@@ -371,6 +410,10 @@ let
           mkOpt (types.listOf types.str) [ ]
             "Log file paths or glob patterns that Alloy should also push to Loki.";
       };
+
+      ingress =
+        mkOpt (types.attrsOf ingressRouteType) { }
+          "Routes contributed by this service, keyed by the ingress provider name.";
     };
 
   # Convenience wrapper for the common one-container/one-systemd-service case.
@@ -428,9 +471,7 @@ let
               Group = runtimeUser.group;
             }
             // hardeningConfig
-            // optionalAttrs (service.shares != [ ]) {
-              UMask = "0007";
-            }
+            // optionalAttrs (service.shares != [ ]) { UMask = "0007"; }
             // serviceConfig;
           };
         }
@@ -440,7 +481,6 @@ let
 in
 {
   inherit containerUidOffset;
-  mkContainerBase = genContainerBase;
   mkServiceOptions = genServiceOptions;
   mkServiceContainer = genServiceContainer;
   mkSingleServiceContainer = genSingleServiceContainer;
