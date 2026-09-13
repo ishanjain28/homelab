@@ -1,5 +1,14 @@
-use crate::apply::run_apply;
-use crate::snapshot::{run_snapshot_create, run_snapshot_list, run_snapshot_remove};
+use crate::{
+    apply::{run_apply, run_create},
+    backup::{run_backup, run_migration_cancel, run_migration_release, run_reconcile},
+    restore::{
+        run_migration_prepare, run_restore_abort, run_restore_cutover, run_restore_finalize,
+        run_restore_list, run_restore_prepare, run_restore_resume, run_restore_retire,
+        run_restore_rollback, run_restore_status,
+    },
+    retire::run_retire,
+    snapshot::{run_snapshot_create, run_snapshot_list, run_snapshot_remove},
+};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
@@ -17,7 +26,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum VolumeCommand {
-    /// Apply local volume state: create, format, verify, and grow.
+    /// Verify and grow existing local volumes. Never creates or formats storage.
     Apply {
         /// Apply without interactive prompts. Shrinks are still refused.
         #[arg(long)]
@@ -27,10 +36,56 @@ enum VolumeCommand {
         volume_ids: Vec<String>,
     },
 
+    /// Explicitly create and format new empty volumes.
+    Create {
+        /// Create without interactive confirmation.
+        #[arg(long)]
+        yes: bool,
+
+        /// Volume IDs to create. At least one is required.
+        #[arg(required = true)]
+        volume_ids: Vec<String>,
+    },
+
     /// Manage temporary LVM snapshots of declared volumes.
     Snapshot {
         #[command(subcommand)]
         command: SnapshotCommand,
+    },
+
+    /// Back up all opted-in volumes owned by one service as one consistent snapshot set.
+    Backup {
+        owner_service: String,
+
+        /// Mark the Restic snapshot as the final source copy for a migration.
+        #[arg(long = "final")]
+        final_backup: bool,
+    },
+
+    /// Remove orphaned temporary backup snapshots and mounts.
+    Reconcile {
+        /// Limit reconciliation to one owner service.
+        #[arg(long)]
+        owner_service: Option<String>,
+    },
+
+    /// Restore a complete service volume set from Restic.
+    Restore {
+        #[command(subcommand)]
+        command: RestoreCommand,
+    },
+
+    /// Cross-host migration using final backup and restore operations.
+    Migrate {
+        #[command(subcommand)]
+        command: MigrationCommand,
+    },
+
+    /// Permanently remove an LV covered by a deployed deletion tombstone.
+    Retire {
+        volume_id: String,
+        #[arg(long)]
+        yes: bool,
     },
 }
 
@@ -62,11 +117,121 @@ enum SnapshotCommand {
     },
 }
 
+#[derive(Subcommand)]
+enum RestoreCommand {
+    /// List eligible consistent snapshots for a service.
+    List {
+        owner_service: String,
+        #[arg(long)]
+        source_host: Option<String>,
+    },
+    /// Restore into new staging LVs without changing active LV names.
+    Prepare {
+        owner_service: String,
+        #[arg(long)]
+        source_host: Option<String>,
+        #[arg(long)]
+        snapshot: Option<String>,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Resume an interrupted staging restore.
+    Resume { operation_id: String },
+    /// Replace active LV names with a prepared restore, retaining rollback LVs.
+    Cutover {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Verify the enabled owner service and mark a cutover finalized.
+    Finalize { operation_id: String },
+    /// Restore the previous LVs and retain the failed restored copies.
+    Rollback {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Remove rollback LVs after finalization, or failed LVs after rollback.
+    Retire {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Abandon a prepared restore and remove only its tagged staging LVs.
+    Abort {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Print an operation journal.
+    Status { operation_id: String },
+}
+
+#[derive(Subcommand)]
+enum MigrationCommand {
+    /// On the source host, create the final coordinated Restic backup.
+    Export { owner_service: String },
+    /// Cancel a completed export and restart the source service.
+    CancelExport {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Remove the source start block after it is disabled in the deployed configuration.
+    ReleaseExport {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// On the target host, restore the service into staging LVs.
+    Prepare {
+        owner_service: String,
+        #[arg(long)]
+        source_host: String,
+        /// Snapshot ID printed by a successful `volume migrate export`.
+        #[arg(long)]
+        snapshot: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Resume an interrupted target restore.
+    Resume { operation_id: String },
+    /// Cut over target LV names while its service remains disabled.
+    Cutover {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// After deploying the target service enabled, verify and finalize.
+    Finalize { operation_id: String },
+    /// Roll back target LV names after its service is disabled and deployed.
+    Rollback {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Remove displaced target LVs after finalization, or failed LVs after rollback.
+    Retire {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Abandon a prepared migration and remove only its tagged staging LVs.
+    Abort {
+        operation_id: String,
+        #[arg(long)]
+        yes: bool,
+    },
+    /// Print a migration operation journal.
+    Status { operation_id: String },
+}
+
 pub fn run() -> Result<(), String> {
     let cli = Cli::parse();
 
     match cli.command {
         VolumeCommand::Apply { yes, volume_ids } => run_apply(&cli.state_file, yes, &volume_ids),
+        VolumeCommand::Create { yes, volume_ids } => run_create(&cli.state_file, yes, &volume_ids),
         VolumeCommand::Snapshot { command } => match command {
             SnapshotCommand::Create {
                 volume_id,
@@ -78,5 +243,94 @@ pub fn run() -> Result<(), String> {
                 run_snapshot_remove(&cli.state_file, &volume_id, name.as_deref())
             }
         },
+        VolumeCommand::Backup {
+            owner_service,
+            final_backup,
+        } => run_backup(&cli.state_file, &owner_service, final_backup),
+        VolumeCommand::Reconcile { owner_service } => {
+            run_reconcile(&cli.state_file, owner_service.as_deref())
+        }
+        VolumeCommand::Restore { command } => run_restore_command(&cli.state_file, command),
+        VolumeCommand::Migrate { command } => run_migration_command(&cli.state_file, command),
+        VolumeCommand::Retire { volume_id, yes } => run_retire(&cli.state_file, &volume_id, yes),
+    }
+}
+
+fn run_restore_command(
+    state_file: &std::path::Path,
+    command: RestoreCommand,
+) -> Result<(), String> {
+    match command {
+        RestoreCommand::List {
+            owner_service,
+            source_host,
+        } => run_restore_list(state_file, &owner_service, source_host.as_deref()),
+        RestoreCommand::Prepare {
+            owner_service,
+            source_host,
+            snapshot,
+            yes,
+        } => run_restore_prepare(
+            state_file,
+            &owner_service,
+            source_host.as_deref(),
+            snapshot.as_deref(),
+            yes,
+        ),
+        RestoreCommand::Resume { operation_id } => run_restore_resume(state_file, &operation_id),
+        RestoreCommand::Cutover { operation_id, yes } => {
+            run_restore_cutover(state_file, &operation_id, yes)
+        }
+        RestoreCommand::Finalize { operation_id } => {
+            run_restore_finalize(state_file, &operation_id)
+        }
+        RestoreCommand::Rollback { operation_id, yes } => {
+            run_restore_rollback(state_file, &operation_id, yes)
+        }
+        RestoreCommand::Retire { operation_id, yes } => {
+            run_restore_retire(state_file, &operation_id, yes)
+        }
+        RestoreCommand::Abort { operation_id, yes } => {
+            run_restore_abort(state_file, &operation_id, yes)
+        }
+        RestoreCommand::Status { operation_id } => run_restore_status(&operation_id),
+    }
+}
+
+fn run_migration_command(
+    state_file: &std::path::Path,
+    command: MigrationCommand,
+) -> Result<(), String> {
+    match command {
+        MigrationCommand::Export { owner_service } => run_backup(state_file, &owner_service, true),
+        MigrationCommand::CancelExport { operation_id, yes } => {
+            run_migration_cancel(state_file, &operation_id, yes)
+        }
+        MigrationCommand::ReleaseExport { operation_id, yes } => {
+            run_migration_release(state_file, &operation_id, yes)
+        }
+        MigrationCommand::Prepare {
+            owner_service,
+            source_host,
+            snapshot,
+            yes,
+        } => run_migration_prepare(state_file, &owner_service, &source_host, &snapshot, yes),
+        MigrationCommand::Resume { operation_id } => run_restore_resume(state_file, &operation_id),
+        MigrationCommand::Cutover { operation_id, yes } => {
+            run_restore_cutover(state_file, &operation_id, yes)
+        }
+        MigrationCommand::Finalize { operation_id } => {
+            run_restore_finalize(state_file, &operation_id)
+        }
+        MigrationCommand::Rollback { operation_id, yes } => {
+            run_restore_rollback(state_file, &operation_id, yes)
+        }
+        MigrationCommand::Retire { operation_id, yes } => {
+            run_restore_retire(state_file, &operation_id, yes)
+        }
+        MigrationCommand::Abort { operation_id, yes } => {
+            run_restore_abort(state_file, &operation_id, yes)
+        }
+        MigrationCommand::Status { operation_id } => run_restore_status(&operation_id),
     }
 }

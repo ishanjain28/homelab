@@ -10,12 +10,13 @@ with lib.${namespace};
 let
   json = pkgs.formats.json { };
   volumePackage = pkgs.callPackage ../../../packages/volume { };
-  volumeStateFile = json.generate "homelab-volumes.json" config.system.homelab.volumes;
+  volumeStateFile = json.generate "homelab-volumes.json" config.system.homelab.volumeState;
   cfg = config.${namespace};
   registry = config.system.homelab.registry;
   inherit (registry) services volumes;
   inherit (cfg) deletedVolumes;
   enabledServices = filterAttrs (_name: service: service.enable) services;
+  activeVolumes = filterAttrs (_volumeId: volume: services.${volume.ownerService}.enable) volumes;
 
   volumeHostPath = volume: "/var/lib/volumes/${volume.name}";
   volumeApplyUnit = volumeId: "homelab-volume-${volumeId}.service";
@@ -25,8 +26,6 @@ let
     "nofail"
     "x-systemd.device-timeout=10s"
   ];
-  volumeState = volumeId: { ${volumeId} = config.system.homelab.volumes.${volumeId}; };
-  volumeStatePath = volumeId: json.generate "homelab-volume-${volumeId}.json" (volumeState volumeId);
   serviceVolumeIds = srv: srv.volumes;
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
   serviceVolumes = srv: map (volumeId: volumes.${volumeId}) (existingServiceVolumeIds srv);
@@ -64,6 +63,10 @@ let
 
   activeDeletedVolumes = filter (volumeId: hasAttr volumeId volumes) (attrNames deletedVolumes);
 
+  duplicateValues = values: unique (filter (value: length (filter (candidate: candidate == value) values) > 1) values);
+  duplicateLvNames = duplicateValues (map (volume: volume.name) (attrValues volumes));
+  duplicateHostMountPaths = duplicateValues (map volumeHostPath (attrValues volumes));
+
   volumeOwnerService = volume: services.${volume.ownerService};
   volumeOwner = volume: (volumeOwnerService volume).runtimeUser;
   ownerHostUid = volume: containerUidOffset + (volumeOwnerService volume).runtimeId;
@@ -71,9 +74,21 @@ let
   volumeLvPath = volume: "/dev/pool/${volume.name}";
 
   mkVolumeState = volumeId: volume: {
-    inherit volumeId;
-    inherit (volume) uuid size fsType;
-    lvPath = volumeLvPath volume;
+    id = volumeId;
+    inherit (volume)
+      backup
+      fsType
+      mode
+      mountPath
+      name
+      size
+      uuid
+      ;
+    hostMountPath = volumeHostPath volume;
+    lv = volumeLvPath volume;
+    ownerEnabled = services.${volume.ownerService}.enable;
+    inherit (volume) ownerService;
+    ownerUnit = "container@${volume.ownerService}.service";
   };
 
   mkVolumeApplyService = volumeId: _volume: {
@@ -87,7 +102,7 @@ let
       ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${volumePackage}/bin/volume --state-file ${volumeStatePath volumeId} apply --yes ${escapeShellArg volumeId}";
+        ExecStart = "${volumePackage}/bin/volume --state-file ${volumeStateFile} apply --yes ${escapeShellArg volumeId}";
         RemainAfterExit = true;
       };
     };
@@ -155,7 +170,8 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          restartTriggers = map volumeStatePath (existingServiceVolumeIds srv);
+          unitConfig.ConditionPathExists = [ "!/var/lib/homelab-volume/migration-block/${serviceName}" ];
+          restartTriggers = [ volumeStateFile ];
           partOf = map volumeMountUnit attachedVolumes;
           requires =
             map volumeApplyUnit (existingServiceVolumeIds srv)
@@ -180,6 +196,13 @@ in
     default = { };
     internal = true;
     description = "Evaluated homelab volume metadata.";
+  };
+
+  options.system.homelab.volumeState = mkOption {
+    type = types.attrsOf types.anything;
+    default = { };
+    internal = true;
+    description = "Runtime state consumed by the homelab volume tool.";
   };
 
   options.${namespace} = {
@@ -209,11 +232,9 @@ in
                       type = types.str;
                       description = "Named homelab backup target.";
                     };
-                    onCalendar = mkOpt types.str "daily" "systemd calendar expression for this backup.";
-                    randomizedDelaySec = mkOpt types.str "1h" "Maximum randomized delay applied to the backup timer.";
-                    snapshotSize = mkOption {
-                      type = types.str;
-                      description = "LVM COW space allocated to the temporary backup snapshot.";
+                    cron = mkOption {
+                      type = types.strMatching "[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+";
+                      description = "Five-field cron expression for this volume's backup.";
                     };
                   };
                 }
@@ -227,19 +248,22 @@ in
     )) { } "Global service volume registry.";
 
     deletedVolumes = mkOpt (types.attrsOf (
-      types.submodule {
-        options = {
-          uuid = mkOption {
-            type = types.str;
-            description = "UUID of the deleted volume.";
+      types.submodule (
+        { name, ... }: {
+          options = {
+            name = mkOpt (types.strMatching "[a-z0-9][a-z0-9-]*") name "Retired LVM logical volume name.";
+            uuid = mkOption {
+              type = types.str;
+              description = "UUID of the deleted volume.";
+            };
+            after = mkOption {
+              type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+              description = "Date after which manual GC may remove the volume.";
+            };
+            reason = mkOpt types.str "" "Reason for deleting the volume.";
           };
-          after = mkOption {
-            type = types.str;
-            description = "Date after which manual GC may remove the volume.";
-          };
-          reason = mkOpt types.str "" "Reason for deleting the volume.";
-        };
-      }
+        }
+      )
     )) { } "Explicit tombstones for volumes that may be garbage collected manually.";
   };
 
@@ -272,10 +296,41 @@ in
           assertion = activeDeletedVolumes == [ ];
           message = "Volumes are both active and tombstoned: ${concatStringsSep ", " activeDeletedVolumes}";
         }
+        {
+          assertion = duplicateLvNames == [ ];
+          message = "Duplicate homelab volume LV names on ${registry.host.name}: ${concatStringsSep ", " duplicateLvNames}";
+        }
+        {
+          assertion = duplicateHostMountPaths == [ ];
+          message = "Duplicate homelab volume host mount paths on ${registry.host.name}: ${concatStringsSep ", " duplicateHostMountPaths}";
+        }
       ];
     }
 
-    { system.homelab.volumes = mapAttrs mkVolumeState volumes; }
+    {
+      system.homelab.volumes = mapAttrs mkVolumeState volumes;
+      system.homelab.volumeState = {
+        schemaVersion = 1;
+        host = registry.host.name;
+        volumes = config.system.homelab.volumes;
+        backupTargets = mapAttrs (_targetName: target: {
+          inherit (target)
+            environmentFile
+            initialize
+            passwordFile
+            repository
+            ;
+        }) cfg.backups.targets;
+        deletedVolumes = mapAttrs (_volumeId: volume: {
+          inherit (volume)
+            after
+            name
+            reason
+            uuid
+            ;
+        }) deletedVolumes;
+      };
+    }
 
     {
       environment.systemPackages = [ volumePackage ];
@@ -284,13 +339,13 @@ in
 
     {
       systemd.services = mkMerge (
-        mapAttrsToList mkVolumeApplyService volumes
-        ++ mapAttrsToList mkVolumePermissionsService volumes
+        mapAttrsToList mkVolumeApplyService activeVolumes
+        ++ mapAttrsToList mkVolumePermissionsService activeVolumes
         ++ map (fragment: fragment.systemd.services) serviceVolumeConfigs
       );
     }
 
-    { systemd.mounts = mapAttrsToList mkVolumeMountOrdering volumes; }
+    { systemd.mounts = mapAttrsToList mkVolumeMountOrdering activeVolumes; }
 
     { containers = mkMerge (map (fragment: fragment.containers) serviceVolumeConfigs); }
   ];

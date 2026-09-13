@@ -1,12 +1,16 @@
-use crate::models::{load_volumes, Volume};
-use crate::prompt::confirm;
-use crate::table::print_table;
-use crate::util::parse_size;
-use std::fs;
-use std::os::fd::AsRawFd;
-use std::os::unix::fs::FileTypeExt;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use crate::{
+    lock::VolumeLocks,
+    models::{load_volumes, Volume},
+    prompt::confirm,
+    table::print_table,
+    util::parse_size,
+};
+use std::{
+    fs,
+    os::{fd::AsRawFd, unix::fs::FileTypeExt},
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 const VG_NAME: &str = "pool";
 
@@ -17,6 +21,11 @@ pub fn run_apply(state_file: &Path, assume_yes: bool, volume_ids: &[String]) -> 
         println!("no matching homelab volumes declared");
         return Ok(());
     }
+    let ids = volumes
+        .iter()
+        .map(|volume| volume.id.clone())
+        .collect::<Vec<_>>();
+    let _locks = VolumeLocks::acquire(&ids, "apply")?;
 
     let rows = volumes
         .iter()
@@ -43,14 +52,76 @@ fn apply_volume(volume: &Volume, assume_yes: bool) -> Result<(), String> {
     println!("[{}] apply", volume.id);
 
     let expected_size = parse_size(&volume.size)?;
-    let lv_name = lv_name(volume)?;
 
     ensure_vg(volume)?;
-    let lv_created = ensure_lv(volume, &lv_name, assume_yes)?;
-    ensure_filesystem(volume, assume_yes, lv_created)?;
+    ensure_existing_lv(volume)?;
+    ensure_filesystem(volume)?;
     ensure_size(volume, expected_size, assume_yes)?;
 
     println!("[{}] ok", volume.id);
+    Ok(())
+}
+
+pub fn run_create(
+    state_file: &Path,
+    assume_yes: bool,
+    volume_ids: &[String],
+) -> Result<(), String> {
+    if volume_ids.is_empty() {
+        return Err("no volume IDs supplied".to_string());
+    }
+    let volumes = load_volumes(state_file, volume_ids)?;
+    let _locks = VolumeLocks::acquire(volume_ids, "create")?;
+
+    for volume in volumes {
+        create_volume(&volume, assume_yes)?;
+    }
+
+    Ok(())
+}
+
+fn create_volume(volume: &Volume, assume_yes: bool) -> Result<(), String> {
+    println!("[{}] create", volume.id);
+    ensure_vg(volume)?;
+
+    if is_block_device(Path::new(&volume.lv)) {
+        return Err(format!(
+            "[{}] {} already exists; use 'volume apply {}' to verify it",
+            volume.id, volume.lv, volume.id
+        ));
+    }
+
+    confirm_or_assume(
+        assume_yes,
+        &format!(
+            "[{}] create and format {} ({}, {})",
+            volume.id, volume.lv, volume.size, volume.fs_type
+        ),
+    )?;
+    run_command(
+        "lvcreate",
+        &[
+            "--yes",
+            "--size",
+            &volume.size,
+            "--name",
+            &lv_name(volume)?,
+            VG_NAME,
+        ],
+    )?;
+
+    if let Err(error) = run_command(
+        &format!("mkfs.{}", volume.fs_type),
+        &["-F", "-U", &volume.uuid, &volume.lv],
+    ) {
+        return Err(format!(
+            "[{}] filesystem creation failed; the unformatted LV has been retained at {}: {error}",
+            volume.id, volume.lv
+        ));
+    }
+
+    ensure_filesystem(volume)?;
+    println!("[{}] created", volume.id);
     Ok(())
 }
 
@@ -58,53 +129,28 @@ fn ensure_vg(volume: &Volume) -> Result<(), String> {
     if command_status("vgs", &[VG_NAME])? {
         Ok(())
     } else {
-        Err(format!("[{}] missing LVM volume group: {VG_NAME}", volume.id))
+        Err(format!(
+            "[{}] missing LVM volume group: {VG_NAME}",
+            volume.id
+        ))
     }
 }
 
-fn ensure_lv(volume: &Volume, lv_name: &str, assume_yes: bool) -> Result<bool, String> {
+fn ensure_existing_lv(volume: &Volume) -> Result<(), String> {
     if is_block_device(Path::new(&volume.lv)) {
-        return Ok(false);
+        Ok(())
+    } else {
+        Err(format!(
+            "[{}] missing {}; durable volumes are never created during activation. Declare the owner service disabled, deploy, then run 'volume create {}' for new data or restore it from backup",
+            volume.id, volume.lv, volume.id
+        ))
     }
-
-    confirm_or_assume(
-        assume_yes,
-        &format!("[{}] create {} with size {}", volume.id, volume.lv, volume.size),
-    )?;
-    run_command(
-        "lvcreate",
-        &["--yes", "--size", &volume.size, "--name", lv_name, VG_NAME],
-    )?;
-    Ok(true)
 }
 
-fn ensure_filesystem(volume: &Volume, assume_yes: bool, lv_created: bool) -> Result<(), String> {
-    let mut filesystem = probe_filesystem(volume)?;
-
-    if filesystem.is_none() {
-        if assume_yes && !lv_created {
-            return Err(format!(
-                "[{}] no filesystem detected on existing LV {}; refusing to format unattended. Run volume apply {} interactively to confirm",
-                volume.id, volume.lv, volume.id
-            ));
-        }
-        confirm_or_assume(
-            assume_yes,
-            &format!(
-                "[{}] create {} filesystem on {} with UUID {}",
-                volume.id, volume.fs_type, volume.lv, volume.uuid
-            ),
-        )?;
-        run_command(
-            &format!("mkfs.{}", volume.fs_type),
-            &["-F", "-U", &volume.uuid, &volume.lv],
-        )?;
-        filesystem = probe_filesystem(volume)?;
-    }
-
-    let (actual_type, actual_uuid) = filesystem.ok_or_else(|| {
+fn ensure_filesystem(volume: &Volume) -> Result<(), String> {
+    let (actual_type, actual_uuid) = probe_filesystem(volume)?.ok_or_else(|| {
         format!(
-            "[{}] no filesystem detected on {} after formatting",
+            "[{}] no filesystem detected on {}; refusing to format an existing LV",
             volume.id, volume.lv
         )
     })?;
@@ -291,7 +337,7 @@ fn command_status(program: &str, args: &[&str]) -> Result<bool, String> {
         .map_err(|error| format!("failed to run {program}: {error}"))
 }
 
-fn run_command(program: &str, args: &[&str]) -> Result<(), String> {
+pub(crate) fn run_command(program: &str, args: &[&str]) -> Result<(), String> {
     let output = Command::new(program)
         .args(args)
         .output()
@@ -303,7 +349,7 @@ fn run_command(program: &str, args: &[&str]) -> Result<(), String> {
     }
 }
 
-fn command_output(output: &std::process::Output) -> String {
+pub(crate) fn command_output(output: &std::process::Output) -> String {
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
     [stdout.trim(), stderr.trim()]
@@ -316,7 +362,8 @@ fn command_output(output: &std::process::Output) -> String {
 fn block_device_size(path: &Path) -> Result<u64, String> {
     const BLKGETSIZE64: libc::c_ulong = 0x8008_1272;
 
-    let file = fs::File::open(path).map_err(|error| format!("failed to open {}: {error}", path.display()))?;
+    let file = fs::File::open(path)
+        .map_err(|error| format!("failed to open {}: {error}", path.display()))?;
     let mut size = 0_u64;
     let result = unsafe { libc::ioctl(file.as_raw_fd(), BLKGETSIZE64, &mut size) };
     if result == 0 {
@@ -351,7 +398,10 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(result, Some(("ext4".to_string(), Some("test-uuid".to_string()))));
+        assert_eq!(
+            result,
+            Some(("ext4".to_string(), Some("test-uuid".to_string())))
+        );
     }
 
     #[test]
@@ -364,21 +414,17 @@ mod tests {
 
     #[test]
     fn rejects_probe_errors() {
-        let error = classify_filesystem_probe(
-            "data",
-            "/dev/pool/data",
-            Some(4),
-            "",
-            "permission denied",
-        )
-        .unwrap_err();
+        let error =
+            classify_filesystem_probe("data", "/dev/pool/data", Some(4), "", "permission denied")
+                .unwrap_err();
 
         assert!(error.contains("permission denied"));
     }
 
     #[test]
     fn rejects_ambiguous_probe_results() {
-        let error = classify_filesystem_probe("data", "/dev/pool/data", Some(8), "", "").unwrap_err();
+        let error =
+            classify_filesystem_probe("data", "/dev/pool/data", Some(8), "", "").unwrap_err();
 
         assert!(error.contains("status 8"));
     }

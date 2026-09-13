@@ -1,3 +1,4 @@
+use crate::lock::VolumeLocks;
 use crate::models::{load_volume, load_volumes, Volume};
 use crate::table::print_table;
 use crate::util::parse_size;
@@ -11,6 +12,7 @@ pub fn run_snapshot_create(
     requested_name: Option<&str>,
 ) -> Result<(), String> {
     let volume = load_volume(state_file, volume_id)?;
+    let _locks = VolumeLocks::acquire(&[volume_id.to_string()], "snapshot-create")?;
     if parse_size(size)? == 0 {
         return Err("snapshot size must be greater than zero".to_string());
     }
@@ -47,6 +49,7 @@ pub fn run_snapshot_remove(
     requested_name: Option<&str>,
 ) -> Result<(), String> {
     let volume = load_volume(state_file, volume_id)?;
+    let _locks = VolumeLocks::acquire(&[volume_id.to_string()], "snapshot-remove")?;
     let name = snapshot_name(&volume, requested_name)?;
     let path = snapshot_path(&volume, &name)?;
 
@@ -223,9 +226,17 @@ mod tests {
         Volume {
             id: "data".to_string(),
             lv: "/dev/pool/data".to_string(),
+            name: "data".to_string(),
             size: "1G".to_string(),
             fs_type: "ext4".to_string(),
             uuid: "uuid".to_string(),
+            owner_service: "service".to_string(),
+            owner_enabled: false,
+            owner_unit: "container@service.service".to_string(),
+            host_mount_path: "/var/lib/volumes/data".to_string(),
+            mount_path: "/var/lib/data".to_string(),
+            mode: "0700".to_string(),
+            backup: None,
         }
     }
 

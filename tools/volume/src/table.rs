@@ -1,5 +1,8 @@
 pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
-    let mut widths = headers.iter().map(|header| header.len()).collect::<Vec<_>>();
+    let mut widths = headers
+        .iter()
+        .map(|header| header.len())
+        .collect::<Vec<_>>();
 
     for row in rows {
         for (index, field) in row.iter().enumerate() {

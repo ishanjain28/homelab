@@ -42,6 +42,7 @@
             // {
               host = hostName;
               inherit volumeId;
+              ownerEnabled = owner.enable;
               ownerRuntimeId = owner.runtimeId;
               ownerRuntimeUser = owner.runtimeUser;
             }
@@ -62,6 +63,7 @@
         ) hostRegistries
       );
       volumeIds = lib.unique (map (volume: volume.volumeId) volumeEntries);
+      volumeUuids = lib.unique (map (volume: volume.uuid) volumeEntries);
       immutableVolumeFields = [
         "fsType"
         "mode"
@@ -84,6 +86,16 @@
         in
         builtins.any (declaration: builtins.intersectAttrs expected declaration != expected) (builtins.tail declarations)
       ) volumeIds;
+      multiplyActiveVolumeIds = builtins.filter (
+        volumeId:
+        builtins.length (builtins.filter (volume: volume.volumeId == volumeId && volume.ownerEnabled) volumeEntries) > 1
+      ) volumeIds;
+      multiplyNamedVolumeUuids = builtins.filter (
+        uuid:
+        builtins.length (
+          lib.unique (map (volume: volume.volumeId) (builtins.filter (volume: volume.uuid == uuid) volumeEntries))
+        ) > 1
+      ) volumeUuids;
     in
     {
       hosts = builtins.mapAttrs (_hostName: registry: registry.host) hostRegistries;
@@ -92,6 +104,10 @@
       volumes =
         if conflictingVolumeIds != [ ] then
           throw "Conflicting homelab volume declarations across hosts: ${builtins.concatStringsSep ", " conflictingVolumeIds}"
+        else if multiplyActiveVolumeIds != [ ] then
+          throw "Homelab volumes have active owners on more than one host: ${builtins.concatStringsSep ", " multiplyActiveVolumeIds}"
+        else if multiplyNamedVolumeUuids != [ ] then
+          throw "Homelab filesystem UUIDs are assigned to multiple volume IDs: ${builtins.concatStringsSep ", " multiplyNamedVolumeUuids}"
         else
           volumeEntries;
     };
