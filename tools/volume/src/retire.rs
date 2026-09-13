@@ -1,10 +1,9 @@
 use crate::lock::VolumeLocks;
-use crate::models::load_state;
-use crate::prompt::confirm;
-use std::path::{Path, PathBuf};
+use crate::lvm::{lv_exists, lv_path};
+use crate::models::{load_state, Volume};
+use crate::util::{confirm, is_mounted, run_command};
+use std::path::Path;
 use std::process::Command;
-
-const VG_NAME: &str = "pool";
 
 pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Result<(), String> {
     let state = load_state(state_file)?;
@@ -23,16 +22,30 @@ pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Resul
             tombstone.after
         ));
     }
-    let _locks = VolumeLocks::acquire(&[volume_id.to_string()], "retire")?;
+    let lock_volume = Volume {
+        id: volume_id.to_string(),
+        lv: String::new(),
+        name: tombstone.name.clone(),
+        size: String::new(),
+        fs_type: String::new(),
+        uuid: tombstone.uuid.clone(),
+        owner_service: String::new(),
+        owner_enabled: false,
+        owner_unit: String::new(),
+        host_mount_path: String::new(),
+        mount_path: String::new(),
+        mode: String::new(),
+    };
+    let _locks = VolumeLocks::acquire(std::slice::from_ref(&lock_volume), "retire")?;
     let lv = lv_path(&tombstone.name);
     if !lv_exists(&tombstone.name)? {
         return Err(format!("retired LV does not exist: {}", lv.display()));
     }
-    if is_mounted(&lv)? {
+    if is_mounted(lv.to_string_lossy().as_ref())? {
         return Err(format!("refusing to remove mounted LV {}", lv.display()));
     }
     if !lv.exists() {
-        run(
+        run_command(
             "lvchange",
             &["--activate", "y", lv.to_string_lossy().as_ref()],
         )?;
@@ -77,54 +90,10 @@ pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Resul
         lv.display(),
         tombstone.reason
     );
-    if !assume_yes && !confirm(&prompt)? {
+    if !confirm(assume_yes, &prompt)? {
         return Err(format!("{prompt}: skipped"));
     }
-    run("lvremove", &["--yes", lv.to_string_lossy().as_ref()])
-}
-
-fn lv_path(name: &str) -> PathBuf {
-    Path::new("/dev").join(VG_NAME).join(name)
-}
-
-fn lv_exists(name: &str) -> Result<bool, String> {
-    let status = Command::new("lvs")
-        .args(["--noheadings", &format!("{VG_NAME}/{name}")])
-        .status()
-        .map_err(|error| format!("failed to query LV {name}: {error}"))?;
-    match status.code() {
-        Some(0) => Ok(true),
-        Some(5) => Ok(false),
-        _ => Err(format!("lvs failed while querying {name}: {status}")),
-    }
-}
-
-fn is_mounted(device: &Path) -> Result<bool, String> {
-    let status = Command::new("findmnt")
-        .args([
-            "--noheadings",
-            "--source",
-            device.to_string_lossy().as_ref(),
-        ])
-        .status()
-        .map_err(|error| format!("failed to query mounts for {}: {error}", device.display()))?;
-    match status.code() {
-        Some(0) => Ok(true),
-        Some(1) => Ok(false),
-        _ => Err(format!("findmnt failed for {}: {status}", device.display())),
-    }
-}
-
-fn run(program: &str, args: &[&str]) -> Result<(), String> {
-    let status = Command::new(program)
-        .args(args)
-        .status()
-        .map_err(|error| format!("failed to execute {program}: {error}"))?;
-    if status.success() {
-        Ok(())
-    } else {
-        Err(format!("{program} failed with {status}"))
-    }
+    run_command("lvremove", &["--yes", lv.to_string_lossy().as_ref()])
 }
 
 fn output(program: &str, args: &[&str]) -> Result<String, String> {

@@ -1,7 +1,12 @@
-use std::fs::{self, File, OpenOptions};
-use std::io::Write;
-use std::os::fd::AsRawFd;
-use std::path::Path;
+use core::convert::AsRef;
+use std::{
+    fs::{self, File, OpenOptions},
+    io::Write,
+    os::fd::AsRawFd,
+    path::Path,
+};
+
+use crate::models::Volume;
 
 const LOCK_ROOT: &str = "/run/lock/homelab-volume";
 
@@ -10,16 +15,15 @@ pub struct VolumeLocks {
 }
 
 impl VolumeLocks {
-    pub fn acquire(volume_ids: &[String], operation: &str) -> Result<Self, String> {
+    pub fn acquire(volumes: &[Volume], operation: &str) -> Result<Self, String> {
         fs::create_dir_all(LOCK_ROOT)
             .map_err(|error| format!("failed to create {LOCK_ROOT}: {error}"))?;
 
-        let mut ids = volume_ids.to_vec();
-        ids.sort();
-        ids.dedup();
-        let mut files = Vec::with_capacity(ids.len());
+        let mut files = Vec::with_capacity(volumes.len());
 
-        for id in ids {
+        for volume in volumes.as_ref() {
+            let id = &volume.id;
+
             let path = Path::new(LOCK_ROOT).join(format!("{id}.lock"));
             let mut file = OpenOptions::new()
                 .create(true)

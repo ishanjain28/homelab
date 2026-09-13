@@ -12,39 +12,58 @@ let
   volumes = config.${namespace}.volumes;
   services = config.system.homelab.registry.services;
   inherit (cfg) targets;
-  volumePackage = pkgs.callPackage ../../../packages/volume { };
 
-  backedUpVolumes = filterAttrs (_volumeId: volume: volume.backup != null) volumes;
-  backedUpVolumeList = mapAttrsToList (volumeId: volume: volume // { inherit volumeId; }) backedUpVolumes;
-  backupGroups = groupBy (volume: volume.ownerService) backedUpVolumeList;
-  activeBackupGroups = filterAttrs (ownerService: _group: services.${ownerService}.enable) backupGroups;
-
+  backedUpVolumes = filterAttrs (
+    _volumeId: volume: volume.backup != null && services.${volume.ownerService}.enable
+  ) volumes;
   missingTargets = unique (
     mapAttrsToList (_volumeId: volume: volume.backup.target) (
       filterAttrs (_volumeId: volume: !(hasAttr volume.backup.target targets)) backedUpVolumes
     )
   );
-  inconsistentGroups = attrNames (
-    filterAttrs (
-      _ownerService: group:
-      let
-        expected = (head group).backup;
-      in
-      any (volume: volume.backup != expected) (tail group)
-    ) backupGroups
-  );
 
   keepOption = name: value: optional (value > 0) "--keep-${name}=${toString value}";
   retentionOptions =
     retention:
-    # Operation IDs are intentionally unique Restic tags, so grouping by tags
-    # would make every snapshot its own retention group and retain everything.
     [ "--group-by=host,paths" ]
     ++ keepOption "hourly" retention.hourly
     ++ keepOption "daily" retention.daily
     ++ keepOption "weekly" retention.weekly
     ++ keepOption "monthly" retention.monthly
     ++ keepOption "yearly" retention.yearly;
+
+  volumeBackupName = volumeId: "homelab-volume-${volumeId}";
+  volumeMountUnit = volume: "var-lib-volumes-${replaceStrings [ "-" ] [ "\\x2d" ] volume.name}.mount";
+  volumePath = volume: "/var/lib/volumes/${volume.name}";
+
+  mkVolumeBackup =
+    volumeId: volume:
+    let
+      target = targets.${volume.backup.target};
+    in
+    nameValuePair (volumeBackupName volumeId) {
+      inherit (target)
+        environmentFile
+        initialize
+        passwordFile
+        repository
+        ;
+      paths = [ (volumePath volume) ];
+      timerConfig = { };
+      createWrapper = true;
+    };
+
+  mkVolumeBackupOrdering = volumeId: volume: {
+    "restic-backups-${volumeBackupName volumeId}" = {
+      after = [ (volumeMountUnit volume) ];
+      requires = [ (volumeMountUnit volume) ];
+      inherit (cfg) onFailure;
+    };
+  };
+
+  mkCron =
+    volumeId: volume:
+    "${volume.backup.cron} root ${pkgs.systemd}/bin/systemctl start restic-backups-${volumeBackupName volumeId}.service";
 
   mkTargetMaintenance =
     targetName: target:
@@ -68,38 +87,6 @@ let
       ) "--read-data-subset=${target.maintenance.readDataSubset}";
       createWrapper = true;
     };
-
-  volumeUnit = volumeId: "homelab-volume-${volumeId}-permissions.service";
-  backupUnit = ownerService: "homelab-backup-${ownerService}";
-  mkBackupService =
-    ownerService: group:
-    let
-      dependencies = map (volume: volumeUnit volume.volumeId) group;
-    in
-    nameValuePair (backupUnit ownerService) {
-      description = "Back up volumes owned by '${ownerService}'";
-      after = dependencies;
-      requires = dependencies;
-      inherit (cfg) onFailure;
-      path = with pkgs; [
-        coreutils
-        e2fsprogs
-        lvm2
-        restic
-        systemd
-        util-linux
-      ];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${volumePackage}/bin/volume backup ${escapeShellArg ownerService}";
-        ExecStopPost = "${volumePackage}/bin/volume reconcile --owner-service ${escapeShellArg ownerService}";
-        TimeoutStartSec = "infinity";
-      };
-    };
-
-  mkCron =
-    ownerService: group:
-    "${(head group).backup.cron} root ${pkgs.systemd}/bin/systemctl start ${backupUnit ownerService}.service";
 in
 {
   options.${namespace}.backups = {
@@ -108,7 +95,7 @@ in
         types.submodule {
           options = {
             repository = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "Restic repository location.";
             };
             passwordFile = mkOption {
@@ -159,10 +146,6 @@ in
           assertion = missingTargets == [ ];
           message = "Volumes reference missing homelab backup targets: ${concatStringsSep ", " missingTargets}";
         }
-        {
-          assertion = inconsistentGroups == [ ];
-          message = "Volumes owned by one service are snapshotted together and must use the same backup target and cron: ${concatStringsSep ", " inconsistentGroups}";
-        }
       ]
       ++ mapAttrsToList (targetName: target: {
         assertion = target.passwordFile != null || target.environmentFile != null;
@@ -171,37 +154,18 @@ in
     }
 
     {
-      services.restic.backups = mapAttrs' mkTargetMaintenance targets;
-      services.cron = mkIf (activeBackupGroups != { }) {
+      services.restic.backups = (mapAttrs' mkVolumeBackup backedUpVolumes) // (mapAttrs' mkTargetMaintenance targets);
+      services.cron = mkIf (backedUpVolumes != { }) {
         enable = true;
-        systemCronJobs = mapAttrsToList mkCron activeBackupGroups;
+        systemCronJobs = mapAttrsToList mkCron backedUpVolumes;
       };
       environment.systemPackages = optional (targets != { }) pkgs.restic;
     }
 
     {
-      systemd.services = (mapAttrs' mkBackupService activeBackupGroups) // {
-        homelab-volume-reconcile = {
-          description = "Reconcile interrupted homelab volume operations";
-          wantedBy = [ "multi-user.target" ];
-          before = map (ownerService: "${backupUnit ownerService}.service") (attrNames activeBackupGroups);
-          path = with pkgs; [
-            coreutils
-            lvm2
-            systemd
-            util-linux
-          ];
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${volumePackage}/bin/volume reconcile";
-          };
-        };
-      };
-    }
-
-    {
       systemd.services = mkMerge (
-        mapAttrsToList (targetName: _target: {
+        mapAttrsToList mkVolumeBackupOrdering backedUpVolumes
+        ++ mapAttrsToList (targetName: _target: {
           "restic-backups-homelab-maintenance-${targetName}".onFailure = cfg.onFailure;
         }) targets
       );

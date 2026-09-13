@@ -1,15 +1,10 @@
 mod apply;
-mod backup;
 mod cli;
 mod lock;
+mod lvm;
 mod models;
-mod operation;
-mod prompt;
-mod restic;
-mod restore;
 mod retire;
-mod snapshot;
-mod table;
+mod transfer;
 mod util;
 
 fn main() {

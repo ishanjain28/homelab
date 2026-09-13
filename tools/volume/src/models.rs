@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
-use std::fs;
-use std::path::Path;
+use std::{collections::BTreeMap, fs, path::Path};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -9,8 +7,6 @@ pub struct State {
     pub schema_version: u32,
     pub host: String,
     pub volumes: BTreeMap<String, Volume>,
-    #[serde(default)]
-    pub backup_targets: BTreeMap<String, BackupTarget>,
     #[serde(default)]
     pub deleted_volumes: BTreeMap<String, DeletedVolume>,
 }
@@ -30,25 +26,6 @@ pub struct Volume {
     pub host_mount_path: String,
     pub mount_path: String,
     pub mode: String,
-    #[serde(default)]
-    pub backup: Option<BackupPolicy>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct BackupPolicy {
-    pub target: String,
-    pub cron: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BackupTarget {
-    pub repository: String,
-    pub password_file: Option<String>,
-    pub environment_file: Option<String>,
-    #[serde(default)]
-    pub initialize: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -87,6 +64,12 @@ pub fn load_state(state_file: &Path) -> Result<State, String> {
                 volume.id
             ));
         }
+        if !is_safe_identifier(&volume.owner_service) {
+            return Err(format!(
+                "invalid owner service {:?} for volume {key:?}",
+                volume.owner_service
+            ));
+        }
     }
 
     Ok(state)
@@ -102,10 +85,6 @@ fn is_safe_identifier(value: &str) -> bool {
 pub fn load_volumes(state_file: &Path, volume_ids: &[String]) -> Result<Vec<Volume>, String> {
     let state = load_state(state_file)?;
 
-    if volume_ids.is_empty() {
-        return Ok(state.volumes.into_values().collect());
-    }
-
     volume_ids
         .iter()
         .map(|id| {
@@ -118,14 +97,25 @@ pub fn load_volumes(state_file: &Path, volume_ids: &[String]) -> Result<Vec<Volu
         .collect()
 }
 
-pub fn load_volume(state_file: &Path, volume_id: &str) -> Result<Volume, String> {
-    load_volumes(state_file, &[volume_id.to_string()])?
-        .into_iter()
-        .next()
-        .ok_or_else(|| {
-            format!(
-                "volume {volume_id:?} is not declared in {}",
-                state_file.display()
-            )
-        })
+pub fn load_all_volumes(state_file: &Path) -> Result<Vec<Volume>, String> {
+    let state = load_state(state_file)?;
+
+    return Ok(state.volumes.into_values().collect());
+}
+
+pub fn service_volumes(state: &State, owner_service: &str) -> Result<Vec<Volume>, String> {
+    let volumes = state
+        .volumes
+        .values()
+        .filter(|volume| volume.owner_service == owner_service)
+        .cloned()
+        .collect::<Vec<_>>();
+
+    if volumes.is_empty() {
+        Err(format!(
+            "service {owner_service:?} owns no declared volumes"
+        ))
+    } else {
+        Ok(volumes)
+    }
 }

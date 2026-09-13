@@ -76,7 +76,6 @@ let
   mkVolumeState = volumeId: volume: {
     id = volumeId;
     inherit (volume)
-      backup
       fsType
       mode
       mountPath
@@ -170,7 +169,6 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          unitConfig.ConditionPathExists = [ "!/var/lib/homelab-volume/migration-block/${serviceName}" ];
           restartTriggers = [ volumeStateFile ];
           partOf = map volumeMountUnit attachedVolumes;
           requires =
@@ -229,7 +227,7 @@ in
                 types.submodule {
                   options = {
                     target = mkOption {
-                      type = types.str;
+                      type = types.nonEmptyStr;
                       description = "Named homelab backup target.";
                     };
                     cron = mkOption {
@@ -240,7 +238,7 @@ in
                 }
               );
               default = null;
-              description = "Backup policy. Declaring this attribute opts the volume into backups.";
+              description = "Restic backup policy for this volume.";
             };
           };
         }
@@ -313,14 +311,6 @@ in
         schemaVersion = 1;
         host = registry.host.name;
         volumes = config.system.homelab.volumes;
-        backupTargets = mapAttrs (_targetName: target: {
-          inherit (target)
-            environmentFile
-            initialize
-            passwordFile
-            repository
-            ;
-        }) cfg.backups.targets;
         deletedVolumes = mapAttrs (_volumeId: volume: {
           inherit (volume)
             after
