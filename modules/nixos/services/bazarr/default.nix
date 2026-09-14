@@ -9,7 +9,6 @@ with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.bazarr;
-  secretPath = "/run/container-secrets/bazarr.yml";
   configPath = "/var/lib/bazarr/config/config.yaml";
 in
 {
@@ -28,7 +27,7 @@ in
     secrets.config = {
       file = "secrets/bazarr.yml";
       format = "yaml";
-      mountPath = secretPath;
+      mountPath = configPath;
     };
     resources = {
       CPUQuota = "200%";
@@ -42,20 +41,6 @@ in
         listenPort = cfg.endpoints.web.port;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
-      };
-
-      systemd.tmpfiles.settings."20-bazarr-config" = {
-        "/var/lib/bazarr/config".d = {
-          user = cfg.runtimeUser.name;
-          group = cfg.runtimeUser.group;
-          mode = "0700";
-        };
-        ${configPath}."C+" = {
-          user = cfg.runtimeUser.name;
-          group = cfg.runtimeUser.group;
-          mode = "0600";
-          argument = secretPath;
-        };
       };
 
       systemd.services.bazarr = {
