@@ -124,7 +124,8 @@ in
 {
   options.${namespace}.logging = {
     enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
-    lokiPushUrls = mkOpt (types.attrsOf types.str) {
+    lokiPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
+      # Eventually, I either want a v6 only auto derived addresses here or maybe just DNS.
       "50" = "http://10.0.50.23:3100/loki/api/v1/push";
       "70" = "http://10.0.70.11:3100/loki/api/v1/push";
       "99" = "http://10.0.99.29:3100/loki/api/v1/push";

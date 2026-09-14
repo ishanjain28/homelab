@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   lib,
   namespace,
@@ -15,9 +16,9 @@ in
   options.${namespace}.services.ssh = {
     enable = mkEnableOption "Setup SSH";
     addRootKeys = mkBoolOpt false "Add the same keys to the root user";
-    keys = mkOpt (types.listOf types.str) [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise"
-    ] "List of SSH keys to add";
+    keys = mkOpt (types.listOf types.nonEmptyStr) (builtins.split "\n" (
+      lib.removeSuffix "\n" (builtins.readFile "${inputs.self}/ssh-keys.txt")
+    )) "List of SSH keys to add";
     package = mkPackageOption pkgs "openssh" { };
     passwordAuth = mkBoolOpt true "Allow password authentication";
     permitRootLogin = mkBoolOpt false "Allow root login";

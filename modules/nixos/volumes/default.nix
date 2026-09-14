@@ -210,13 +210,13 @@ in
           options = {
             name = mkOpt (types.strMatching "[a-z0-9][a-z0-9-]*") name "LVM logical volume name.";
             uuid = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "Filesystem UUID. This is the stable identity of the volume.";
             };
-            ownerService = mkOpt types.str name "Service that owns this volume.";
-            mountPath = mkOpt types.str "/var/lib/${name}" "Path where the volume is mounted inside the service container.";
+            ownerService = mkOpt types.nonEmptyStr name "Service that owns this volume.";
+            mountPath = mkOpt types.nonEmptyStr "/var/lib/${name}" "Path where the volume is mounted inside the service container.";
             size = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "Logical volume size.";
             };
             fsType = mkOpt (types.enum [ "ext4" ]) "ext4" "Filesystem type.";
@@ -251,7 +251,7 @@ in
           options = {
             name = mkOpt (types.strMatching "[a-z0-9][a-z0-9-]*") name "Retired LVM logical volume name.";
             uuid = mkOption {
-              type = types.str;
+              type = types.nonEmptyStr;
               description = "UUID of the deleted volume.";
             };
             after = mkOption {

@@ -302,7 +302,7 @@ let
     {
       enable = mkEnableOption name;
 
-      name = mkOpt types.str name "Canonical service/container name.";
+      name = mkOpt types.nonEmptyStr name "Canonical service/container name.";
 
       description = mkOpt types.str description "Human-readable service description.";
 
@@ -313,9 +313,9 @@ let
         description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
       };
 
-      volumes = mkOpt (types.listOf types.str) [ ] "Volume IDs to attach to this service container.";
+      volumes = mkOpt (types.listOf types.nonEmptyStr) [ ] "Volume IDs to attach to this service container.";
 
-      shares = mkOpt (types.listOf types.str) [ ] "Shared host storage attached to this service container.";
+      shares = mkOpt (types.listOf types.nonEmptyStr) [ ] "Shared host storage attached to this service container.";
 
       runtimeId = mkOpt (types.nullOr types.int) null "Stable numeric UID/GID for this service inside the container.";
 
