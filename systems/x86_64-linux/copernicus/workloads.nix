@@ -45,6 +45,23 @@
     shares = [ "music" ];
   };
 
+  # unpackerr = disabled // {
+  #   vlans = [ 50 ];
+  #   runtimeId = 30359;
+  #   shares = [ "wd-4tb" ];
+  # };
+
+  jellyfin = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30360;
+    volumes = [ "jellyfin" ];
+    shares = [
+      "wd-4tb"
+      "music"
+    ];
+    devices = [ "render" ];
+  };
+
   nitter = enabled // {
     vlans = [ 50 ];
     runtimeId = 30351;

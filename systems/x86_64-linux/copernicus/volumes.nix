@@ -21,4 +21,9 @@
     uuid = "c3449bae-8590-44ad-8cc7-58ff813688b4";
     size = "1G";
   };
+
+  jellyfin = {
+    uuid = "95408258-29ea-4970-b0fb-d0e610eef08c";
+    size = "45G";
+  };
 }

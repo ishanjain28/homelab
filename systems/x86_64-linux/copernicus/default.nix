@@ -16,6 +16,10 @@ in
     profiles.server = enabled;
     inherit volumes;
     services = workloads;
+    devices.render = {
+      hostPath = "/dev/dri/renderD128";
+      udevMatch = ''SUBSYSTEM=="drm", KERNEL=="renderD128"'';
+    };
     shares = {
       wd-4tb = {
         hostPath = "/mnt/wd-4tb";

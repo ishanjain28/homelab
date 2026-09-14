@@ -19,6 +19,7 @@ let
   mkService = _name: service: {
     inherit (service)
       description
+      devices
       endpoints
       enable
       logging

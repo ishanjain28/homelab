@@ -317,6 +317,8 @@ let
 
       shares = mkOpt (types.listOf types.nonEmptyStr) [ ] "Shared host storage attached to this service container.";
 
+      devices = mkOpt (types.listOf types.nonEmptyStr) [ ] "Host devices attached to this service container.";
+
       runtimeId = mkOpt (types.nullOr types.int) null "Stable numeric UID/GID for this service inside the container.";
 
       runtimeUser = {

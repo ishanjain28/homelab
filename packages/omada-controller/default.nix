@@ -6,7 +6,7 @@ let
     version = "1.1.1w-debian11";
 
     src = pkgs.fetchurl {
-      url = "https://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1w-0+deb11u8_amd64.deb";
+      url = "https://ftp.mpi-inf.mpg.de/pub/linux/mirror/debian-snapshots/bullseye/security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1w-0+deb11u8_amd64.deb";
       hash = "sha256-3MaKVD3my5VaVwd7ZtzbFfYdHjHgcvLGzECCw32hsA0=";
     };
 

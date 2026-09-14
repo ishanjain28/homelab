@@ -26,6 +26,8 @@ in
       );
     in
     {
+      activationTimeout = 900;
+      confirmTimeout = 120;
       inherit nodes;
     };
 }
