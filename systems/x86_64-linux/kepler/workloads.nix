@@ -38,6 +38,12 @@
     giteaURI = "https://git.ishanjain.me";
   };
 
+  # TODO: windmill pkg in nixpkgs is very old. need to update that!
+  windmill = disabled // {
+    vlans = [ 50 ];
+    runtimeId = 30353;
+  };
+
   bentopdf = enabled // {
     vlans = [ 50 ];
     runtimeId = 50715;

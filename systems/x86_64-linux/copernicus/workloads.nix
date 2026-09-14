@@ -20,6 +20,31 @@
     runtimeId = 30350;
   };
 
+  radarr = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30354;
+    shares = [ "wd-4tb" ];
+  };
+
+  sonarr = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30355;
+    shares = [ "wd-4tb" ];
+  };
+
+  bazarr = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30356;
+    volumes = [ "bazarr" ];
+    shares = [ "wd-4tb" ];
+  };
+
+  lidarr = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30358;
+    shares = [ "music" ];
+  };
+
   nitter = enabled // {
     vlans = [ 50 ];
     runtimeId = 30351;

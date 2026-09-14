@@ -16,6 +16,18 @@ in
     profiles.server = enabled;
     inherit volumes;
     services = workloads;
+    shares = {
+      wd-4tb = {
+        hostPath = "/mnt/wd-4tb";
+        gid = 30357;
+        readOnly = false;
+      };
+      music = {
+        hostPath = "/main/music";
+        gid = 30359;
+        readOnly = false;
+      };
+    };
 
     hardware.networking = enabled // {
       inherit hostName;

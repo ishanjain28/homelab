@@ -22,6 +22,8 @@ let
         type = types.int;
         description = "Shared group ID inside attached service containers.";
       };
+
+      readOnly = mkBoolOpt false "Whether to bind mount the share read-only.";
     };
   };
 
@@ -67,7 +69,14 @@ let
     else
       {
         containers.${serviceName} = {
-          bindMounts = mkMerge (map (share: { ${share.hostPath} = { inherit (share) hostPath; }; }) attachedShares);
+          bindMounts = mkMerge (
+            map (share: {
+              ${share.hostPath} = {
+                inherit (share) hostPath;
+                isReadOnly = share.readOnly;
+              };
+            }) attachedShares
+          );
 
           config = {
             users.groups = mkMerge (map (shareId: { ${shareId}.gid = mkForce shares.${shareId}.gid; }) shareIds);

@@ -16,4 +16,9 @@
     mountPath = "/var/lib/omada";
     size = "2G";
   };
+
+  bazarr = {
+    uuid = "c3449bae-8590-44ad-8cc7-58ff813688b4";
+    size = "1G";
+  };
 }
