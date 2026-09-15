@@ -38,6 +38,12 @@
     giteaURI = "https://git.ishanjain.me";
   };
 
+  asterisk = enabled // {
+    vlans = [ 140 ];
+    runtimeId = 30362;
+    logging = disabled;
+  };
+
   # TODO: windmill pkg in nixpkgs is very old. need to update that!
   windmill = disabled // {
     vlans = [ 50 ];
