@@ -68,7 +68,10 @@
   };
 
   caddy = enabled // {
-    vlans = [ 50 ];
+    vlans = [
+      50
+      140
+    ];
     runtimeId = 30352;
     configFile = "secrets/caddy/home.json";
   };

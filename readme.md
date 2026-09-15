@@ -28,7 +28,7 @@ nix run github:nix-community/nixos-anywhere -- --flake .#tomato ishan@<address>
 
 
 
-## TODO
+## TODO Notes
 
 * Generate caddy config from services config.
 
@@ -54,3 +54,10 @@ are predictable but IPv4 addresses are not. Ideally, I'd like to move the intern
 because Microsoft did not have a PLAT implementation.
 
 * limit the amount of space visible to stateless apps and apps checking disk space outside of the mounted volumes.
+
+* LLDP enabled on hosts permanently. Remote rescue should be easily discoverable.
+
+* gitea runner needs privileged access.
+
+* Specify secrets update policies. Currently, it restarts the service but some services offer a reload option to do it without disrupting the process. In that situation,
+it should call the reload command for the service rather than restarting it!

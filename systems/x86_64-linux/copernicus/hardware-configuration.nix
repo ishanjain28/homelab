@@ -1,6 +1,9 @@
 { lib, modulesPath, ... }: {
   imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
+  # This can probably be removed after removing to bare-metal.
+  hardware.enableRedistributableFirmware = true;
+
   boot.initrd.availableKernelModules = [
     "ata_piix"
     "uhci_hcd"

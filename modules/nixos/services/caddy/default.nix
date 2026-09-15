@@ -24,9 +24,10 @@ in
           port = 2019;
           expose = false;
         };
+        healthcheck.port = 9001;
       };
       monitor = enabled // {
-        endpoint = "https";
+        endpoint = "healthcheck";
         protocol = "tcp";
       };
     }
@@ -47,7 +48,10 @@ in
       mountPath = configPath;
     };
 
-    environment.XDG_DATA_HOME = "/var/lib";
+    environment = {
+      XDG_CONFIG_HOME = "/var/lib";
+      XDG_DATA_HOME = "/var/lib";
+    };
 
     resources = {
       CPUQuota = "400%";
