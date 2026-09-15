@@ -30,6 +30,16 @@ let
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
   serviceVolumes = srv: map (volumeId: volumes.${volumeId}) (existingServiceVolumeIds srv);
 
+  serviceVolumeStateFile =
+    serviceName: srv:
+    json.generate "homelab-${serviceName}-volumes.json" {
+      schemaVersion = 1;
+      host = registry.host.name;
+      volumes = listToAttrs (
+        map (volumeId: nameValuePair volumeId config.system.homelab.volumes.${volumeId}) (existingServiceVolumeIds srv)
+      );
+    };
+
   volumeUuidList = map (volume: volume.uuid) (attrValues volumes);
   duplicateUuids = unique (
     filter (uuid: length (filter (candidate: candidate == uuid) volumeUuidList) > 1) volumeUuidList
@@ -169,7 +179,7 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          restartTriggers = [ volumeStateFile ];
+          restartTriggers = [ (serviceVolumeStateFile serviceName srv) ];
           partOf = map volumeMountUnit attachedVolumes;
           requires =
             map volumeApplyUnit (existingServiceVolumeIds srv)

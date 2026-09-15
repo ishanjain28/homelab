@@ -2,6 +2,7 @@
   config,
   lib,
   namespace,
+  pkgs,
   ...
 }:
 with lib;
@@ -33,13 +34,15 @@ in
 
     containerConfig = {
       services.unpackerr = enabled // {
-        openFirewall = false;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
       };
 
       systemd.services.unpackerr = {
-        serviceConfig.UMask = "0007";
+        serviceConfig = {
+          ExecStart = mkForce "${pkgs.unpackerr}/bin/unpackerr";
+          UMask = "0007";
+        };
       };
     };
   });
