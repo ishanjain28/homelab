@@ -1,15 +1,12 @@
 { inputs }:
 let
   inherit (inputs) deploy-rs;
-  registryLib = import ../registry/default.nix { lib = inputs.nixpkgs.lib; };
 in
 {
   mkDeploy =
-    { self }:
+    { self, fleetRegistry }:
     let
       hosts = self.nixosConfigurations;
-      hostRegistries = builtins.mapAttrs (_hostName: machine: machine.config.system.homelab.registry) hosts;
-      fleetRegistry = registryLib.mkFleetRegistry hostRegistries;
       nodes = builtins.deepSeq fleetRegistry.volumes (
         builtins.mapAttrs (_: machine: {
           hostname = machine.config.networking.hostName;

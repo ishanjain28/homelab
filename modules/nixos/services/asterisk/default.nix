@@ -2,6 +2,7 @@
   config,
   lib,
   namespace,
+  pkgs,
   ...
 }:
 with lib;
@@ -118,6 +119,7 @@ in
 
     containerConfig = {
       services.asterisk = enabled // {
+        package = pkgs.asterisk;
         useTheseDefaultConfFiles = [ ];
       };
 
@@ -125,6 +127,11 @@ in
         {
           from = 10000;
           to = 20000;
+        }
+        {
+          # Keep this in sync with secrets/asterisk/rtp.conf.
+          from = 52000;
+          to = 52200;
         }
       ];
     };

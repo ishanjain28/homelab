@@ -1,10 +1,10 @@
 _inputs: _final: prev: {
   asterisk = prev.asterisk.overrideAttrs (old: {
     # My fork of asterisk with a patch to make it work on Jio
-    version = "22.8.0-jio";
+    version = "22.3.0-jio";
     src = builtins.fetchGit {
       url = "ssh://git@ssh.git.ishanjain.me:2222/ishan/asterisk.git";
-      rev = "daf374e7353f2e17a97bd3c6831b9aafcb047da5";
+      rev = "2b14dbdba06c891036c2fd681037776b1cd3a174";
     };
 
     preBuild = (old.preBuild or "") + ''

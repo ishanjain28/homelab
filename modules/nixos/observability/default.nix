@@ -2,6 +2,7 @@
   config,
   lib,
   namespace,
+  pkgs,
   ...
 }:
 with lib;
@@ -12,6 +13,14 @@ let
   enabledServices = filterAttrs (_name: service: service.enable) allServices;
   logging = config.${namespace}.logging;
   loggedServices = filterAttrs (_name: service: service.enable && service.logging.enable) allServices;
+  metrics = config.${namespace}.metrics;
+  vethServiceMap = listToAttrs (
+    concatLists (
+      mapAttrsToList (
+        name: service: map (vlan: nameValuePair (mkContainerVethName name vlan) name) service.vlans
+      ) enabledServices
+    )
+  );
   gatus = config.${namespace}.services.gatus;
 
   serviceLokiPushUrl =
@@ -122,14 +131,21 @@ let
   gatusSettings.endpoints = serviceEndpoints ++ gatus.externalEndpoints;
 in
 {
-  options.${namespace}.logging = {
-    enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
-    lokiPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
-      # Eventually, I either want a v6 only auto derived addresses here or maybe just DNS.
-      "50" = "http://10.0.50.23:3100/loki/api/v1/push";
-      "70" = "http://10.0.70.11:3100/loki/api/v1/push";
-      "99" = "http://10.0.99.29:3100/loki/api/v1/push";
-    } "Loki push API URLs keyed by VLAN.";
+  options.${namespace} = {
+    logging = {
+      enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
+      lokiPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
+        # Eventually, I either want a v6 only auto derived addresses here or maybe just DNS.
+        "50" = "http://10.0.50.23:3100/loki/api/v1/push";
+        "70" = "http://10.0.70.11:3100/loki/api/v1/push";
+        "99" = "http://10.0.99.29:3100/loki/api/v1/push";
+      } "Loki push API URLs keyed by VLAN.";
+    };
+
+    metrics = {
+      enable = mkBoolOpt false "Whether to enable metrics collection.";
+      victoriaMetricsUrl = mkOpt types.nonEmptyStr "http://10.0.50.21:8428" "VictoriaMetrics URL";
+    };
   };
 
   config = mkMerge [
@@ -178,6 +194,122 @@ in
           environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl name service) service.logging.files;
         };
       }) loggedServices;
+    })
+
+    (mkIf metrics.enable {
+      # Host-only: reads host /proc and /sys directly, and walks each
+      # container's cgroup from the outside (machine.slice/container@<name>.service),
+      # so it covers host and per-service CPU/mem/disk/net/temp without an
+      # agent inside every container.
+      services.telegraf = enabled // {
+        extraConfig = {
+          agent = {
+            interval = "30s";
+            flush_interval = "30s";
+          };
+
+          inputs = {
+            system = [
+              {
+                include = [
+                  "cpus"
+                  "load"
+                  "uptime"
+                ];
+              }
+            ];
+            cpu = [
+              {
+                percpu = false;
+                totalcpu = true;
+                collect_cpu_time = false;
+                report_active = false;
+              }
+            ];
+            mem = [ { } ];
+            disk = [
+              {
+                ignore_fs = [
+                  "tmpfs"
+                  "devtmpfs"
+                  "overlay"
+                  "squashfs"
+                  "iso9660"
+                ];
+              }
+            ];
+            diskio = [ { } ];
+            net = [ { } ];
+            sensors = [ { } ];
+            smart = [
+              {
+                path_smartctl = "${pkgs.smartmontools}/bin/smartctl";
+                path_nvme = "${pkgs.nvme-cli}/bin/nvme";
+                interval = "45s";
+              }
+            ];
+            cgroup = [
+              {
+                paths = [ "/sys/fs/cgroup/machine.slice/container@*.service" ];
+                files = [
+                  "cpu.stat"
+                  "memory.current"
+                  "memory.max"
+                  "memory.swap.current"
+                  "pids.current"
+                ];
+              }
+            ];
+          };
+
+          processors.enum = [
+            {
+              mapping = [
+                {
+                  tags = [ "interface" ];
+                  dest = "service";
+                  value_mappings = vethServiceMap;
+                }
+              ];
+            }
+          ];
+
+          processors.regex = [
+            {
+              tags = [
+                {
+                  key = "path";
+                  pattern = ".*container@(.+)\\.service$";
+                  replacement = "$\{1}";
+                  result_key = "service";
+                }
+              ];
+            }
+          ];
+
+          outputs.influxdb_v2 = [
+            {
+              urls = [ metrics.victoriaMetricsUrl ];
+              bucket = "telegraf";
+              organization = "homelab";
+              token = "";
+            }
+          ];
+        };
+      };
+
+      # The sensors input execs `sensors` from lm_sensors via $PATH.
+      systemd.services.telegraf.path = [ pkgs.lm_sensors ];
+
+      # smartctl/nvme need raw device access: `disk` group for SATA/SAS SG_IO,
+      # CAP_SYS_ADMIN/CAP_SYS_RAWIO for NVMe admin passthrough commands.
+      systemd.services.telegraf.serviceConfig = {
+        SupplementaryGroups = [ "disk" ];
+        AmbientCapabilities = [
+          "CAP_SYS_ADMIN"
+          "CAP_SYS_RAWIO"
+        ];
+      };
     })
 
     {

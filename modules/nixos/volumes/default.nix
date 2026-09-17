@@ -30,15 +30,7 @@ let
   existingServiceVolumeIds = srv: filter (volumeId: hasAttr volumeId volumes) (serviceVolumeIds srv);
   serviceVolumes = srv: map (volumeId: volumes.${volumeId}) (existingServiceVolumeIds srv);
 
-  serviceVolumeStateFile =
-    serviceName: srv:
-    json.generate "homelab-${serviceName}-volumes.json" {
-      schemaVersion = 1;
-      host = registry.host.name;
-      volumes = listToAttrs (
-        map (volumeId: nameValuePair volumeId config.system.homelab.volumes.${volumeId}) (existingServiceVolumeIds srv)
-      );
-    };
+  volumeRestartTrigger = volumeIds: builtins.toJSON (map (volumeId: config.system.homelab.volumes.${volumeId}) volumeIds);
 
   volumeUuidList = map (volume: volume.uuid) (attrValues volumes);
   duplicateUuids = unique (
@@ -109,9 +101,10 @@ let
         lvm2
         util-linux
       ];
+      restartTriggers = [ (volumeRestartTrigger [ volumeId ]) ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${volumePackage}/bin/volume --state-file ${volumeStateFile} apply --yes ${escapeShellArg volumeId}";
+        ExecStart = "${volumePackage}/bin/volume apply --yes ${escapeShellArg volumeId}";
         RemainAfterExit = true;
       };
     };
@@ -179,7 +172,7 @@ let
         };
 
         systemd.services."container@${serviceName}" = {
-          restartTriggers = [ (serviceVolumeStateFile serviceName srv) ];
+          restartTriggers = [ (volumeRestartTrigger (existingServiceVolumeIds srv)) ];
           partOf = map volumeMountUnit attachedVolumes;
           requires =
             map volumeApplyUnit (existingServiceVolumeIds srv)

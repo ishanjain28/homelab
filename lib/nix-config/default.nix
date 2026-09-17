@@ -1,19 +1,12 @@
 {
-  mkNixConfig = { pkgs, lib }: {
+  mkNixConfig = { lib }: {
     generateNixPathFromInputs = true;
     linkInputs = true;
-    distributedBuilds = false;
-
-    extraOptions = ''
-      keep-outputs = true
-      warn-dirty = false
-      keep-derivations = true
-    '';
+    optimise.automatic = true;
 
     settings = {
       accept-flake-config = true;
       allowed-users = [ "ishan" ];
-      auto-optimise-store = true;
       builders-use-substitutes = false;
       experimental-features = lib.mkForce [
         "auto-allocate-uids"
@@ -24,10 +17,11 @@
       ];
       flake-registry = "/etc/nix/registry.json";
       http-connections = 50;
+      keep-derivations = true;
       keep-going = true;
+      keep-outputs = true;
       log-lines = 20;
       max-jobs = "auto";
-      sandbox = lib.mkForce (!pkgs.stdenv.hostPlatform.isDarwin);
       substitute = false;
       trusted-users = [
         "root"

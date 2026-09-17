@@ -6,7 +6,7 @@
 
   grafana = {
     uuid = "ad555d93-40a2-40ae-90eb-e3c6c591ef65";
-    size = "256M";
+    size = "1G";
   };
 
   seerr = {
@@ -16,6 +16,11 @@
 
   loki = {
     uuid = "9f67c61c-3d4c-45d2-b4df-6f1775331d9b";
+    size = "20G";
+  };
+
+  victoriametrics = {
+    uuid = "9bc789b1-fa53-4d8e-bd32-760af3d0280a";
     size = "20G";
   };
 

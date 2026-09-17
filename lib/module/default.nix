@@ -60,6 +60,8 @@ rec {
     enable = false;
   };
 
+  timeZone = "Asia/Kolkata";
+
   shellAliases = {
     g = "git";
     gst = "git status";

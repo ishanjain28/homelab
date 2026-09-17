@@ -165,6 +165,12 @@
     runtimeId = 30346;
   };
 
+  victoriametrics = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 36929;
+    volumes = [ "victoriametrics" ];
+  };
+
   cups = enabled // {
     vlans = [ 70 ];
     runtimeId = 30347;

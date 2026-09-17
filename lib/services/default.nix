@@ -145,10 +145,7 @@ let
       );
     in
     {
-      time = {
-        timeZone = "Asia/Kolkata";
-        hardwareClockInLocalTime = false;
-      };
+      time.timeZone = timeZone;
 
       networking = {
         networkmanager = disabled;
@@ -417,7 +414,7 @@ let
     };
 in
 {
-  inherit containerUidOffset;
+  inherit containerUidOffset mkContainerVethName;
   mkServiceOptions = genServiceOptions;
   mkServiceContainer = genServiceContainer;
   mkSingleServiceContainer = genSingleServiceContainer;

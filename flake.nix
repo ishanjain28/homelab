@@ -156,7 +156,10 @@
           "omada-controller"
         ];
 
-      deploy = lib.mkDeploy { inherit (inputs) self; };
+      deploy = lib.mkDeploy {
+        inherit (inputs) self;
+        inherit fleetRegistry;
+      };
 
       devShells = inputs.nixpkgs.lib.genAttrs supportedSystems (system: {
         default = mkDevShell system;

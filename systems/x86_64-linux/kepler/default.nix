@@ -15,6 +15,7 @@ in
 
   homelab = {
     profiles.server = enabled;
+    metrics = enabled;
 
     inherit backups;
     inherit volumes;

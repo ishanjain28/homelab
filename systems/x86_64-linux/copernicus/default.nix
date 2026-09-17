@@ -14,6 +14,7 @@ in
 
   homelab = {
     profiles.server = enabled;
+    metrics = enabled;
     inherit volumes;
     services = workloads;
     devices.render = {
