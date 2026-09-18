@@ -28,7 +28,7 @@ in
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
     resources = {
-      CPUQuota = "800%";
+      CPUQuota = "1200%";
       MemoryMax = "8G";
       TasksMax = 2048;
     };

@@ -45,7 +45,7 @@
   };
 
   # TODO: windmill pkg in nixpkgs is very old. need to update that!
-  windmill = disabled // {
+  windmill = enabled // {
     vlans = [ 50 ];
     runtimeId = 30353;
   };

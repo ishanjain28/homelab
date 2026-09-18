@@ -52,8 +52,8 @@ in
     exec = "/bin/omada-controller";
     containerTimeout = "3min";
     resources = {
-      CPUQuota = "400%";
-      MemoryMax = "4G";
+      CPUQuota = "500%";
+      MemoryMax = "5G";
       TasksMax = 1024;
     };
 

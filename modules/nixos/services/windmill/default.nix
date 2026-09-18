@@ -18,6 +18,7 @@ let
     EnvironmentFile = environmentFile;
     ExecStart = getExe pkgs.windmill;
     LimitNOFILE = 65536;
+    PrivateTmp = true;
     Restart = "always";
     RestartSec = "5s";
     TimeoutStopSec = "30s";
