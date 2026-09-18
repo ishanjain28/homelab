@@ -1,1119 +1,1808 @@
 {
+  "uid": "homelab-logs",
   "title": "Homelab Logs",
-  "description": "Homelab journald logs collected by Alloy and stored in Loki.",
+  "description": "Journald logs from hosts and nspawn service containers, collected by Alloy and stored in Loki. Fields that Alloy attaches as structured metadata (Caddy access logs) are always filterable; switch Parser to JSON or logfmt to parse other services' lines at query time.",
   "tags": [
     "homelab",
     "logs",
     "loki",
     "journald"
   ],
-  "cursorSync": "Off",
   "editable": true,
-  "links": [],
-  "liveNow": false,
-  "preload": false,
-  "timeSettings": {
-    "timezone": "browser",
+  "graphTooltip": 1,
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
     "from": "now-6h",
-    "to": "now",
-    "autoRefresh": "30s",
-    "autoRefreshIntervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ],
-    "hideTimepicker": false,
-    "fiscalYearStartMonth": 0
+    "to": "now"
   },
-  "variables": [
-    {
-      "kind": "QueryVariable",
-      "spec": {
+  "timezone": "browser",
+  "refresh": "1m",
+  "timepicker": {},
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "loki",
+        "label": "Loki",
+        "query": "loki",
+        "hide": 2,
+        "refresh": 1,
+        "regex": "",
+        "current": {
+          "text": "homelab-loki",
+          "value": "homelab-loki"
+        },
+        "options": []
+      },
+      {
+        "type": "constant",
+        "name": "noise",
+        "query": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service",
+        "hide": 2,
+        "current": {
+          "text": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service",
+          "value": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service"
+        },
+        "options": []
+      },
+      {
+        "type": "query",
         "name": "container",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": ".*"
-        },
         "label": "Container",
-        "hide": "dontHide",
-        "skipUrlSync": false,
-        "refresh": "onDashboardLoad",
-        "query": {
-          "kind": "DataQuery",
-          "group": "loki",
-          "version": "v0",
-          "datasource": {
-            "name": "homelab-loki"
-          },
-          "spec": {
-            "query": "label_values({source=\"journald\"}, container)"
-          }
+        "description": "Host or service container.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
         },
+        "query": {
+          "label": "container",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "definition": "label_values(container)",
+        "refresh": 2,
         "regex": "",
-        "sort": "alphabeticalAsc",
-        "definition": "label_values({source=\"journald\"}, container)",
-        "options": [],
+        "sort": 1,
         "multi": true,
         "includeAll": true,
+        "allValue": ".+",
         "allowCustomValue": true,
-        "description": "Filter logs by host or service container.",
-        "allValue": ".*"
-      }
-    },
-    {
-      "kind": "QueryVariable",
-      "spec": {
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      },
+      {
+        "type": "query",
         "name": "unit",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": ".*"
-        },
         "label": "Unit",
-        "hide": "dontHide",
-        "skipUrlSync": false,
-        "refresh": "onDashboardLoad",
-        "query": {
-          "kind": "DataQuery",
-          "group": "loki",
-          "version": "v0",
-          "datasource": {
-            "name": "homelab-loki"
-          },
-          "spec": {
-            "query": "label_values({source=\"journald\"}, unit)"
-          }
+        "description": "Systemd unit inside the selected containers.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
         },
+        "query": {
+          "label": "unit",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{container=~\"$container\"}",
+          "type": 1
+        },
+        "definition": "label_values({container=~\"$container\"}, unit)",
+        "refresh": 2,
         "regex": "",
-        "sort": "alphabeticalAsc",
-        "definition": "label_values({source=\"journald\"}, unit)",
-        "options": [],
+        "sort": 1,
         "multi": true,
         "includeAll": true,
+        "allValue": ".+",
         "allowCustomValue": true,
-        "description": "Filter logs by systemd unit.",
-        "allValue": ".*"
-      }
-    },
-    {
-      "kind": "QueryVariable",
-      "spec": {
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      },
+      {
+        "type": "query",
         "name": "priority",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": ".*"
-        },
         "label": "Priority",
-        "hide": "dontHide",
-        "skipUrlSync": false,
-        "refresh": "onDashboardLoad",
-        "query": {
-          "kind": "DataQuery",
-          "group": "loki",
-          "version": "v0",
-          "datasource": {
-            "name": "homelab-loki"
-          },
-          "spec": {
-            "query": "label_values({source=\"journald\"}, priority)"
-          }
+        "description": "Journald priority.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
         },
+        "query": {
+          "label": "priority",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "definition": "label_values(priority)",
+        "refresh": 2,
         "regex": "",
-        "sort": "alphabeticalAsc",
-        "definition": "label_values({source=\"journald\"}, priority)",
-        "options": [],
+        "sort": 1,
         "multi": true,
         "includeAll": true,
+        "allValue": ".+",
         "allowCustomValue": true,
-        "description": "Filter logs by journald priority.",
-        "allValue": ".*"
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      },
+      {
+        "type": "textbox",
+        "name": "search",
+        "label": "Search regex",
+        "description": "Regex applied to the raw log line before parsing.",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "options": []
+      },
+      {
+        "type": "custom",
+        "name": "parser",
+        "label": "Parser",
+        "description": "Query-time parser for log lines. None is cheapest and still exposes structured metadata that Alloy attached at ingest (Caddy fields). JSON and logfmt parse every line; lines that do not match are kept unparsed.",
+        "query": "None : __error__=\"\",JSON : json | drop __error__\\, __error_details__,logfmt : logfmt | drop __error__\\, __error_details__",
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "None",
+          "value": "__error__=\"\""
+        },
+        "options": [
+          {
+            "text": "None",
+            "value": "__error__=\"\"",
+            "selected": true
+          },
+          {
+            "text": "JSON",
+            "value": "json | drop __error__, __error_details__",
+            "selected": false
+          },
+          {
+            "text": "logfmt",
+            "value": "logfmt | drop __error__, __error_details__",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "type": "adhoc",
+        "name": "filters",
+        "label": "Field filters",
+        "description": "Filters on stream labels or parsed JSON fields, e.g. status = 502 or request_host = git.ishanjain.me. Applied to every panel.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "filters": [],
+        "baseFilters": [],
+        "allowCustomValue": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Log lines",
+      "description": "Application log lines in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
       }
     },
     {
-      "kind": "TextVariable",
-      "spec": {
-        "name": "search",
-        "current": {
-          "selected": false,
-          "text": ".",
-          "value": "."
-        },
-        "label": "Search regex",
-        "hide": "dontHide",
-        "skipUrlSync": false,
-        "query": ".",
-        "description": "Regex filter applied to log messages."
-      }
-    }
-  ],
-  "annotations": [],
-  "elements": {
-    "panel-1": {
-      "kind": "Panel",
-      "spec": {
-        "id": 1,
-        "title": "App Log Lines / 15m",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
+      "id": 3,
+      "type": "stat",
+      "title": "Warnings",
+      "description": "Lines at warning priority in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"}[15m]))",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Errors",
+      "description": "Lines at err, crit, alert or emerg priority in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Containers logging",
+      "description": "Hosts and service containers that produced application logs.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "count(sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Units logging",
+      "description": "Systemd units that produced application logs.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "count(sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Log volume",
+      "description": "Bytes of application log lines in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Log lines by priority",
+      "description": "Application log lines per interval, stacked by journald priority.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (priority) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{priority}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "emerg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
                 }
               }
-            ],
-            "transformations": [],
-            "queryOptions": {}
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alert"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "crit"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "err"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warning"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "notice"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "debug"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#888888"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Log lines by container",
+      "description": "Application log lines per interval for the busiest containers.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "topk(15, sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{container}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           }
         },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "stat",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "colorMode": "value",
-              "graphMode": "area",
-              "justifyMode": "auto",
-              "orientation": "auto",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "textMode": "auto",
-              "wideLayout": true
-            },
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "mappings": [],
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Containers and units",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Containers",
+      "description": "Per-container log counts for the selected time range. Click a column header to sort.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "B",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "C",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "D",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "exclude": {
+              "pattern": "^Time.*"
             }
           }
         },
-        "description": "Count of application service log lines in the last 15 minutes."
-      }
-    },
-    "panel-2": {
-      "kind": "Panel",
-      "spec": {
-        "id": 2,
-        "title": "App Warnings / 15m",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "Lines",
+              "Value #B": "Warnings",
+              "Value #C": "Errors",
+              "Value #D": "Volume"
+            },
+            "indexByName": {
+              "container": 0,
+              "Lines": 1,
+              "Warnings": 2,
+              "Errors": 3,
+              "Volume": 4
+            },
+            "excludeByName": {}
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"warning|err|crit|alert|emerg\"}[15m]))",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
+                "color": "green",
+                "value": null
               }
-            ],
-            "transformations": [],
-            "queryOptions": {}
+            ]
           }
         },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "stat",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "colorMode": "value",
-              "graphMode": "area",
-              "justifyMode": "auto",
-              "orientation": "auto",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "textMode": "auto",
-              "wideLayout": true
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lines"
             },
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "mappings": [],
-                "thresholds": {
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warnings"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
                   "mode": "absolute",
                   "steps": [
                     {
                       "color": "green",
-                      "value": 0
+                      "value": null
                     },
                     {
-                      "color": "yellow",
+                      "color": "orange",
                       "value": 1
                     }
                   ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            }
-          }
-        },
-        "description": "Application warnings and higher severities in the last 15 minutes."
-      }
-    },
-    "panel-3": {
-      "kind": "Panel",
-      "spec": {
-        "id": 3,
-        "title": "App Errors / 15m",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"err|crit|alert|emerg\"}[15m]))",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
                 }
               }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "stat",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "colorMode": "value",
-              "graphMode": "area",
-              "justifyMode": "auto",
-              "orientation": "auto",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "textMode": "auto",
-              "wideLayout": true
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Errors"
             },
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "mappings": [],
-                "thresholds": {
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
                   "mode": "absolute",
                   "steps": [
                     {
                       "color": "green",
-                      "value": 0
+                      "value": null
                     },
                     {
                       "color": "red",
                       "value": 1
                     }
                   ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Volume"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Lines",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Units",
+      "description": "Per-unit log counts for the selected time range. Click a column header to sort.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "B",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "C",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "D",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "exclude": {
+              "pattern": "^Time.*"
             }
           }
         },
-        "description": "Application errors and higher severities in the last 15 minutes."
-      }
-    },
-    "panel-4": {
-      "kind": "Panel",
-      "spec": {
-        "id": 4,
-        "title": "App Log Rate By Priority",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "Lines",
+              "Value #B": "Warnings",
+              "Value #C": "Errors",
+              "Value #D": "Volume"
+            },
+            "indexByName": {
+              "container": 0,
+              "unit": 1,
+              "Lines": 2,
+              "Warnings": 3,
+              "Errors": 4,
+              "Volume": 5
+            },
+            "excludeByName": {}
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (priority) (rate({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"}[$__interval]))",
-                      "legendFormat": "{{priority}}",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
+                "color": "green",
+                "value": null
               }
-            ],
-            "transformations": [],
-            "queryOptions": {}
+            ]
           }
         },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "timeseries",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "legend": {
-                "calcs": [
-                  "lastNotNull",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lines"
             },
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "line",
-                  "fillOpacity": 12,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 1,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "mappings": [],
-                "thresholds": {
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warnings"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
                   "mode": "absolute",
                   "steps": [
                     {
                       "color": "green",
-                      "value": 0
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
                     }
                   ]
-                },
-                "unit": "ops"
-              },
-              "overrides": []
-            }
-          }
-        },
-        "description": "Application service log rate grouped by journald priority."
-      }
-    },
-    "panel-5": {
-      "kind": "Panel",
-      "spec": {
-        "id": 5,
-        "title": "Top App Units By Log Rate",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "topk(20, sum by (unit) (rate({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"}[$__interval])))",
-                      "legendFormat": "{{unit}}",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
                 }
               }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "timeseries",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "legend": {
-                "calcs": [
-                  "lastNotNull",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Errors"
             },
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "bars",
-                  "fillOpacity": 80,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 1,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "mappings": [],
-                "thresholds": {
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
                   "mode": "absolute",
                   "steps": [
                     {
                       "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "ops"
-              },
-              "overrides": []
-            }
-          }
-        },
-        "description": "Highest-volume application service units."
-      }
-    },
-    "panel-6": {
-      "kind": "Panel",
-      "spec": {
-        "id": 6,
-        "title": "Top App Units By Errors / 1h",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
+                      "value": null
                     },
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "topk(20, sum by (unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"err|crit|alert|emerg\"}[1h])))",
-                      "legendFormat": "{{unit}}",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
-              }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "timeseries",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "legend": {
-                "calcs": [
-                  "lastNotNull",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "mode": "multi",
-                "sort": "desc"
-              }
-            },
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "drawStyle": "bars",
-                  "fillOpacity": 80,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 1,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "mappings": [],
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
                     {
-                      "color": "green",
-                      "value": 0
+                      "color": "red",
+                      "value": 1
                     }
                   ]
-                },
-                "unit": "short"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Volume"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Lines",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Warnings by unit",
+      "description": "Warning-priority lines per interval, stacked by unit.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{container}} {{unit}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Errors by unit",
+      "description": "Error-and-above lines per interval, stacked by unit.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{container}} {{unit}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": "row",
+      "title": "Logs",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "panels": []
+    },
+    {
+      "id": 16,
+      "type": "logs",
+      "title": "Warnings and errors",
+      "description": "Application lines at warning priority or higher. Expand a line and use the filter buttons on a field to add it to the field filters above.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\" | $parser",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 500
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showFieldSelector": false,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
+      "id": 17,
+      "type": "logs",
+      "title": "Failure signals",
+      "description": "Any-priority lines whose message mentions a failure, error, panic or OOM.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\" | $parser",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 500
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showFieldSelector": false,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
+      "id": 18,
+      "type": "logs",
+      "title": "Application logs",
+      "description": "All application lines matching the filters. JSON lines are parsed: use the field selector on the left to show only the fields you want, and the filter buttons in log details to filter on a field value.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 500
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": true,
+        "showFieldSelector": true,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "System",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      },
+      "panels": [
+        {
+          "id": 19,
+          "type": "logs",
+          "title": "Boot and system logs",
+          "description": "Container and host boot/system plumbing lines, kept out of the application views.",
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 68
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki}"
               },
-              "overrides": []
+              "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
+              "refId": "A",
+              "editorMode": "code",
+              "queryType": "range",
+              "legendFormat": "",
+              "maxLines": 500
             }
-          }
-        },
-        "description": "Application service units with the most errors in the last hour."
-      }
-    },
-    "panel-7": {
-      "kind": "Panel",
-      "spec": {
-        "id": 7,
-        "title": "App Warnings And Errors",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "direction": "backward",
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\"",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
-              }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "logs",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "dedupStrategy": "none",
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showLabels": false,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "wrapLogMessage": false
-            },
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            }
-          }
-        },
-        "description": "Warning and error logs from application service units."
-      }
-    },
-    "panel-8": {
-      "kind": "Panel",
-      "spec": {
-        "id": 8,
-        "title": "App Failure Signals",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "direction": "backward",
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\"",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
-              }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "logs",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "dedupStrategy": "none",
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showLabels": false,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "wrapLogMessage": false
-            },
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            }
-          }
-        },
-        "description": "Application logs matching common failure terms."
-      }
-    },
-    "panel-9": {
-      "kind": "Panel",
-      "spec": {
-        "id": 9,
-        "title": "App Logs",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "direction": "backward",
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|systemd-journald[.]service|systemd-tmpfiles-.*[.]service|systemd-networkd[.]service|systemd-resolved[.]service|systemd-sysctl[.]service|systemd-remount-fs[.]service|systemd-random-seed[.]service|systemd-modules-load[.]service|systemd-machine-id-commit[.]service|systemd-update-done[.]service|systemd-vconsole-setup[.]service|logrotate[.]service\", priority=~\"$priority\"} |~ \"$search\"",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
-              }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "logs",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "dedupStrategy": "none",
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showLabels": true,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "wrapLogMessage": false
-            },
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            }
-          }
-        },
-        "description": "Application service logs matching the selected filters."
-      }
-    },
-    "panel-10": {
-      "kind": "Panel",
-      "spec": {
-        "id": 10,
-        "title": "Boot And System Logs",
-        "links": [],
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "query": {
-                    "kind": "DataQuery",
-                    "group": "loki",
-                    "version": "v0",
-                    "datasource": {
-                      "name": "homelab-loki"
-                    },
-                    "spec": {
-                      "direction": "backward",
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
-                      "queryType": "range"
-                    }
-                  },
-                  "refId": "A",
-                  "hidden": false
-                }
-              }
-            ],
-            "transformations": [],
-            "queryOptions": {}
-          }
-        },
-        "vizConfig": {
-          "kind": "VizConfig",
-          "group": "logs",
-          "version": "11.0.0",
-          "spec": {
-            "options": {
-              "dedupStrategy": "none",
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showLabels": true,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "wrapLogMessage": false
-            },
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            }
-          }
-        },
-        "description": "Container and host boot/system plumbing logs, kept separate from the default app view."
-      }
-    }
-  },
-  "layout": {
-    "kind": "GridLayout",
-    "spec": {
-      "items": [
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 0,
-            "width": 6,
-            "height": 4,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-1"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 6,
-            "y": 0,
-            "width": 6,
-            "height": 4,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-2"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 12,
-            "y": 0,
-            "width": 6,
-            "height": 4,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-3"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 4,
-            "width": 24,
-            "height": 8,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-4"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 12,
-            "width": 12,
-            "height": 8,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-5"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 12,
-            "y": 12,
-            "width": 12,
-            "height": 8,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-6"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 20,
-            "width": 24,
-            "height": 9,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-7"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 29,
-            "width": 24,
-            "height": 9,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-8"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 38,
-            "width": 24,
-            "height": 12,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-9"
-            }
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "x": 0,
-            "y": 50,
-            "width": 24,
-            "height": 12,
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-10"
-            }
+          ],
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "options": {
+            "dedupStrategy": "none",
+            "enableInfiniteScrolling": true,
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showControls": false,
+            "showFieldSelector": false,
+            "displayedFields": [],
+            "showLabels": false,
+            "showLevel": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "timestampResolution": "ms",
+            "unwrappedColumns": false,
+            "wrapLogMessage": false,
+            "syntaxHighlighting": true
           }
         }
       ]
     }
-  }
+  ]
 }

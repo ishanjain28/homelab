@@ -4,6 +4,11 @@
     size = "512M";
   };
 
+  gitea = {
+    uuid = "ba59e26e-d0ee-46e7-9d5c-d43cd5850aef";
+    size = "10G";
+  };
+
   grafana = {
     uuid = "ad555d93-40a2-40ae-90eb-e3c6c591ef65";
     size = "1G";

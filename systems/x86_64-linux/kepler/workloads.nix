@@ -32,6 +32,12 @@
     runtimeId = 27777;
   };
 
+  gitea = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 36930;
+    volumes = [ "gitea" ];
+  };
+
   gitea-runner = enabled // {
     vlans = [ 50 ];
     runtimeId = 36928;
