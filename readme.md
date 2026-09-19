@@ -45,7 +45,7 @@ address in cloudflare and then more DNS entries for internal services and device
 
 * Add deployment order dependency if possible.
 
-* Grow and shrink LVS based on updated values. Require user action if the LVS was shrunk!
+* [PARTIALLY DONE] Grow and shrink LVS based on updated values. Require user action if the LVS was shrunk!
 
 * Introduce firewall in the networking stack maybe by using services.firewalld.
 
@@ -62,7 +62,7 @@ because Microsoft did not have a PLAT implementation.
 * Specify secrets update policies. Currently, it restarts the service but some services offer a reload option to do it without disrupting the process. In that situation,
 it should call the reload command for the service rather than restarting it!
 
-* Monitoring resource usage CPU/MEM/Storage of each deployed service and the hosts in grafana.
+* [DONE] Monitoring resource usage CPU/MEM/Storage of each deployed service and the hosts in grafana.
 
 * Alerting system when something fails. Backups, healthchecks
 
