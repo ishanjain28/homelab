@@ -53,12 +53,6 @@ in
       LLDAP_KEY_FILE = containerKeyPath;
     };
 
-    serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "5s";
-
-      AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-      CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
-    };
+    hardeningProfile = "privileged-ports";
   });
 }

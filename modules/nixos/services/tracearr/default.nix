@@ -71,7 +71,6 @@ in
       StateDirectory = "tracearr";
       StateDirectoryMode = "0700";
       WorkingDirectory = "/var/lib/tracearr";
-      RestartSec = "5s";
     };
   });
 }

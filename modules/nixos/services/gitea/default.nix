@@ -53,7 +53,6 @@ in
     };
 
     serviceConfig = {
-      RestartSec = "5s";
       StateDirectory = "gitea";
       StateDirectoryMode = "0700";
       WorkingDirectory = workDir;

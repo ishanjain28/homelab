@@ -40,9 +40,8 @@ in
       TasksMax = 256;
     };
 
+    hardeningProfile = "privileged-ports";
     serviceConfig = {
-      AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-      CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
       StateDirectory = serviceName;
       StateDirectoryMode = "0700";
       WorkingDirectory = "/var/lib/${serviceName}";

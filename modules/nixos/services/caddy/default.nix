@@ -41,6 +41,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     command = "${pkgs.${namespace}.caddy}/bin/caddy run --config ${configPath}";
+    hardeningProfile = "privileged-ports";
 
     secrets.config = {
       file = cfg.configFile;
@@ -60,14 +61,9 @@ in
     };
 
     serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "5s";
       ExecStartPre = "${pkgs.${namespace}.caddy}/bin/caddy validate --config ${configPath}";
-      AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-      CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
       StateDirectory = "caddy";
       StateDirectoryMode = "0700";
-      UMask = "0077";
     };
   });
 }

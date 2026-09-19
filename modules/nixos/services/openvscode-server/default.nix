@@ -91,7 +91,6 @@ in
       serviceConfig = {
         StateDirectory = "openvscode-server";
         StateDirectoryMode = "0700";
-        RestartSec = "5s";
       };
 
       containerConfig = {

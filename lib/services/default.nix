@@ -396,9 +396,11 @@ let
             inherit after wants;
             wantedBy = [ "multi-user.target" ];
             inherit environment;
+            unitConfig.StartLimitIntervalSec = 0;
             serviceConfig = {
               ExecStart = execStart;
               Restart = "always";
+              RestartSec = "5s";
               TimeoutStopSec = "20s";
               DynamicUser = false;
               User = runtimeUser.name;

@@ -51,8 +51,6 @@ in
     serviceConfig = {
       EnvironmentFile = containerEnvPath;
       ExecStartPre = "${pkgs.${namespace}.mathesar}/bin/mathesar-setup-django";
-      Restart = "on-failure";
-      RestartSec = "5s";
       StateDirectory = "mathesar";
       WorkingDirectory = "/var/lib/mathesar";
     };

@@ -65,10 +65,7 @@ in
     serviceConfig = {
       StateDirectory = "omada";
       StateDirectoryMode = "0700";
-      Restart = "on-failure";
-      RestartSec = "10s";
       LimitNOFILE = 65536;
-      UMask = "0077";
     };
   });
 }

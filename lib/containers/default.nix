@@ -43,6 +43,11 @@ let
       CapabilityBoundingSet = "CAP_NET_RAW";
     };
 
+    privileged-ports = default // {
+      AmbientCapabilities = "CAP_NET_BIND_SERVICE";
+      CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+    };
+
     device-access = default // {
       ProtectHome = false;
     };

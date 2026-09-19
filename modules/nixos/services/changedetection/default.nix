@@ -85,7 +85,7 @@ in
           XDG_CONFIG_HOME = "${chromiumPath}/config";
           WORKSPACE_DIR = "/run/browserless";
         };
-        serviceConfig = {
+        serviceConfig = getNspawnHardeningProfile "default" // {
           ExecStart = "${pkgs.${namespace}.browserless}/bin/browserless";
           Restart = "always";
           RestartSec = "10s";
@@ -93,11 +93,7 @@ in
           RuntimeDirectoryMode = "0700";
           User = cfg.runtimeUser.name;
           Group = cfg.runtimeUser.group;
-          AmbientCapabilities = "";
-          CapabilityBoundingSet = "";
-          NoNewPrivileges = true;
           PrivateTmp = true;
-          UMask = "0077";
         };
       };
     };
