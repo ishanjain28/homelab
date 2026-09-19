@@ -51,6 +51,13 @@
     shares = [ "wd-4tb" ];
   };
 
+  qbittorrent = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30361;
+    volumes = [ "qbittorrent" ];
+    shares = [ "wd-4tb" ];
+  };
+
   jellyfin = enabled // {
     vlans = [ 50 ];
     runtimeId = 30360;

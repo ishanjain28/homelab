@@ -26,4 +26,9 @@
     uuid = "95408258-29ea-4970-b0fb-d0e610eef08c";
     size = "45G";
   };
+
+  qbittorrent = {
+    uuid = "d220f35f-449b-4d60-8105-1eac2f0e5bbc";
+    size = "256M";
+  };
 }

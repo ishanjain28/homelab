@@ -44,6 +44,8 @@ in
       "kernel.keys.maxbytes" = 25000000;
     };
 
+    boot.kernelModules = [ "wireguard" ];
+
     users = {
       mutableUsers = false;
       users.ishan = {
