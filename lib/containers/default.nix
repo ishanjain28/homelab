@@ -6,7 +6,7 @@ let
     };
 
     privileged = {
-      privateUsers = false;
+      privateUsers = "no";
     };
   };
 

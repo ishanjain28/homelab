@@ -36,6 +36,14 @@ in
 
     systemd.targets.multi-user = enabled;
 
+    # Running OCI containers inside nspawn containers triggers an error like
+    # unable to create session key: disk quota exceeded
+    # Gitea runners do this so I needed to increase disk quota for keyring
+    boot.kernel.sysctl = {
+      "kernel.keys.maxkeys" = 1000000;
+      "kernel.keys.maxbytes" = 25000000;
+    };
+
     users = {
       mutableUsers = false;
       users.ishan = {

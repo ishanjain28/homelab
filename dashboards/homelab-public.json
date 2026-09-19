@@ -10,7 +10,7 @@
   "schemaVersion": 41,
   "version": 1,
   "time": {
-    "from": "now-6h",
+    "from": "now-8h",
     "to": "now"
   },
   "timezone": "browser",

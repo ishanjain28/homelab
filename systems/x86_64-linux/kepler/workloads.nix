@@ -41,7 +41,7 @@
   gitea-runner = enabled // {
     vlans = [ 50 ];
     runtimeId = 36928;
-    giteaURI = "https://git.ishanjain.me";
+    giteaURI = "http://10.0.50.20:3000";
   };
 
   asterisk = enabled // {
@@ -204,6 +204,14 @@
     vlans = [ 150 ];
     runtimeId = 36926;
     volumes = [ "ripe-atlas-primary" ];
+  };
+
+  telegraf-snmp = enabled // {
+    vlans = [
+      50
+      99
+    ];
+    runtimeId = 36931;
   };
 
   ripe-atlas-lte = enabled // {
