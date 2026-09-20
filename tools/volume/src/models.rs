@@ -26,6 +26,30 @@ pub struct Volume {
     pub host_mount_path: String,
     pub mount_path: String,
     pub mode: String,
+    #[serde(default)]
+    pub backup: BackupPolicy,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BackupPolicy {
+    #[serde(default)]
+    pub groups: Vec<String>,
+    #[serde(default = "default_snapshot_size")]
+    pub snapshot_size: String,
+}
+
+impl Default for BackupPolicy {
+    fn default() -> Self {
+        Self {
+            groups: Vec::new(),
+            snapshot_size: default_snapshot_size(),
+        }
+    }
+}
+
+fn default_snapshot_size() -> String {
+    "20%ORIGIN".to_string()
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -70,6 +94,11 @@ pub fn load_state(state_file: &Path) -> Result<State, String> {
                 volume.owner_service
             ));
         }
+        for group in &volume.backup.groups {
+            if !is_safe_identifier(group) {
+                return Err(format!("invalid backup group {group:?} for volume {key:?}"));
+            }
+        }
     }
 
     Ok(state)
@@ -101,6 +130,26 @@ pub fn load_all_volumes(state_file: &Path) -> Result<Vec<Volume>, String> {
     let state = load_state(state_file)?;
 
     return Ok(state.volumes.into_values().collect());
+}
+
+pub fn backup_volumes(
+    state: &State,
+    group: &str,
+    owner_service: &str,
+) -> Result<Vec<Volume>, String> {
+    let mut volumes = Vec::new();
+    for volume in state.volumes.values() {
+        if volume.owner_service == owner_service && volume.backup.groups.iter().any(|g| g == group)
+        {
+            volumes.push(volume.clone());
+        }
+    }
+    if volumes.is_empty() {
+        return Err(format!(
+            "service {owner_service:?} has no volumes in backup group {group:?}"
+        ));
+    }
+    Ok(volumes)
 }
 
 pub fn service_volumes(state: &State, owner_service: &str) -> Result<Vec<Volume>, String> {

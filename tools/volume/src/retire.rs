@@ -1,6 +1,6 @@
 use crate::lock::VolumeLocks;
 use crate::lvm::{lv_exists, lv_path};
-use crate::models::{load_state, Volume};
+use crate::models::{load_state, BackupPolicy, Volume};
 use crate::util::{confirm, is_mounted, run_command};
 use std::path::Path;
 use std::process::Command;
@@ -35,6 +35,7 @@ pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Resul
         host_mount_path: String::new(),
         mount_path: String::new(),
         mode: String::new(),
+        backup: BackupPolicy::default(),
     };
     let _locks = VolumeLocks::acquire(std::slice::from_ref(&lock_volume), "retire")?;
     let lv = lv_path(&tombstone.name);

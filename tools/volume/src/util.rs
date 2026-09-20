@@ -126,6 +126,25 @@ pub fn is_mounted(device: &str) -> Result<bool, String> {
     }
 }
 
+pub fn is_mountpoint(path: &Path) -> Result<bool, String> {
+    let output = Command::new("findmnt")
+        .args(["--noheadings", "--mountpoint"])
+        .arg(path)
+        .output()
+        .map_err(|error| format!("failed to run findmnt: {error}"))?;
+
+    match output.status.code() {
+        Some(0) => Ok(true),
+        Some(1) => Ok(false),
+        status => Err(format!(
+            "findmnt failed while checking {} (status {}): {}",
+            path.display(),
+            status.map_or_else(|| "signal".to_string(), |code| code.to_string()),
+            String::from_utf8_lossy(&output.stderr).trim()
+        )),
+    }
+}
+
 pub fn run_command(program: &str, args: &[&str]) -> Result<(), String> {
     let output = Command::new(program)
         .args(args)

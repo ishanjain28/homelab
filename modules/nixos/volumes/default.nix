@@ -9,7 +9,7 @@ with lib;
 with lib.${namespace};
 let
   json = pkgs.formats.json { };
-  volumePackage = pkgs.callPackage ../../../packages/volume { };
+  volumePackage = pkgs.${namespace}.volume;
   volumeStateFile = json.generate "homelab-volumes.json" config.system.homelab.volumeState;
   cfg = config.${namespace};
   registry = config.system.homelab.registry;
@@ -90,6 +90,7 @@ let
     ownerEnabled = services.${volume.ownerService}.enable;
     inherit (volume) ownerService;
     ownerUnit = "container@${volume.ownerService}.service";
+    backup = { inherit (volume.backup) groups snapshotSize; };
   };
 
   mkVolumeApplyService = volumeId: _volume: {
@@ -225,23 +226,12 @@ in
             fsType = mkOpt (types.enum [ "ext4" ]) "ext4" "Filesystem type.";
             readOnly = mkBoolOpt false "Whether to bind mount this volume read-only.";
             mode = mkOpt types.str "0700" "Directory mode for the mounted data inside the container.";
-            backup = mkOption {
-              type = types.nullOr (
-                types.submodule {
-                  options = {
-                    target = mkOption {
-                      type = types.nonEmptyStr;
-                      description = "Named homelab backup target.";
-                    };
-                    cron = mkOption {
-                      type = types.strMatching "[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+";
-                      description = "Five-field cron expression for this volume's backup.";
-                    };
-                  };
-                }
-              );
-              default = null;
-              description = "Restic backup policy for this volume.";
+            backup = {
+              groups = mkOpt (types.listOf types.nonEmptyStr) [ ] "Backup groups this volume belongs to.";
+              exclude = mkOpt (types.listOf types.str) [ ] "Restic exclude patterns relative to the volume root.";
+              snapshotSize =
+                mkOpt types.nonEmptyStr "20%ORIGIN"
+                  "LVM snapshot COW capacity, as an lvcreate --size value or a percentage of the origin.";
             };
           };
         }

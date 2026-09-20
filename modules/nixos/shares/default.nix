@@ -81,6 +81,9 @@ let
           config = {
             users.groups = mkMerge (map (shareId: { ${shareId}.gid = mkForce shares.${shareId}.gid; }) shareIds);
             users.users.${service.runtimeUser.name}.extraGroups = shareIds;
+            systemd.services.${serviceName}.serviceConfig.ReadWritePaths = map (share: share.hostPath) (
+              filter (share: !share.readOnly) attachedShares
+            );
           };
         };
 

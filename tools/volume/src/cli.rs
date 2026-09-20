@@ -1,10 +1,11 @@
 use crate::{
     apply::run_apply,
+    backup::{run_backup_cleanup, run_backup_prepare},
     retire::run_retire,
     transfer::{run_copy, run_receive},
 };
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use std::{path::PathBuf, time::Duration};
 
 #[derive(Parser)]
 #[command(name = "volume")]
@@ -55,6 +56,33 @@ enum VolumeCommand {
         #[arg(long)]
         yes: bool,
     },
+
+    /// Quiesce a service, snapshot its volumes in one backup group, and mount
+    /// the snapshots read-only under /run/homelab-backup/<group>/.
+    BackupPrepare {
+        #[arg(long)]
+        group: String,
+
+        #[arg(long)]
+        owner: String,
+
+        /// Seconds to wait for volume locks held by another operation.
+        #[arg(long, default_value_t = 600)]
+        wait: u64,
+    },
+
+    /// Unmount and remove the snapshots created by backup-prepare and make
+    /// sure the service is running again.
+    BackupCleanup {
+        #[arg(long)]
+        group: String,
+
+        #[arg(long)]
+        owner: String,
+
+        #[arg(long, default_value_t = 600)]
+        wait: u64,
+    },
 }
 
 pub fn run() -> Result<(), String> {
@@ -69,5 +97,11 @@ pub fn run() -> Result<(), String> {
             source_bytes,
         } => run_receive(&cli.state_file, &owner_service, &volume_id, source_bytes),
         VolumeCommand::Retire { volume_id, yes } => run_retire(&cli.state_file, &volume_id, yes),
+        VolumeCommand::BackupPrepare { group, owner, wait } => {
+            run_backup_prepare(&cli.state_file, &group, &owner, Duration::from_secs(wait))
+        }
+        VolumeCommand::BackupCleanup { group, owner, wait } => {
+            run_backup_cleanup(&cli.state_file, &group, &owner, Duration::from_secs(wait))
+        }
     }
 }

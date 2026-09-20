@@ -8,12 +8,16 @@ use std::{
 use crate::{
     apply::{apply_volume, ensure_filesystem, grow_ext4_to_device, run_e2fsck, validate_volume},
     lock::VolumeLocks,
-    lvm::{ensure_vg, lv_exists, lv_field, lv_path, VG_NAME},
+    lvm::{
+        create_snapshot, derived_name, ensure_vg, has_tag, lv_exists, lv_field, lv_path,
+        remove_snapshot, VG_NAME,
+    },
     models::{load_state, service_volumes, Volume},
+    quiesce::QuiesceGuard,
     util::{block_device_size, is_block_device, is_mounted, run_command},
 };
 
-const SNAPSHOT_EXTENTS: &str = "20%ORIGIN";
+const SNAPSHOT_TAG: &str = "homelab-copy";
 const REMOTE_VOLUME: &str = "/run/current-system/sw/bin/volume";
 
 pub fn run_copy(state_file: &Path, owner_service: &str, target: &str) -> Result<(), String> {
@@ -33,9 +37,16 @@ pub fn run_copy(state_file: &Path, owner_service: &str, target: &str) -> Result<
     }
 
     let result = (|| {
+        let guard = QuiesceGuard::begin(&volumes[0].owner_unit)?;
         for volume in &volumes {
-            create_snapshot(volume)?;
+            create_snapshot(
+                volume,
+                &snapshot_name(volume)?,
+                SNAPSHOT_TAG,
+                &volume.backup.snapshot_size,
+            )?;
         }
+        guard.release()?;
         for volume in &volumes {
             copy_snapshot(volume, owner_service, target)?;
         }
@@ -233,34 +244,10 @@ fn copy_snapshot(volume: &Volume, owner_service: &str, target: &str) -> Result<(
     transfer
 }
 
-fn create_snapshot(volume: &Volume) -> Result<(), String> {
-    let name = snapshot_name(volume)?;
-    remove_snapshot(volume, &name)?;
-    run_command(
-        "lvcreate",
-        &[
-            "--yes",
-            "--snapshot",
-            "--permission",
-            "r",
-            "--extents",
-            SNAPSHOT_EXTENTS,
-            "--name",
-            &name,
-            "--addtag",
-            "homelab-copy",
-            "--addtag",
-            &format!("homelab-volume-{}", volume.id),
-            &volume.lv,
-        ],
-    )?;
-    run_command("udevadm", &["settle"])
-}
-
 fn cleanup_snapshots(volumes: &[Volume]) -> Result<(), String> {
     let mut errors = Vec::new();
     for volume in volumes.iter().rev() {
-        match snapshot_name(volume).and_then(|name| remove_snapshot(volume, &name)) {
+        match snapshot_name(volume).and_then(|name| remove_snapshot(volume, &name, SNAPSHOT_TAG)) {
             Ok(()) => {}
             Err(error) => errors.push(error),
         }
@@ -270,21 +257,6 @@ fn cleanup_snapshots(volumes: &[Volume]) -> Result<(), String> {
     } else {
         Err(errors.join("\n"))
     }
-}
-
-fn remove_snapshot(volume: &Volume, name: &str) -> Result<(), String> {
-    if !lv_exists(name)? {
-        return Ok(());
-    }
-    let origin = lv_field(name, "origin")?;
-    let tags = lv_field(name, "lv_tags")?;
-    if origin != volume.name || !has_tag(&tags, "homelab-copy") {
-        return Err(format!(
-            "refusing to remove LV {name:?}: expected a homelab-copy snapshot of {:?}",
-            volume.name
-        ));
-    }
-    run_command("lvremove", &["--yes", &lv_path(name).to_string_lossy()])
 }
 
 fn remove_receiving_lv(volume: &Volume, name: &str) -> Result<(), String> {
@@ -323,27 +295,12 @@ fn send_handshake(value: &str) -> Result<(), String> {
         .map_err(|error| format!("failed to flush handshake: {error}"))
 }
 
-fn has_tag(tags: &str, expected: &str) -> bool {
-    tags.split(',').any(|tag| tag.trim() == expected)
-}
-
 fn snapshot_name(volume: &Volume) -> Result<String, String> {
     derived_name(&volume.name, "-copy")
 }
 
 fn receiving_name(volume: &Volume) -> Result<String, String> {
     derived_name(&volume.name, "-receiving")
-}
-
-fn derived_name(name: &str, suffix: &str) -> Result<String, String> {
-    let derived = format!("{name}{suffix}");
-    if derived.len() <= 127 {
-        Ok(derived)
-    } else {
-        Err(format!(
-            "LV name {name:?} is too long to append migration suffix {suffix:?}"
-        ))
-    }
 }
 
 fn validate_ssh_target(target: &str) -> Result<(), String> {
@@ -362,7 +319,7 @@ fn validate_ssh_target(target: &str) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{derived_name, validate_ssh_target};
+    use super::validate_ssh_target;
 
     #[test]
     fn validates_ssh_targets() {
@@ -370,11 +327,5 @@ mod tests {
         assert!(validate_ssh_target("root@10.0.99.8").is_ok());
         assert!(validate_ssh_target("-oProxyCommand=bad").is_err());
         assert!(validate_ssh_target("host;bad").is_err());
-    }
-
-    #[test]
-    fn validates_derived_lv_name_length() {
-        assert_eq!(derived_name("jellyfin", "-copy").unwrap(), "jellyfin-copy");
-        assert!(derived_name(&"a".repeat(123), "-copy").is_err());
     }
 }

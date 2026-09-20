@@ -1,8 +1,10 @@
 mod apply;
+mod backup;
 mod cli;
 mod lock;
 mod lvm;
 mod models;
+mod quiesce;
 mod retire;
 mod transfer;
 mod util;
