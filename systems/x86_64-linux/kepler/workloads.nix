@@ -251,4 +251,14 @@
     runtimeId = 36927;
     volumes = [ "ripe-atlas-lte" ];
   };
+
+  caddy = enabled // {
+    vlans = [
+      50
+      140
+    ];
+    runtimeId = 30352;
+    configFile = "secrets/caddy/home.json";
+  };
+
 }

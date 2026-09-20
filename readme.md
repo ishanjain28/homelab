@@ -17,11 +17,63 @@ nix build .#install-isoConfigurations.minimal
 
 ### Configuring nodes from Minimal Nix ISO
 
+#### Generating machine hardware and disk configuration
+
+1. We need the disk config and hardware configuration for the new machine. This needs careful manual inspection and you can
+get the initial draft by running `sudo nixos-generate-config  --show-hardware-config` on the machine.
+
+Run this to get the detailed disk data, import any existing file systems.
+
+```
+lsblk -o NAME,SIZE,TYPE,MODEL,SERIAL,FSTYPE,LABEL,MOUNTPOINTS
+ls -l /dev/disk/by-id/ | grep -v part
+sudo pvs; sudo vgs; sudo lvs
+```
+
+Add `filesystems.<mountpoints>` by specifying the path to device by-id and fsType.
+
+For ZFS, add the following config and each dataset in the pool will be mounted after boot.
+```
+boot.supportedFilesystems.zfs = true
+boot.zfs.extraPools = [ "<pool-name>" ]
+boot.kernelPackages = pkgs.linuxPackages
+services.zfs.autoScrub.enable = true;
+```
+
+ZFS uses `/etc/machine-id` data to ensure the same pool is not mounted on 2 systems. The pool will fail to import on the new machine and to fix that you need to
+run `sudo zpool import -f <pool-name>` as a 1 time fix to update the captured machine-id.
+
+
+Run the command below to copy persistent volumes data from the previous machine.
+This copies everything and preserves uid/gid on the content.
+```
+sudo rsync -aHAX --numeric-ids --delete --info=progress2 \
+  root@<old-machine-ip>:/mnt/backup/volumes/ /var/lib/volumes/
+```
+
+2. Networking
+
+I love predictable network interface names. Get the MAC addresses of interfaces and update `default.nix` with the interface names in `mkIfLink`.
+Update rest of the networking as needed.
+
+3. Workloads and volumes
+
+Add the services that should run on this instance and the volumes the services need. Volumes are created as thick LVM volumes on the
+LVM specified in disk-config for the system with the assumption the PV is just called `pool`.
+
+
+4. Deploy!
+
 This assumes the machine to configure is called `tomato`. Use `nixos-anywhere` to configure the node.
 
 ```console
 nix run github:nix-community/nixos-anywhere -- --flake .#tomato ishan@<address>
 ```
+
+The persistent volumes are created on the initial deployment but services will fail to start because the secrets are encrypted with a different key. It uses SSH key on the host to encrypt credentials.
+This ssh key is generated on deployment and is not part of the repo. Optionally, It can be specified using `sshKeyFile`.
+After deployment copy the generaated public key from the host(from `/etc/ssh/ssh_host_ed25519_key.pub`) and update all the secrets using `echo '<key>' | nix run nixpkgs#ssh-to-age`.
+Add the key in `.sops.yaml` and then run `find secrets -type f -exec sops updatekeys -y {} \;` to update all the secrets.
 
 
 ## Features
@@ -67,3 +119,11 @@ it should call the reload command for the service rather than restarting it!
 * Windmill working with an email receiver. Ideally, I want to do an IMAP server just for this rather than giving it limited access to some other email account. This can be IPv6 only in my ASN and IPv6 only is fine in this context.
 
 * Credit card / Bank statement processing pipeline in windmill to auto save them to actual budget
+
+### remote bootstrap Notes
+
+1. got stuck on /dev/disk/by-label/nixos-minimal-26.11-x86_64 when booting with the virtual media option in jetkvm. FIX: Needs to be mounted as CD/DVD for it to show up in boot options and then mounted as disk not as cd/dvd for it to show up in /dev/disk/by-label/nix...
+
+2. did not request an ip address using dhcp, did not use slaac for auto assignment. TODO: Machine should have a fallback address maybe 192.168.1.254 ? PROBLEM: The other side was only allowing vlan tagged traffic and bootstrap nix only works with untagged traffic.
+
+3.

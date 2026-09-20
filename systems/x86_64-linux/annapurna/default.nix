@@ -2,7 +2,7 @@
 with lib;
 with lib.${namespace};
 let
-  hostName = "copernicus";
+  hostName = "annapurna";
   backups = import ./backups.nix;
   volumes = import ./volumes.nix;
   workloads = import ./workloads.nix { inherit lib namespace; };
@@ -42,10 +42,15 @@ in
 
       # Rename PHYs to values I like using the permanent
       # MAC address as reference.
-      links = mkIfLink {
-        name = "eth0";
-        macAddress = "BC:24:11:94:DD:90";
-      };
+      links =
+        mkIfLink {
+          name = "eth0";
+          macAddress = "A8:A1:59:B7:DE:5E";
+        }
+        // mkIfLink {
+          name = "eth1";
+          macAddress = "A8:A1:59:B7:DE:5F";
+        };
 
       netdevs = mkMerge [
         (mkBridgeIf "br0")
@@ -62,7 +67,8 @@ in
             networkConfig.Bridge = "br0";
             # Copernicus is temporarily nested inside Proxmox. Mark the VM uplink
             # as the multicast-router port so IGMP reports cross both bridges.
-            # Remove this when Copernicus moves to bare metal.
+            # TODO: Review if this is still needed.
+            # Remove this when copernicus/annapurna moves to bare metal.
             bridgeConfig.MulticastRouter = "permanent";
             linkConfig.RequiredForOnline = "no";
             bridgeVLANs = [
@@ -101,8 +107,8 @@ in
               IPv6LinkLocalAddressGenerationMode = "eui64";
               IPv6PrivacyExtensions = "no";
               IPv6AcceptRA = "yes";
-              LLDP = "no";
-              EmitLLDP = "no";
+              LLDP = "yes";
+              EmitLLDP = "yes";
               LLMNR = "no";
             };
             ipv6AcceptRAConfig = {

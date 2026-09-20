@@ -130,6 +130,8 @@ let
               LLMNR = "no";
             };
             dhcpV4Config = {
+              ClientIdentifier = "mac";
+              VendorClassIdentifier = "homelab-container/${name}";
               RouteMetric = 100 + index;
               UseDNS = index == 0;
               UseNTP = index == 0;

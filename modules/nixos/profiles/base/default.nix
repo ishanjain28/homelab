@@ -16,6 +16,7 @@ in
   config = mkIf cfg.enable {
     time.timeZone = timeZone;
 
+    environment.enableAllTerminfo = true;
     environment.shellAliases = shellAliases;
     programs.fish = enabled;
     users.defaultUserShell = pkgs.fish;

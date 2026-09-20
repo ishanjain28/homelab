@@ -2,7 +2,7 @@ _: {
   disko.devices = {
     disk.main = {
       type = "disk";
-      device = "/dev/sda";
+      device = "/dev/disk/by-id/nvme-WD_Blue_SN570_1TB_22054B802412";
       content = {
         type = "gpt";
         partitions = {
@@ -17,7 +17,7 @@ _: {
             };
           };
           root = {
-            size = "25G";
+            size = "100G";
             content = {
               type = "filesystem";
               format = "ext4";

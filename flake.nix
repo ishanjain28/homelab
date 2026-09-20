@@ -176,7 +176,7 @@
           ];
         };
         hosts = {
-          copernicus.modules = [ ];
+          annapurna.modules = [ ];
           kepler.modules = [ ];
         };
       };
