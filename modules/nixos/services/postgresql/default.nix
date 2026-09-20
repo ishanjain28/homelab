@@ -243,7 +243,9 @@ let
         ++ concatLists (mapAttrsToList (_name: user: user.memberOf) cfg.users)
       );
       undeclaredRoles = filter (role: !(hasAttr role cfg.users)) referencedRoles;
-      passwordsWithoutLoginRole = filter (user: !(hasAttr user cfg.users) || !cfg.users.${user}.login) (passwordUsers name);
+      passwordsWithoutLoginRole = filter (user: !(hasAttr user cfg.users) || !cfg.users.${user}.login) (
+        subtractLists [ "replica" ] (passwordUsers name)
+      );
     in
     mkIf cfg.enable (mkMerge [
       {
@@ -291,10 +293,19 @@ let
             settings = {
               port = cfg.endpoints.postgres.port;
             }
+            // optionalAttrs (cfg.replicaOf != null) {
+              primary_conninfo = "host=${cfg.replicaOf} port=5432 user=replica passfile=/run/postgresql/pgpass";
+              primary_slot_name = "homelab";
+            }
             // cfg.settings;
           };
 
           systemd.services.postgresql.serviceConfig.OOMScoreAdjust = -200;
+          systemd.services.postgresql.path = [ pkgs.jq ];
+          systemd.services.postgresql.preStart = mkIf (cfg.replicaOf != null) (mkBefore ''
+            umask 077
+            jq -r --arg instance ${escapeShellArg name} '"${cfg.replicaOf}:5432:*:replica:" + .[$instance].users.replica' ${secretsPath} > /run/postgresql/pgpass
+          '');
           systemd.services.postgresql-setup = {
             path = [ pkgs.jq ];
             script = mkAfter (mkSetupScript name cfg);
@@ -322,6 +333,8 @@ in
       };
 
       authentication = mkOpt lines "" "pg_hba.conf entries for network clients.";
+
+      replicaOf = mkOpt (nullOr nonEmptyStr) null "Address of the primary this instance streams from.";
 
       extensions = mkOpt (listOf nonEmptyStr) [ ] "PostgreSQL extension packages installed into this instance.";
 

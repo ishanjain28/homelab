@@ -9,6 +9,16 @@
     ];
   };
 
+  postgresql-del-mirror = {
+    uuid = "6a5b5582-b8c9-4641-a3ff-e25e9cd06c28";
+    mountPath = "/var/lib/postgresql";
+    size = "2G";
+    backup.groups = [
+      "hourly"
+      "daily"
+    ];
+  };
+
   karakeep = {
     uuid = "e81be5cb-aa35-4c80-96bf-ed55f3c492e9";
     size = "512M";
