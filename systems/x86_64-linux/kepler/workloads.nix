@@ -27,7 +27,7 @@
     runtimeId = 20691;
   };
 
-  huawei-sms-telegram = enabled // {
+  huawei-sms = enabled // {
     vlans = [ 50 ];
     runtimeId = 27777;
   };

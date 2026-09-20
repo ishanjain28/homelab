@@ -14,6 +14,61 @@ let
   logging = config.${namespace}.logging;
   loggedServices = filterAttrs (_name: service: service.enable && service.logging.enable) allServices;
   metrics = config.${namespace}.metrics;
+
+  intelGpuSample = pkgs.writeShellScript "intel-gpu-sample" ''
+    ${pkgs.coreutils}/bin/timeout 6 ${pkgs.intel-gpu-tools}/bin/intel_gpu_top -c -s 2000 | ${pkgs.gnused}/bin/sed -n 3p
+  '';
+
+  intelGpuTelegrafConfig = (pkgs.formats.toml { }).generate "telegraf-intel-gpu.toml" {
+    agent = {
+      interval = "30s";
+      flush_interval = "30s";
+    };
+    inputs.exec = [
+      {
+        commands = [ "${intelGpuSample}" ];
+        timeout = "10s";
+        name_override = "intel_gpu";
+        data_format = "csv";
+        csv_header_row_count = 0;
+        csv_column_names = [
+          "frequency_requested_mhz"
+          "frequency_actual_mhz"
+          "interrupts_per_s"
+          "rc6_pct"
+          "power_gpu_w"
+          "power_package_w"
+          "render_busy_pct"
+          "render_sema_pct"
+          "render_wait_pct"
+          "blitter_busy_pct"
+          "blitter_sema_pct"
+          "blitter_wait_pct"
+          "video_busy_pct"
+          "video_sema_pct"
+          "video_wait_pct"
+          "video_enhance_busy_pct"
+          "video_enhance_sema_pct"
+          "video_enhance_wait_pct"
+        ];
+        fieldinclude = [
+          "frequency_actual_mhz"
+          "power_gpu_w"
+          "render_busy_pct"
+          "video_busy_pct"
+          "video_enhance_busy_pct"
+        ];
+      }
+    ];
+    outputs.influxdb_v2 = [
+      {
+        urls = [ metrics.victoriaMetricsUrl ];
+        bucket = "telegraf";
+        organization = "homelab";
+        token = "";
+      }
+    ];
+  };
   vethServiceMap = listToAttrs (
     concatLists (
       mapAttrsToList (
@@ -145,6 +200,7 @@ in
     metrics = {
       enable = mkBoolOpt false "Whether to enable metrics collection.";
       victoriaMetricsUrl = mkOpt types.nonEmptyStr "http://10.0.50.21:8428" "VictoriaMetrics URL";
+      intelGpu.enable = mkBoolOpt false "Whether to collect Intel GPU video engine, frequency and power metrics on this host.";
     };
   };
 
@@ -255,6 +311,7 @@ in
                   "cpu.stat"
                   "memory.current"
                   "memory.max"
+                  "memory.stat"
                   "memory.swap.current"
                   "pids.current"
                 ];
@@ -309,6 +366,23 @@ in
           "CAP_SYS_ADMIN"
           "CAP_SYS_RAWIO"
         ];
+      };
+    })
+
+    (mkIf (metrics.enable && metrics.intelGpu.enable) {
+      systemd.services.telegraf-intel-gpu = {
+        description = "Telegraf Intel GPU collector";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        serviceConfig = {
+          ExecStart = "${getExe pkgs.telegraf} --config ${intelGpuTelegrafConfig}";
+          DynamicUser = true;
+          AmbientCapabilities = [ "CAP_PERFMON" ];
+          CapabilityBoundingSet = [ "CAP_PERFMON" ];
+          Restart = "on-failure";
+          RestartSec = "10s";
+        };
       };
     })
 

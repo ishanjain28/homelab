@@ -15,7 +15,9 @@ in
 
   homelab = {
     profiles.server = enabled;
-    metrics = enabled;
+    metrics = enabled // {
+      intelGpu = enabled;
+    };
     inherit backups;
     inherit volumes;
     services = workloads;

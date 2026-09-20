@@ -9,19 +9,19 @@ with lib;
 with lib.${namespace};
 let
   srv = config.${namespace}.services;
-  cfg = srv.huawei-sms-telegram;
-  containerSecretPath = "/run/container-secrets/huawei-sms-telegram.env";
+  cfg = srv.huawei-sms;
+  containerSecretPath = "/run/container-secrets/huawei-sms.env";
 in
 {
-  options.${namespace}.services.huawei-sms-telegram = mkServiceOptions {
-    name = "huawei-sms-telegram";
-    description = "Huawei 5G Modem messages to Telegram";
+  options.${namespace}.services.huawei-sms = mkServiceOptions {
+    name = "huawei-sms";
+    description = "Huawei 5G Modem messages to Pushover";
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     secrets.env = {
-      file = "secrets/huawei-sms-telegram.env";
+      file = "secrets/huawei-sms.env";
       format = "dotenv";
       mountPath = containerSecretPath;
     };
@@ -30,14 +30,15 @@ in
       MemoryMax = "128M";
       TasksMax = 256;
     };
-    package = pkgs.${namespace}.huawei-sms-telegram;
-    exec = "/bin/huawei-msg";
+    package = pkgs.${namespace}.huawei-sms;
     environment = {
-      RUST_LOG = "info";
+      RUST_LOG = "warn";
       TOKIO_WORKER_THREADS = "2";
+      STATE_FILE = "/var/lib/huawei-sms/state.json";
     };
     serviceConfig = {
       EnvironmentFile = containerSecretPath;
+      StateDirectory = "huawei-sms";
     };
   });
 }

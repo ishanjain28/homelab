@@ -431,7 +431,7 @@
       "id": 7,
       "type": "stat",
       "title": "Service memory in use",
-      "description": "",
+      "description": "Anonymous + shared memory of all service containers (page cache excluded).",
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
         "uid": "efyik59h6cbnkc"
@@ -448,7 +448,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "sum(label_replace(cgroup_memory_current{host=~\"$host\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "sum(label_replace(cgroup_memory_stat_anon{host=~\"$host\"} + cgroup_memory_stat_shmem{host=~\"$host\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "A",
           "legendFormat": "",
           "instant": true,
@@ -1077,7 +1077,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (service) (label_replace(cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "C",
           "legendFormat": "",
           "instant": true,
@@ -1101,7 +1101,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(100 * cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} / cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (service) (label_replace(100 * (cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}) / cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "E",
           "legendFormat": "",
           "instant": true,
@@ -2193,6 +2193,318 @@
       }
     },
     {
+      "type": "row",
+      "title": "GPUs",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "id": 31,
+      "panels": []
+    },
+    {
+      "id": 32,
+      "type": "timeseries",
+      "title": "GPU engine utilization",
+      "description": "Busy time of the Intel iGPU engines: video (decode/encode), video enhance and render/3D.",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "efyik59h6cbnkc"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 61
+      },
+      "interval": "1m",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "efyik59h6cbnkc"
+          },
+          "expr": "intel_gpu_video_busy_pct{host=~\"$host\"}",
+          "refId": "A",
+          "legendFormat": "{{host}} video"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "efyik59h6cbnkc"
+          },
+          "expr": "intel_gpu_video_enhance_busy_pct{host=~\"$host\"}",
+          "refId": "B",
+          "legendFormat": "{{host}} video enhance"
+        },
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "efyik59h6cbnkc"
+          },
+          "expr": "intel_gpu_render_busy_pct{host=~\"$host\"}",
+          "refId": "C",
+          "legendFormat": "{{host}} render/3D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 33,
+      "type": "timeseries",
+      "title": "GPU frequency",
+      "description": "Actual Intel iGPU clock.",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "efyik59h6cbnkc"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 61
+      },
+      "interval": "1m",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "efyik59h6cbnkc"
+          },
+          "expr": "intel_gpu_frequency_actual_mhz{host=~\"$host\"}",
+          "refId": "A",
+          "legendFormat": "{{host}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "rotmhz",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 34,
+      "type": "timeseries",
+      "title": "GPU power",
+      "description": "Intel iGPU package power draw.",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "efyik59h6cbnkc"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 70
+      },
+      "interval": "1m",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "efyik59h6cbnkc"
+          },
+          "expr": "intel_gpu_power_gpu_w{host=~\"$host\"}",
+          "refId": "A",
+          "legendFormat": "{{host}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "watt",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
       "id": 21,
       "type": "row",
       "title": "Services",
@@ -2201,7 +2513,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 79
       },
       "panels": []
     },
@@ -2218,7 +2530,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 61
+        "y": 80
       },
       "interval": "1m",
       "targets": [
@@ -2304,7 +2616,7 @@
       "id": 23,
       "type": "timeseries",
       "title": "Memory used, % of limit",
-      "description": "cgroup memory.current as a percentage of the MemoryMax limit, so every service is on the same 0\u2013100 scale. Absolute used-vs-limit is in the Service detail row.",
+      "description": "Anonymous + shared memory as a percentage of each container's memory limit. Page cache is excluded; it is reclaimable and does not count as pressure.",
       "datasource": {
         "type": "victoriametrics-metrics-datasource",
         "uid": "efyik59h6cbnkc"
@@ -2313,7 +2625,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 61
+        "y": 80
       },
       "interval": "1m",
       "targets": [
@@ -2322,7 +2634,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(100 * cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} / cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (service) (label_replace(100 * (cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}) / cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "A",
           "legendFormat": "{{service}}"
         }
@@ -2416,7 +2728,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 70
+        "y": 89
       },
       "interval": "1m",
       "targets": [
@@ -2509,7 +2821,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 70
+        "y": 89
       },
       "targets": [
         {
@@ -2584,14 +2896,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 79
+        "y": 98
       },
       "panels": [
         {
           "id": 26,
           "type": "timeseries",
           "title": "Memory used vs limit",
-          "description": "Solid = memory.current, dashed = MemoryMax. Same legend name per service, so one click toggles the pair. Narrow the service variable to keep this readable.",
+          "description": "Anonymous + shared memory (\"used\"), total charged memory including page cache (\"incl. cache\"), and the container limit.",
           "datasource": {
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
@@ -2600,7 +2912,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 80
+            "y": 99
           },
           "interval": "1m",
           "targets": [
@@ -2609,18 +2921,27 @@
                 "type": "victoriametrics-metrics-datasource",
                 "uid": "efyik59h6cbnkc"
               },
-              "expr": "max by (service) (label_replace(cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
               "refId": "A",
-              "legendFormat": "{{service}}"
+              "legendFormat": "{{service}} used",
+              "expr": "max by (service) (label_replace(cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
             },
             {
               "datasource": {
                 "type": "victoriametrics-metrics-datasource",
                 "uid": "efyik59h6cbnkc"
               },
-              "expr": "max by (service) (label_replace(cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
               "refId": "B",
-              "legendFormat": "{{service}}"
+              "legendFormat": "{{service}} incl. cache",
+              "expr": "max by (service) (label_replace(cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
+            },
+            {
+              "datasource": {
+                "type": "victoriametrics-metrics-datasource",
+                "uid": "efyik59h6cbnkc"
+              },
+              "refId": "C",
+              "legendFormat": "{{service}} limit",
+              "expr": "max by (service) (label_replace(cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
             }
           ],
           "fieldConfig": {
@@ -2696,6 +3017,28 @@
                     "value": 1
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".* incl\\. cache"
+                },
+                "properties": [
+                  {
+                    "id": "custom.lineStyle",
+                    "value": {
+                      "fill": "dash",
+                      "dash": [
+                        4,
+                        4
+                      ]
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
               }
             ]
           },
@@ -2730,7 +3073,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 80
+            "y": 99
           },
           "interval": "1m",
           "targets": [
@@ -2824,7 +3167,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 89
+            "y": 108
           },
           "interval": "1m",
           "targets": [
@@ -2918,7 +3261,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 89
+            "y": 108
           },
           "interval": "1m",
           "targets": [
