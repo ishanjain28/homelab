@@ -79,13 +79,14 @@ in
       fish
       git
       htop
+      iftop
       inetutils
       iotop
       iproute2
       iperf3
+      iptraf-ng
       iputils
       jq
-      kitty.terminfo
       lm_sensors
       lsof
       lvm2

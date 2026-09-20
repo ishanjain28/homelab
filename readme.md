@@ -120,6 +120,9 @@ it should call the reload command for the service rather than restarting it!
 
 * Credit card / Bank statement processing pipeline in windmill to auto save them to actual budget
 
+* MAC address for services is created from a hash of <svc-name>:<vlan-id>. A service with the exact same name deployed on 2 machines will have a conflict. I don't want this to be a hard error because this repo will deploy
+services on machines that are on completely different networks but maybe there should be a warning.
+
 ### remote bootstrap Notes
 
 1. got stuck on /dev/disk/by-label/nixos-minimal-26.11-x86_64 when booting with the virtual media option in jetkvm. FIX: Needs to be mounted as CD/DVD for it to show up in boot options and then mounted as disk not as cd/dvd for it to show up in /dev/disk/by-label/nix...

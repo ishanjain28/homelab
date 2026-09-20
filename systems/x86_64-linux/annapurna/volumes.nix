@@ -38,7 +38,7 @@
 
   jellyfin = {
     uuid = "95408258-29ea-4970-b0fb-d0e610eef08c";
-    size = "45G";
+    size = "90G";
     backup.groups = [ "daily" ];
   };
 

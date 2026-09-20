@@ -104,20 +104,12 @@ let
     }:
     let
       vlanInterface = vlan: "eth${toString vlan}";
-      vethLinks = listToAttrs (
-        map (
-          vlan:
-          nameValuePair "20-${vlanInterface vlan}" {
-            matchConfig.OriginalName = vlanInterface vlan;
-            linkConfig.MACAddress = mkContainerMacAddress "${name}:${toString vlan}";
-          }
-        ) vlans
-      );
       vlanNetworks = listToAttrs (
         imap0 (
           index: vlan:
           nameValuePair "40-${vlanInterface vlan}" {
             matchConfig.Name = vlanInterface vlan;
+            linkConfig.MACAddress = mkContainerMacAddress "${name}:${toString vlan}";
             networkConfig = {
               Description = "${name} service container VLAN ${toString vlan}";
               DHCP = "ipv4";
@@ -190,7 +182,6 @@ let
       };
 
       systemd.network = enabled // {
-        links = vethLinks;
         networks = vlanNetworks;
       };
 
