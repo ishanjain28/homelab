@@ -38,6 +38,10 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    databaseUnits = [
+      "windmill-server"
+      "windmill-worker"
+    ];
 
     secrets.env = {
       file = "secrets/windmill.env";

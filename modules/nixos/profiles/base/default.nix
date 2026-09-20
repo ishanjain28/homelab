@@ -25,7 +25,7 @@ in
       fish
     ];
 
-    documentation = enabled // {
+    documentation = disabled // {
       doc = disabled;
       dev = disabled;
       man = disabled;

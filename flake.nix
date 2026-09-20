@@ -154,6 +154,7 @@
         builtins.elem (inputs.nixpkgs.lib.getName package) [
           "mongodb-ce"
           "omada-controller"
+          "timescaledb"
         ];
 
       deploy = lib.mkDeploy {

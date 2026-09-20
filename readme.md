@@ -62,8 +62,6 @@ because Microsoft did not have a PLAT implementation.
 * Specify secrets update policies. Currently, it restarts the service but some services offer a reload option to do it without disrupting the process. In that situation,
 it should call the reload command for the service rather than restarting it!
 
-* [DONE] Monitoring resource usage CPU/MEM/Storage of each deployed service and the hosts in grafana.
-
 * Alerting system when something fails. Backups, healthchecks
 
 * Windmill working with an email receiver. Ideally, I want to do an IMAP server just for this rather than giving it limited access to some other email account. This can be IPv6 only in my ASN and IPv6 only is fine in this context.

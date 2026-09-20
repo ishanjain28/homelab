@@ -34,7 +34,7 @@ in
     exec = "/bin/gitea web --config ${confPath}";
 
     secrets.config = {
-      file = "secrets/gitea.ini";
+      file = "secrets/gitea.config";
       format = "binary";
       mountPath = confPath;
     };

@@ -33,6 +33,10 @@
   };
 
   gitea = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "gitea";
+    };
     vlans = [ 50 ];
     runtimeId = 36930;
     volumes = [ "gitea" ];
@@ -52,6 +56,10 @@
 
   # TODO: windmill pkg in nixpkgs is very old. need to update that!
   windmill = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "windmill";
+    };
     vlans = [ 50 ];
     runtimeId = 30353;
   };
@@ -62,27 +70,47 @@
   };
 
   lldap = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "ldap";
+    };
     vlans = [ 50 ];
     runtimeId = 25457;
   };
 
   authelia = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "authelia";
+    };
     vlans = [ 50 ];
     runtimeId = 20001;
   };
 
   grafana = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "grafana";
+    };
     vlans = [ 50 ];
     runtimeId = 31918;
     volumes = [ "grafana" ];
   };
 
   mathesar = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "mathesar_django";
+    };
     vlans = [ 50 ];
     runtimeId = 30339;
   };
 
   seerr = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "jellyseerr";
+    };
     vlans = [ 50 ];
     runtimeId = 30340;
     volumes = [ "seerr" ];
@@ -152,6 +180,10 @@
   };
 
   tracearr = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "tracearr";
+    };
     vlans = [ 50 ];
     runtimeId = 30342;
   };

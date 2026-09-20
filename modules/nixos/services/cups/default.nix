@@ -148,14 +148,6 @@ in
         };
       };
 
-      # Avahi is Type=dbus. Starting it concurrently with dbus-broker can leave
-      # the unit activating even after Avahi has finished starting, which keeps
-      # the container from reaching multi-user.target.
-      systemd.services.avahi-daemon = {
-        after = [ "dbus.service" ];
-        requires = [ "dbus.service" ];
-      };
-
       services.resolved.settings.Resolve.MulticastDNS = false;
     };
   });

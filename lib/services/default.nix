@@ -144,7 +144,7 @@ let
         ) vlans
       );
     in
-    {
+    { config, ... }: {
       time.timeZone = timeZone;
 
       networking = {
@@ -163,6 +163,7 @@ let
       environment.defaultPackages = mkForce [ ];
       environment.shellAliases = shellAliases;
       environment.systemPackages = mkForce [ ];
+      services.dbus.packages = [ config.systemd.package ];
       nix = disabled;
       programs.command-not-found = disabled;
       services.logind = disabled;
@@ -172,6 +173,7 @@ let
       services.timesyncd = disabled;
       system.nssModules = mkForce [ ];
       systemd.oomd = enabled;
+      systemd.settings.Manager.ShowStatus = false;
       systemd.services."console-getty" = disabled;
       systemd.services.systemd-networkd-persistent-storage = disabled;
       systemd.services.systemd-update-utmp = disabled;
@@ -193,6 +195,60 @@ let
       system.stateVersion = "26.05";
     };
 
+  postgresqlSecretsFile = "secrets/postgresql.json";
+  postgresqlInstances = builtins.fromJSON (builtins.readFile (../.. + "/${postgresqlSecretsFile}"));
+  databaseReadyUnit = "database-ready.service";
+
+  # Readiness gate and watchdog for a container that consumes a PostgreSQL database.
+  genDatabaseClientConfig =
+    service:
+    { pkgs, ... }:
+    let
+      inherit (service) database;
+      host = postgresqlInstances.${database.instance}.address;
+      failureThreshold = 10;
+      checkInterval = 30;
+      check = "${pkgs.postgresql}/bin/pg_isready -q -h ${host} -p 5432 -d postgres -U ishan -t 5";
+    in
+    {
+      systemd.services.database-ready = {
+        description = "Wait for ${database.name} on ${database.instance}";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        serviceConfig = {
+          Type = "notify";
+          NotifyAccess = "all";
+          TimeoutStartSec = "infinity";
+          Restart = "always";
+          RestartSec = "5s";
+        };
+        script = ''
+          until ${check}; do
+            sleep 2
+          done
+          systemd-notify --ready
+
+          failures=0
+          while true; do
+            sleep ${toString checkInterval}
+            if ${check}; then
+              if [ "$failures" -gt 0 ]; then
+                echo "${database.instance} reachable again after $failures failed checks"
+              fi
+              failures=0
+              continue
+            fi
+            failures=$(( failures + 1 ))
+            if [ "$failures" -ge ${toString failureThreshold} ]; then
+              echo "${database.instance} unreachable for $failures consecutive checks, restarting dependent units"
+              systemctl --no-block restart ${databaseReadyUnit}
+            fi
+          done
+        '';
+      };
+    };
+
   # Default homelab service container: minimal NixOS guest plus arbitrary inner config.
   genServiceContainer =
     {
@@ -202,6 +258,7 @@ let
       isolationProfile ? "unprivileged",
       resources ? { },
       containerTimeout ? null,
+      databaseUnits ? [ service.name ],
     }:
     let
       repoRoot = ../..;
@@ -212,53 +269,35 @@ let
         vlans
         ;
       mkSecretName = secretName: "${name}-${secretName}";
-      mkHostUid = uid: containerUidOffset + uid;
-      mkHostGid = gid: containerUidOffset + gid;
-      mkSecretHostPath = secretName: "/run/homelab-container-secrets/${name}/${secretName}";
-      secretHostUid = mkHostUid runtimeId;
-      secretHostGid = mkHostGid runtimeId;
-      mkSecretPrepareLine =
-        secretName: _secret:
-        let
-          sopsName = mkSecretName secretName;
-          hostPath = mkSecretHostPath secretName;
-        in
-        ''
-          install -d -m 0700 -o root -g root ${escapeShellArg "/run/homelab-container-secrets/${name}"}
-          install -m 0400 -o ${toString secretHostUid} -g ${toString secretHostGid} /run/secrets/${sopsName} ${escapeShellArg hostPath}
-        '';
-      secretConfig = mkMerge (
-        mapAttrsToList (
-          secretName: secret:
-          let
-            sopsName = mkSecretName secretName;
-            inherit (secret) mountPath;
-            hostPath = mkSecretHostPath secretName;
-          in
-          {
-            sops.secrets.${sopsName} = {
-              sopsFile = repoRoot + "/${secret.file}";
-              inherit (secret) format;
-              key = secret.key or "";
-              owner = "root";
-              group = "root";
-              mode = "0400";
-              restartUnits = [ "container@${name}.service" ];
-            };
-
-            containers.${name}.bindMounts.${mountPath} = {
-              inherit hostPath;
-              isReadOnly = true;
-            };
-          }
-        ) secrets
-      );
+      databaseEnabled = service.database != null;
+      databaseUnitConfig = genAttrs databaseUnits (_unit: {
+        after = [ databaseReadyUnit ];
+        requires = [ databaseReadyUnit ];
+      });
     in
     mkMerge [
-      secretConfig
-      (mkIf (secrets != { }) {
-        systemd.services."container@${name}".preStart = concatStringsSep "\n" (mapAttrsToList mkSecretPrepareLine secrets);
-      })
+      {
+        sops.secrets = mapAttrs' (
+          secretName: secret:
+          nameValuePair (mkSecretName secretName) {
+            sopsFile = repoRoot + "/${secret.file}";
+            inherit (secret) format;
+            key = secret.key or "";
+            uid = containerUidOffset + runtimeId;
+            gid = containerUidOffset + runtimeId;
+            mode = "0400";
+            restartUnits = [ "container@${name}.service" ];
+          }
+        ) secrets;
+
+        containers.${name}.bindMounts = mapAttrs' (
+          secretName: secret:
+          nameValuePair secret.mountPath {
+            hostPath = "/run/secrets/${mkSecretName secretName}";
+            isReadOnly = true;
+          }
+        ) secrets;
+      }
       (genContainerBase {
         inherit
           name
@@ -280,6 +319,10 @@ let
               group = mkForce runtimeUser.group;
             };
           }
+          (mkIf databaseEnabled (mkMerge [
+            (genDatabaseClientConfig service)
+            { systemd.services = databaseUnitConfig; }
+          ]))
           containerConfig
         ];
       })
@@ -344,6 +387,18 @@ let
         ) "Gatus check conditions.";
       };
 
+      database = mkOpt (types.nullOr (
+        types.submodule {
+          options = {
+            instance = mkOption {
+              type = types.nonEmptyStr;
+              description = "Name of the homelab PostgreSQL service that hosts the database.";
+            };
+            name = mkOpt types.nonEmptyStr name "Database name.";
+          };
+        }
+      )) null "PostgreSQL database this service consumes.";
+
       logging = {
         enable = mkBoolOpt logging.enable "Whether this service container should push journald logs to Loki.";
         files = mkOpt (types.listOf types.str) [ ] "Log file paths or glob patterns that Alloy should also push to Loki.";
@@ -389,6 +444,7 @@ let
         containerTimeout
         secrets
         ;
+      databaseUnits = [ serviceName ];
       containerConfig = mkMerge [
         {
           systemd.services.${serviceName} = {
@@ -416,7 +472,12 @@ let
     };
 in
 {
-  inherit containerUidOffset mkContainerVethName;
+  inherit
+    containerUidOffset
+    mkContainerVethName
+    postgresqlInstances
+    postgresqlSecretsFile
+    ;
   mkServiceOptions = genServiceOptions;
   mkServiceContainer = genServiceContainer;
   mkSingleServiceContainer = genSingleServiceContainer;

@@ -1,4 +1,14 @@
 {
+  postgresql-home-primary = {
+    uuid = "c89f5053-4f04-42ba-a299-6950e0538235";
+    mountPath = "/var/lib/postgresql";
+    size = "10G";
+    backup.groups = [
+      "hourly"
+      "daily"
+    ];
+  };
+
   karakeep = {
     uuid = "e81be5cb-aa35-4c80-96bf-ed55f3c492e9";
     size = "512M";

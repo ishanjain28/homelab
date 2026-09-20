@@ -33,6 +33,7 @@ in
 
     (mkServiceContainer {
       service = cfg;
+      databaseUnits = [ "authelia-main" ];
       secrets = {
         conf = {
           file = "secrets/authelia.yml";
