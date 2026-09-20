@@ -1,27 +1,30 @@
-use crate::lock::VolumeLocks;
-use crate::lvm::{lv_exists, lv_path};
-use crate::models::{load_state, BackupPolicy, Volume};
-use crate::util::{confirm, is_mounted, run_command};
+use anyhow::{ensure, Context, Result};
 use std::path::Path;
-use std::process::Command;
 
-pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Result<(), String> {
+use crate::{
+    lock::VolumeLocks,
+    lvm::{lv_exists, lv_path},
+    models::{load_state, BackupPolicy, Volume},
+    util::{command_stdout, confirm, is_mounted, run_command},
+};
+
+pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Result<()> {
     let state = load_state(state_file)?;
-    let tombstone = state.deleted_volumes.get(volume_id).ok_or_else(|| {
+    let tombstone = state.deleted_volumes.get(volume_id).with_context(|| {
         format!(
             "volume {volume_id:?} has no deployed deletedVolumes tombstone; retirement is refused"
         )
     })?;
-    if state.volumes.contains_key(volume_id) {
-        return Err(format!("volume {volume_id:?} is still actively declared"));
-    }
-    let today = output("date", &["+%F"])?.trim().to_string();
-    if tombstone.after > today {
-        return Err(format!(
-            "volume {volume_id:?} cannot be retired before {} (today is {today})",
-            tombstone.after
-        ));
-    }
+    ensure!(
+        !state.volumes.contains_key(volume_id),
+        "volume {volume_id:?} is still actively declared"
+    );
+    let today = command_stdout("date", &["+%F"])?;
+    ensure!(
+        tombstone.after <= today,
+        "volume {volume_id:?} cannot be retired before {} (today is {today})",
+        tombstone.after
+    );
     let lock_volume = Volume {
         id: volume_id.to_string(),
         lv: String::new(),
@@ -39,19 +42,21 @@ pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Resul
     };
     let _locks = VolumeLocks::acquire(std::slice::from_ref(&lock_volume), "retire")?;
     let lv = lv_path(&tombstone.name);
-    if !lv_exists(&tombstone.name)? {
-        return Err(format!("retired LV does not exist: {}", lv.display()));
-    }
-    if is_mounted(lv.to_string_lossy().as_ref())? {
-        return Err(format!("refusing to remove mounted LV {}", lv.display()));
-    }
+    let lv_str = lv.to_string_lossy();
+    ensure!(
+        lv_exists(&tombstone.name)?,
+        "retired LV does not exist: {}",
+        lv.display()
+    );
+    ensure!(
+        !is_mounted(&lv_str)?,
+        "refusing to remove mounted LV {}",
+        lv.display()
+    );
     if !lv.exists() {
-        run_command(
-            "lvchange",
-            &["--activate", "y", lv.to_string_lossy().as_ref()],
-        )?;
+        run_command("lvchange", &["--activate", "y", &lv_str])?;
     }
-    let snapshots = output(
+    let snapshots = command_stdout(
         "lvs",
         &[
             "--noheadings",
@@ -61,54 +66,27 @@ pub fn run_retire(state_file: &Path, volume_id: &str, assume_yes: bool) -> Resul
             &format!("origin={}", tombstone.name),
         ],
     )?;
-    if !snapshots.trim().is_empty() {
-        return Err(format!(
-            "refusing to remove {} while snapshots exist: {}",
-            lv.display(),
-            snapshots.trim()
-        ));
-    }
-    let identity = output(
-        "blkid",
-        &[
-            "--probe",
-            "--output",
-            "export",
-            lv.to_string_lossy().as_ref(),
-        ],
-    )?;
-    let actual_uuid = identity.lines().find_map(|line| line.strip_prefix("UUID="));
-    if actual_uuid != Some(tombstone.uuid.as_str()) {
-        return Err(format!(
-            "refusing to remove {}: expected filesystem UUID {}, got {}",
-            lv.display(),
-            tombstone.uuid,
-            actual_uuid.unwrap_or("missing")
-        ));
-    }
+    ensure!(
+        snapshots.is_empty(),
+        "refusing to remove {} while snapshots exist: {snapshots}",
+        lv.display()
+    );
+    let identity = command_stdout("blkid", &["--probe", "--output", "export", &lv_str])?;
+    let actual_uuid = identity
+        .lines()
+        .find_map(|line| line.strip_prefix("UUID="))
+        .unwrap_or("missing");
+    ensure!(
+        actual_uuid == tombstone.uuid,
+        "refusing to remove {}: expected filesystem UUID {}, got {actual_uuid}",
+        lv.display(),
+        tombstone.uuid
+    );
     let prompt = format!(
         "permanently remove {} for retired volume {volume_id:?} ({})",
         lv.display(),
         tombstone.reason
     );
-    if !confirm(assume_yes, &prompt)? {
-        return Err(format!("{prompt}: skipped"));
-    }
-    run_command("lvremove", &["--yes", lv.to_string_lossy().as_ref()])
-}
-
-fn output(program: &str, args: &[&str]) -> Result<String, String> {
-    let output = Command::new(program)
-        .args(args)
-        .output()
-        .map_err(|error| format!("failed to execute {program}: {error}"))?;
-    if output.status.success() {
-        Ok(String::from_utf8_lossy(&output.stdout).into_owned())
-    } else {
-        Err(format!(
-            "{program} failed with {}: {}",
-            output.status,
-            String::from_utf8_lossy(&output.stderr).trim()
-        ))
-    }
+    ensure!(confirm(assume_yes, &prompt)?, "{prompt}: skipped");
+    run_command("lvremove", &["--yes", &lv_str])
 }

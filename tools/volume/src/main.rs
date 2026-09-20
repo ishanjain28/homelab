@@ -13,7 +13,7 @@ fn main() {
     env_logger::init();
 
     if let Err(error) = cli::run() {
-        log::error!("{error}");
+        log::error!("{error:#}");
         std::process::exit(1);
     }
 }

@@ -1,3 +1,4 @@
+use anyhow::{ensure, Context, Result};
 use std::{
     fs,
     os::fd::AsRawFd,
@@ -25,7 +26,7 @@ pub fn run_backup_prepare(
     group: &str,
     owner_service: &str,
     wait: Duration,
-) -> Result<(), String> {
+) -> Result<()> {
     let state = load_state(state_file)?;
     let volumes = backup_volumes(&state, group, owner_service)?;
     let _locks = VolumeLocks::acquire_ids(
@@ -35,9 +36,12 @@ pub fn run_backup_prepare(
     )?;
     ensure_vg()?;
     for volume in &volumes {
-        if !is_block_device(Path::new(&volume.lv)) {
-            return Err(format!("[{}] missing LV {}", volume.id, volume.lv));
-        }
+        ensure!(
+            is_block_device(Path::new(&volume.lv)),
+            "missing LV {} for volume {}",
+            volume.lv,
+            volume.id
+        );
     }
 
     let unit = &volumes[0].owner_unit;
@@ -48,9 +52,8 @@ pub fn run_backup_prepare(
     release_volumes(group, &volumes)?;
 
     if let Err(error) = snapshot_and_mount(group, unit, &volumes) {
-        if let Err(cleanup_error) = release_volumes(group, &volumes) {
-            return Err(format!("{error}\ncleanup also failed: {cleanup_error}"));
-        }
+        release_volumes(group, &volumes)
+            .with_context(|| format!("cleanup after failed prepare: {error:#}"))?;
         return Err(error);
     }
     Ok(())
@@ -63,7 +66,7 @@ pub fn run_backup_cleanup(
     group: &str,
     owner_service: &str,
     wait: Duration,
-) -> Result<(), String> {
+) -> Result<()> {
     let state = load_state(state_file)?;
     let volumes = backup_volumes(&state, group, owner_service)?;
     let _locks = VolumeLocks::acquire_ids(
@@ -79,7 +82,7 @@ pub fn run_backup_cleanup(
     Ok(())
 }
 
-fn snapshot_and_mount(group: &str, unit: &str, volumes: &[Volume]) -> Result<(), String> {
+fn snapshot_and_mount(group: &str, unit: &str, volumes: &[Volume]) -> Result<()> {
     let guard = QuiesceGuard::begin(unit)?;
     for volume in volumes {
         syncfs(&volume.host_mount_path)?;
@@ -91,12 +94,13 @@ fn snapshot_and_mount(group: &str, unit: &str, volumes: &[Volume]) -> Result<(),
             &snapshot_name(volume, group)?,
             SNAPSHOT_TAG,
             &volume.backup.snapshot_size,
-        )?;
+        )
+        .with_context(|| format!("[{}] snapshot failed", volume.id))?;
     }
     guard.release()?;
 
     for volume in volumes {
-        mount_snapshot(group, volume)?;
+        mount_snapshot(group, volume).with_context(|| format!("[{}] mount failed", volume.id))?;
     }
     Ok(())
 }
@@ -110,22 +114,26 @@ fn lock_ids(volumes: &[Volume], owner_service: &str) -> Vec<String> {
     ids
 }
 
-fn release_volumes(group: &str, volumes: &[Volume]) -> Result<(), String> {
+fn release_volumes(group: &str, volumes: &[Volume]) -> Result<()> {
     for volume in volumes {
-        let dir = mount_dir(group, &volume.id);
-        if is_mountpoint(&dir)? {
-            run_command("umount", &[&dir.to_string_lossy()])?;
-        }
-        remove_snapshot(volume, &snapshot_name(volume, group)?, SNAPSHOT_TAG)?;
-        let _ = fs::remove_dir(&dir);
+        release_volume(group, volume).with_context(|| format!("[{}] release failed", volume.id))?;
     }
     Ok(())
 }
 
-fn mount_snapshot(group: &str, volume: &Volume) -> Result<(), String> {
+fn release_volume(group: &str, volume: &Volume) -> Result<()> {
     let dir = mount_dir(group, &volume.id);
-    fs::create_dir_all(&dir)
-        .map_err(|error| format!("failed to create {}: {error}", dir.display()))?;
+    if is_mountpoint(&dir)? {
+        run_command("umount", &[&dir.to_string_lossy()])?;
+    }
+    remove_snapshot(volume, &snapshot_name(volume, group)?, SNAPSHOT_TAG)?;
+    let _ = fs::remove_dir(&dir);
+    Ok(())
+}
+
+fn mount_snapshot(group: &str, volume: &Volume) -> Result<()> {
+    let dir = mount_dir(group, &volume.id);
+    fs::create_dir_all(&dir).with_context(|| format!("failed to create {}", dir.display()))?;
     let snapshot = lv_path(&snapshot_name(volume, group)?);
     run_command(
         "mount",
@@ -138,20 +146,20 @@ fn mount_snapshot(group: &str, volume: &Volume) -> Result<(), String> {
             &dir.to_string_lossy(),
         ],
     )
+    .with_context(|| format!("failed to mount {}", snapshot.display()))
 }
 
-fn syncfs(path: &str) -> Result<(), String> {
-    let file = fs::File::open(path).map_err(|error| format!("failed to open {path}: {error}"))?;
-    if unsafe { libc::syncfs(file.as_raw_fd()) } != 0 {
-        return Err(format!(
-            "syncfs failed for {path}: {}",
-            std::io::Error::last_os_error()
-        ));
-    }
+fn syncfs(path: &str) -> Result<()> {
+    let file = fs::File::open(path).with_context(|| format!("failed to open {path}"))?;
+    ensure!(
+        unsafe { libc::syncfs(file.as_raw_fd()) } == 0,
+        "syncfs failed for {path}: {}",
+        std::io::Error::last_os_error()
+    );
     Ok(())
 }
 
-fn snapshot_name(volume: &Volume, group: &str) -> Result<String, String> {
+fn snapshot_name(volume: &Volume, group: &str) -> Result<String> {
     derived_name(&volume.name, &format!("-bk-{group}"))
 }
 

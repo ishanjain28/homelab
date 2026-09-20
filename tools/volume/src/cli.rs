@@ -4,6 +4,7 @@ use crate::{
     retire::run_retire,
     transfer::{run_copy, run_receive},
 };
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 use std::{path::PathBuf, time::Duration};
 
@@ -85,7 +86,7 @@ enum VolumeCommand {
     },
 }
 
-pub fn run() -> Result<(), String> {
+pub fn run() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {

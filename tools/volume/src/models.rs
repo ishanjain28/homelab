@@ -1,3 +1,4 @@
+use anyhow::{ensure, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path};
 
@@ -61,43 +62,40 @@ pub struct DeletedVolume {
     pub reason: String,
 }
 
-pub fn load_state(state_file: &Path) -> Result<State, String> {
+pub fn load_state(state_file: &Path) -> Result<State> {
     let contents = fs::read_to_string(state_file)
-        .map_err(|error| format!("failed to read {}: {error}", state_file.display()))?;
+        .with_context(|| format!("failed to read {}", state_file.display()))?;
     let state = serde_json::from_str::<State>(&contents)
-        .map_err(|error| format!("failed to parse {}: {error}", state_file.display()))?;
+        .with_context(|| format!("failed to parse {}", state_file.display()))?;
 
-    if state.schema_version != 1 {
-        return Err(format!(
-            "unsupported volume state schema {} in {}",
-            state.schema_version,
-            state_file.display()
-        ));
-    }
+    ensure!(
+        state.schema_version == 1,
+        "unsupported volume state schema {} in {}",
+        state.schema_version,
+        state_file.display()
+    );
 
     for (key, volume) in &state.volumes {
-        if !is_safe_identifier(key) {
-            return Err(format!(
-                "invalid volume id {key:?} in {}",
-                state_file.display()
-            ));
-        }
-        if key != &volume.id {
-            return Err(format!(
-                "volume state key {key:?} does not match volume id {:?}",
-                volume.id
-            ));
-        }
-        if !is_safe_identifier(&volume.owner_service) {
-            return Err(format!(
-                "invalid owner service {:?} for volume {key:?}",
-                volume.owner_service
-            ));
-        }
+        ensure!(
+            is_safe_identifier(key),
+            "invalid volume id {key:?} in {}",
+            state_file.display()
+        );
+        ensure!(
+            key == &volume.id,
+            "volume state key {key:?} does not match volume id {:?}",
+            volume.id
+        );
+        ensure!(
+            is_safe_identifier(&volume.owner_service),
+            "invalid owner service {:?} for volume {key:?}",
+            volume.owner_service
+        );
         for group in &volume.backup.groups {
-            if !is_safe_identifier(group) {
-                return Err(format!("invalid backup group {group:?} for volume {key:?}"));
-            }
+            ensure!(
+                is_safe_identifier(group),
+                "invalid backup group {group:?} for volume {key:?}"
+            );
         }
     }
 
@@ -111,32 +109,25 @@ fn is_safe_identifier(value: &str) -> bool {
             .all(|character| character.is_ascii_alphanumeric() || matches!(character, '-' | '_'))
 }
 
-pub fn load_volumes(state_file: &Path, volume_ids: &[String]) -> Result<Vec<Volume>, String> {
+pub fn load_volumes(state_file: &Path, volume_ids: &[String]) -> Result<Vec<Volume>> {
     let state = load_state(state_file)?;
 
-    volume_ids
-        .iter()
-        .map(|id| {
-            state
-                .volumes
-                .get(id)
-                .cloned()
-                .ok_or_else(|| format!("volume {id:?} is not declared in {}", state_file.display()))
-        })
-        .collect()
+    let mut volumes = Vec::with_capacity(volume_ids.len());
+    for id in volume_ids {
+        let volume = state.volumes.get(id).with_context(|| {
+            format!("volume {id:?} is not declared in {}", state_file.display())
+        })?;
+        volumes.push(volume.clone());
+    }
+    Ok(volumes)
 }
 
-pub fn load_all_volumes(state_file: &Path) -> Result<Vec<Volume>, String> {
+pub fn load_all_volumes(state_file: &Path) -> Result<Vec<Volume>> {
     let state = load_state(state_file)?;
-
-    return Ok(state.volumes.into_values().collect());
+    Ok(state.volumes.into_values().collect())
 }
 
-pub fn backup_volumes(
-    state: &State,
-    group: &str,
-    owner_service: &str,
-) -> Result<Vec<Volume>, String> {
+pub fn backup_volumes(state: &State, group: &str, owner_service: &str) -> Result<Vec<Volume>> {
     let mut volumes = Vec::new();
     for volume in state.volumes.values() {
         if volume.owner_service == owner_service && volume.backup.groups.iter().any(|g| g == group)
@@ -144,27 +135,23 @@ pub fn backup_volumes(
             volumes.push(volume.clone());
         }
     }
-    if volumes.is_empty() {
-        return Err(format!(
-            "service {owner_service:?} has no volumes in backup group {group:?}"
-        ));
-    }
+    ensure!(
+        !volumes.is_empty(),
+        "service {owner_service:?} has no volumes in backup group {group:?}"
+    );
     Ok(volumes)
 }
 
-pub fn service_volumes(state: &State, owner_service: &str) -> Result<Vec<Volume>, String> {
-    let volumes = state
-        .volumes
-        .values()
-        .filter(|volume| volume.owner_service == owner_service)
-        .cloned()
-        .collect::<Vec<_>>();
-
-    if volumes.is_empty() {
-        Err(format!(
-            "service {owner_service:?} owns no declared volumes"
-        ))
-    } else {
-        Ok(volumes)
+pub fn service_volumes(state: &State, owner_service: &str) -> Result<Vec<Volume>> {
+    let mut volumes = Vec::new();
+    for volume in state.volumes.values() {
+        if volume.owner_service == owner_service {
+            volumes.push(volume.clone());
+        }
     }
+    ensure!(
+        !volumes.is_empty(),
+        "service {owner_service:?} owns no declared volumes"
+    );
+    Ok(volumes)
 }
