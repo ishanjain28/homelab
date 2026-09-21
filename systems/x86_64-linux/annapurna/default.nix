@@ -6,6 +6,7 @@ let
   backups = import ./backups.nix;
   volumes = import ./volumes.nix;
   workloads = import ./workloads.nix { inherit lib namespace; };
+  vms = import ./vms.nix { inherit lib namespace; };
 in
 {
   imports = [
@@ -21,6 +22,7 @@ in
     inherit backups;
     inherit volumes;
     services = workloads;
+    inherit vms;
     devices.render = {
       hostPath = "/dev/dri/renderD128";
       udevMatch = ''SUBSYSTEM=="drm", KERNEL=="renderD128"'';
@@ -36,6 +38,35 @@ in
         gid = 30359;
         readOnly = false;
       };
+      ishan = {
+        hostPath = "/main/ishan";
+        gid = 30380;
+      };
+      yogesh = {
+        hostPath = "/main/yogesh";
+        gid = 30381;
+      };
+      suman = {
+        hostPath = "/main/suman";
+        gid = 30383;
+      };
+      deshna = {
+        hostPath = "/main/deshna";
+        gid = 30384;
+      };
+      shared = {
+        hostPath = "/main/shared";
+        gid = 30385;
+      };
+      emeraldbackups = {
+        hostPath = "/main/emeraldbackups";
+        gid = 30386;
+      };
+    };
+
+    hardware.vfio = enabled // {
+      iommu = "intel";
+      pciIds = [ ];
     };
 
     hardware.networking = enabled // {

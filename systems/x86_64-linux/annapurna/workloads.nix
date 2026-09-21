@@ -171,6 +171,21 @@
     runtimeId = 30351;
   };
 
+  samba = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30363;
+    shares = [
+      "ishan"
+      "yogesh"
+      "suman"
+      "deshna"
+      "music"
+      "wd-4tb"
+      "shared"
+      "emeraldbackups"
+    ];
+  };
+
   caddy = enabled // {
     vlans = [
       50

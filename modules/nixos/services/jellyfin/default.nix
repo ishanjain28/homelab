@@ -75,6 +75,8 @@ in
       systemd.services.jellyfin.serviceConfig = {
         PrivateUsers = mkForce false;
         UMask = mkForce "0007";
+        Restart = mkForce "always";
+        RestartSec = "2s";
       };
     };
   });

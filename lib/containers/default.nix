@@ -48,6 +48,11 @@ let
       CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
     };
 
+    # SystemCallArchitectures strips CAP_SETUID from root services, which smbd needs to impersonate users.
+    file-server = builtins.removeAttrs default [ "SystemCallArchitectures" ] // {
+      CapabilityBoundingSet = "CAP_CHOWN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_FSETID CAP_KILL CAP_LEASE CAP_NET_BIND_SERVICE CAP_SETGID CAP_SETUID CAP_SYS_RESOURCE";
+    };
+
     device-access = default // {
       ProtectHome = false;
     };
