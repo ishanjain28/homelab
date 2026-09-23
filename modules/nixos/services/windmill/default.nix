@@ -16,7 +16,7 @@ let
   };
   commonServiceConfig = {
     EnvironmentFile = environmentFile;
-    ExecStart = getExe pkgs.windmill;
+    ExecStart = getExe pkgs.${namespace}.windmill;
     LimitNOFILE = 65536;
     PrivateTmp = true;
     Restart = "always";

@@ -54,7 +54,6 @@
     logging = disabled;
   };
 
-  # TODO: windmill pkg in nixpkgs is very old. need to update that!
   windmill = enabled // {
     database = {
       instance = "postgresql-home-primary";
