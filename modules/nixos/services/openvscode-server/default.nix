@@ -11,6 +11,7 @@ let
   srv = config.${namespace}.services;
   cfg = srv.openvscode-server;
   stateDir = "/var/lib/openvscode-server";
+  connectionTokenPath = "/run/container-secrets/openvscode-server.token";
   hostNixUser = "openvscode-server-nix";
   hostNixUid = containerUidOffset + cfg.runtimeId;
   shellPackages = with pkgs; [
@@ -69,13 +70,19 @@ in
         "--accept-server-license-terms"
         "--host=0.0.0.0"
         "--port=${toString cfg.endpoints.web.port}"
-        "--without-connection-token"
+        "--connection-token-file=${connectionTokenPath}"
         "--telemetry-level=off"
         "--user-data-dir=${stateDir}/user-data"
         "--server-data-dir=${stateDir}/server-data"
         "--extensions-dir=${stateDir}/extensions"
         "${stateDir}/workspace"
       ];
+
+      secrets.connection-token = {
+        file = "secrets/openvscode-server.token";
+        format = "binary";
+        mountPath = connectionTokenPath;
+      };
 
       resources = {
         CPUQuota = "400%";
@@ -96,10 +103,11 @@ in
       containerConfig = {
         systemd.services.openvscode-server.path = shellPackages;
 
-        environment.systemPackages = mkForce shellPackages;
+        environment.systemPackages = shellPackages;
 
         nix = mkForce enabled;
         programs.fish = enabled;
+        programs.nix-ld = enabled;
         users.users.${cfg.runtimeUser.name}.shell = pkgs.bashInteractive;
       };
     })
