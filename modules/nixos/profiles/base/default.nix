@@ -26,6 +26,12 @@ in
       fish
     ];
 
+    environment.systemPackages = with pkgs; [
+      gptfdisk
+      pv
+      thin-provisioning-tools
+    ];
+
     documentation = disabled // {
       doc = disabled;
       dev = disabled;

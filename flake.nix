@@ -178,6 +178,7 @@
         };
         hosts = {
           annapurna.modules = [ ];
+          kanchenjunga.modules = [ ];
           kepler.modules = [ ];
         };
       };
