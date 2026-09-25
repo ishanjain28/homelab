@@ -45,6 +45,14 @@ let
           "windows"
         ]) "linux" "Guest OS family; selects clock, power and Hyper-V enlightenment defaults.";
         cpus = mkOpt types.ints.positive 2 "Number of virtual CPUs.";
+        threads = mkOpt (types.enum [
+          1
+          2
+        ]) 1 "Threads per core exposed to the guest; cpus must be a multiple of it.";
+        cpuPins =
+          mkOpt (types.listOf types.ints.unsigned) [ ]
+            "Host CPU for each vCPU in guest order (core 0 thread 0, core 0 thread 1, ...); empty leaves vCPUs unpinned.";
+        hugepages = mkBoolOpt false "Back guest memory with 1G hugepages, which the host must reserve at boot.";
         memory = mkOpt types.nonEmptyStr "4G" "Guest memory size, in QEMU notation.";
         vlans = mkOption {
           type = types.addCheck (types.nonEmptyListOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
@@ -57,6 +65,9 @@ let
         usbDevices =
           mkOpt (types.listOf usbDeviceType) [ ]
             "Host USB devices attached to the guest whenever they are plugged in.";
+        cpuAffinity =
+          mkOpt types.str ""
+            "Host CPUs the virtual machine may run on, in systemd CPUAffinity= syntax; empty allows all.";
         extraArgs = mkOpt (types.listOf types.str) [ ] "Additional QEMU arguments.";
       };
     }
@@ -114,7 +125,7 @@ let
         in
         [
           "-drive"
-          "file=${disk},if=none,id=${id},format=raw,cache=none,aio=native,discard=unmap,detect-zeroes=unmap"
+          "file=${disk},if=none,id=${id},format=raw,cache=none,aio=io_uring,discard=unmap,detect-zeroes=unmap"
           "-device"
           "ide-hd,drive=${id},bus=ahci.${toString index},rotation_rate=1,bootindex=${toString index}"
         ]
@@ -143,23 +154,21 @@ let
       "usb-host,bus=xhci.0,vendorid=0x${device.vendorId},productid=0x${device.productId}"
     ]) vm.usbDevices;
 
-  osArgs = vm: {
+  cpuFlags = {
+    linux = "host,migratable=off";
+    windows = "host,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_vpindex,hv_runtime,hv_synic,hv_stimer,hv_time,hv_frequencies,hv_reset,hv_tlbflush,hv_ipi,+kvm_pv_unhalt,+kvm_pv_eoi,hv_vendor_id=NV43FIX,kvm=off";
+  };
+
+  osArgs = {
     linux = [
-      "-cpu"
-      "host,migratable=off"
       "-rtc"
       "base=utc,driftfix=slew"
     ];
     windows = [
-      "-cpu"
-      (
-        "host,migratable=off,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_time,hv_synic,hv_stimer,hv_vpindex,hv_runtime,hv_frequencies,hv_reset,hv_tlbflush,hv_ipi"
-        + optionalString (vm.pciDevices != [ ]) ",kvm=off,hv_vendor_id=NV43FIX"
-      )
       "-rtc"
       "base=localtime,driftfix=slew"
       "-global"
-      "kvm-pit.lost_tick_policy=delay"
+      "kvm-pit.lost_tick_policy=discard"
       "-global"
       "ICH9-LPC.disable_s3=1"
       "-global"
@@ -176,11 +185,17 @@ let
       "-name"
       "guest=${name},debug-threads=on"
       "-machine"
-      "q35,accel=kvm,smm=on,usb=off,vmport=off"
+      ("q35,accel=kvm,smm=on,usb=off,vmport=off,hpet=off" + optionalString vm.hugepages ",memory-backend=mem")
       "-smp"
-      "${toString vm.cpus},sockets=1,cores=${toString vm.cpus},threads=1"
+      "${toString vm.cpus},sockets=1,cores=${toString (vm.cpus / vm.threads)},threads=${toString vm.threads}"
       "-m"
       vm.memory
+    ]
+    ++ optionals vm.hugepages [
+      "-object"
+      "memory-backend-memfd,id=mem,size=${vm.memory},hugetlb=on,hugetlbsize=1G,prealloc=on"
+    ]
+    ++ [
       "-nodefaults"
       "-no-user-config"
       "-display"
@@ -194,12 +209,14 @@ let
       "-global"
       "driver=cfi.pflash01,property=secure,value=on"
     ]
-    ++ (osArgs vm).${vm.os}
     ++ [
-      "-chardev"
-      "socket,id=monitor,path=${run}/monitor.sock,server=on,wait=off"
-      "-mon"
-      "chardev=monitor,mode=readline"
+      "-cpu"
+      (cpuFlags.${vm.os} + optionalString (vm.threads > 1) ",+topoext")
+    ]
+    ++ osArgs.${vm.os}
+    ++ [
+      "-monitor"
+      "unix:${run}/monitor.sock,server=on,wait=off"
       "-qmp"
       "unix:${run}/qmp.sock,server=on,wait=off"
       "-chardev"
@@ -211,7 +228,7 @@ let
       "-device"
       "virtio-rng-pci"
       "-device"
-      "qemu-xhci,id=xhci"
+      "qemu-xhci,id=xhci,p2=15,p3=15"
     ]
     ++ optionals (tpm vm) [
       "-chardev"
@@ -310,6 +327,30 @@ let
       if [ ! -e "$vars" ]; then
         install -m 0600 ${ovmf.variablesMs} "$vars"
       fi
+    '';
+
+  mkPinScript =
+    name: vm:
+    pkgs.writeShellScript "vm-${name}-pin" ''
+      set -euo pipefail
+      sock="${runDir name}/qmp.sock"
+      pins=(${concatMapStringsSep " " toString vm.cpuPins})
+      threads=""
+      for _ in $(seq 1 60); do
+        threads="$(printf '{"execute":"qmp_capabilities"}\n{"execute":"query-cpus-fast"}\n' \
+          | socat -t 5 - "UNIX-CONNECT:$sock" 2> /dev/null \
+          | jq -r 'select(.return? | type == "array") | .return[] | "\(."cpu-index") \(."thread-id")"' || true)"
+        [ -n "$threads" ] && break
+        sleep 1
+      done
+      if [ -z "$threads" ]; then
+        echo "Could not query vCPU threads of ${name}; vCPUs are left unpinned" >&2
+        exit 0
+      fi
+      while read -r index tid; do
+        taskset -pc "''${pins[$index]}" "$tid" > /dev/null
+      done <<< "$threads"
+      echo "Pinned vCPUs of ${name} to host CPUs ''${pins[*]}"
     '';
 
   mkStopScript =
@@ -411,7 +452,9 @@ let
       path = with pkgs; [
         acl
         coreutils
+        jq
         socat
+        util-linux
       ];
       unitConfig.StartLimitIntervalSec = 0;
       serviceConfig = {
@@ -427,6 +470,7 @@ let
           (mkFirmwareScript name vm)
         ];
         ExecStart = "${qemu}/bin/qemu-system-x86_64 ${escapeShellArgs (mkQemuArgs name vm)}";
+        ExecStartPost = mkIf (vm.cpuPins != [ ]) "+${mkPinScript name vm}";
         ExecStop = mkStopScript name vm;
         TimeoutStartSec = "2min";
         TimeoutStopSec = "3min";
@@ -435,6 +479,7 @@ let
         LimitMEMLOCK = "infinity";
         LimitNOFILE = 1048576;
         OOMScoreAdjust = -500;
+        CPUAffinity = vm.cpuAffinity;
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -453,6 +498,8 @@ let
   vmsWithoutStorage = attrNames (filterAttrs (_name: vm: vm.disks == [ ] && vm.pciDevices == [ ]) vms);
   vmsWithPci = attrNames (filterAttrs (_name: vm: vm.pciDevices != [ ]) vms);
   runtimeIds = mapAttrsToList (_name: vm: vm.runtimeId) vms;
+  vmsWithBadPins = attrNames (filterAttrs (_name: vm: vm.cpuPins != [ ] && length vm.cpuPins != vm.cpus) vms);
+  vmsWithBadThreads = attrNames (filterAttrs (_name: vm: mod vm.cpus vm.threads != 0) vms);
   vmConfigs = mapAttrsToList mkVm vms;
 in
 {
@@ -460,6 +507,14 @@ in
 
   config = {
     assertions = [
+      {
+        assertion = vmsWithBadPins == [ ];
+        message = "Virtual machines must pin every vCPU or none: ${concatStringsSep ", " vmsWithBadPins}";
+      }
+      {
+        assertion = vmsWithBadThreads == [ ];
+        message = "Virtual machine cpus must be a multiple of threads: ${concatStringsSep ", " vmsWithBadThreads}";
+      }
       {
         assertion = longTapNames == [ ];
         message = "Virtual machine tap interface names exceed 15 characters: ${concatStringsSep ", " longTapNames}";
