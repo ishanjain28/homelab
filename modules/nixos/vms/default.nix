@@ -379,6 +379,7 @@ let
     systemd.services."vm-${name}-swtpm" = mkIf (tpm vm) {
       description = "Emulated TPM for virtual machine ${name}";
       partOf = [ "vm-${name}.service" ];
+      restartIfChanged = false;
       serviceConfig = {
         User = vmUser name;
         Group = vmUser name;
@@ -400,13 +401,13 @@ let
     systemd.services."vm-${name}" = {
       description = "Virtual machine ${name}";
       wantedBy = optional vm.autoStart "multi-user.target";
-      after = [
-        "systemd-networkd.service"
-        "network-online.target"
-      ]
-      ++ optional (tpm vm) "vm-${name}-swtpm.service";
-      wants = [ "network-online.target" ];
+      # The tap devices come from systemd-networkd; the prepare script waits
+      # for them, so there is no need to wait for the host to be online.
+      after = [ "systemd-networkd.service" ] ++ optional (tpm vm) "vm-${name}-swtpm.service";
       requires = optional (tpm vm) "vm-${name}-swtpm.service";
+      # Config changes apply on the next manual restart instead of killing a
+      # running guest during nixos-rebuild switch.
+      restartIfChanged = false;
       path = with pkgs; [
         acl
         coreutils
