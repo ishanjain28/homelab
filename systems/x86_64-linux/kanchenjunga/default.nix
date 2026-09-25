@@ -25,10 +25,15 @@ in
       inherit hostName;
       domain = "direct.home.ishanjain.me";
 
-      links = mkIfLink {
-        name = "eth0";
-        macAddress = "CHANGEME";
-      };
+      links =
+        mkIfLink {
+          name = "eth0";
+          macAddress = "18:c0:4d:08:4d:54";
+        }
+        // mkIfLink {
+          name = "eth1";
+          macAddress = "18:c0:4d:08:4d:55";
+        };
 
       netdevs = mkMerge [
         (mkBridgeIf "br0")
@@ -48,7 +53,15 @@ in
               {
                 VLAN = [
                   10
+                  20
+                  30
+                  40
+                  50
+                  60
                   99
+                  140
+                  150
+                  160
                 ];
               }
             ];
