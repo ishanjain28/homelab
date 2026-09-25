@@ -51,6 +51,25 @@ sudo rsync -aHAX --numeric-ids --delete --info=progress2 \
   root@<old-machine-ip>:/mnt/backup/volumes/ /var/lib/volumes/
 ```
 
+Copying VM thick LVM volumes 
+
+Create a raw copy of the LVM volume using 
+```
+# For the example volume is called vm-143-0
+cd backups
+ssh ishan@<previous-server-address> 'zstd -1 -T0 -c /main/backups/vms/vm-143-0.raw' | zstd -d |  sudo dd of=/dev/pool/vm-143-0 bs=4M iflag=fullblock status=progress conv=fsync
+```
+
+Restore it into an identical thick LVM volume using 
+```
+stat -c %s vm-143-0  # Alternatively, you can also get size in bytes using ls -al
+12345678
+
+# On the new machine 
+sudo lvcreate -L 12345678b -n vm-143-0 pool
+ssh ishan@<backup-server-addr> 'cat /main/backups/vms/vm-143-0.raw' | sudo dd of=/dev/pool/vm-143-0 bs=4M iflag=fullblock status=progress conv=fsync 
+```
+
 2. Networking
 
 I love predictable network interface names. Get the MAC addresses of interfaces and update `default.nix` with the interface names in `mkIfLink`.
@@ -128,5 +147,3 @@ services on machines that are on completely different networks but maybe there s
 1. got stuck on /dev/disk/by-label/nixos-minimal-26.11-x86_64 when booting with the virtual media option in jetkvm. FIX: Needs to be mounted as CD/DVD for it to show up in boot options and then mounted as disk not as cd/dvd for it to show up in /dev/disk/by-label/nix...
 
 2. did not request an ip address using dhcp, did not use slaac for auto assignment. TODO: Machine should have a fallback address maybe 192.168.1.254 ? PROBLEM: The other side was only allowing vlan tagged traffic and bootstrap nix only works with untagged traffic.
-
-3.
