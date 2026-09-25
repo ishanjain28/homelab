@@ -68,18 +68,19 @@ let
       target = targets.${targetName};
     in
     {
-      inherit description script;
+      inherit description;
+      script = ''
+        ${restic} cat config > /dev/null 2>&1 || ${restic} init
+      ''
+      + script;
       environment = resticEnvironment targetName;
       inherit (cfg) onFailure;
       wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
-      unitConfig = {
-        RequiresMountsFor = target.requiresMountsFor;
-        AssertPathIsMountPoint = target.requiresMountsFor;
-      };
+      unitConfig.RequiresMountsFor = target.requiresMountsFor;
       serviceConfig = {
         Type = "oneshot";
-        RuntimeMaxSec = "12h";
+        TimeoutStartSec = "2h";
         CacheDirectory = "restic/${targetName}";
         Nice = 19;
         IOSchedulingClass = "idle";
