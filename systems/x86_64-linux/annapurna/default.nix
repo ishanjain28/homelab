@@ -35,7 +35,7 @@ in
       };
       music = {
         hostPath = "/main/music";
-        gid = 30359;
+        gid = 30382;
         readOnly = false;
       };
       ishan = {
