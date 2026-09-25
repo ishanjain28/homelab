@@ -88,7 +88,9 @@ let
     else
       logging.lokiPushUrls.${toString (head configuredVlans)};
 
-  hostLokiPushUrl = head (attrValues logging.lokiPushUrls);
+  hostLokiPushUrl =
+    logging.lokiPushUrls.${toString logging.hostVlan}
+      or (throw "No Loki push URL configured for host VLAN ${toString logging.hostVlan}");
 
   fileSourceConfig =
     name: files:
@@ -195,6 +197,7 @@ in
         "70" = "http://10.0.70.11:3100/loki/api/v1/push";
         "99" = "http://10.0.99.29:3100/loki/api/v1/push";
       } "Loki push API URLs keyed by VLAN.";
+      hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
     };
 
     metrics = {
