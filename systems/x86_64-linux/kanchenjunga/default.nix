@@ -112,6 +112,14 @@ in
     };
   };
 
+  boot.blacklistedKernelModules = [ "nouveau" ];
+  boot.kernelParams = [
+    "initcall_blacklist=sysfb_init"
+    "default_hugepagesz=1G"
+    "hugepagesz=1G"
+    "hugepages=32"
+  ];
+
   sops.secrets.tailscale-auth-key = {
     sopsFile = "${inputs.self}/secrets/tailscale/auth-key";
     format = "binary";
