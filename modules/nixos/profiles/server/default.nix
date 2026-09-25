@@ -42,6 +42,7 @@ in
     boot.kernel.sysctl = {
       "kernel.keys.maxkeys" = 1000000;
       "kernel.keys.maxbytes" = 25000000;
+      "net.core.rmem_max" = 134217728;
     };
 
     boot.kernelModules = [ "wireguard" ];

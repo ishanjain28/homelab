@@ -194,4 +194,26 @@
     runtimeId = 30352;
     configFile = "secrets/caddy/home.json";
   };
+
+  adguardhome = enabled // {
+    vlans = [ 99 ];
+    runtimeId = 30373;
+    configFile = "secrets/adguardhome/home.yaml";
+    certificates = [ "adguard-home" ];
+    endpoints = {
+      dns = {
+        port = 53;
+        transport = "tcp-and-udp";
+      };
+      tls = {
+        port = 853;
+        transport = "tcp-and-udp";
+      };
+      https.port = 443;
+      web = {
+        port = 80;
+        expose = true;
+      };
+    };
+  };
 }

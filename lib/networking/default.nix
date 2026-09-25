@@ -42,6 +42,14 @@ let
 
 in
 {
+  mkMacAddress =
+    seed:
+    let
+      hash = builtins.hashString "sha256" seed;
+      octet = offset: builtins.substring offset 2 hash;
+    in
+    "02:${octet 0}:${octet 2}:${octet 4}:${octet 6}:${octet 8}";
+
   mkIfLink =
     { name, macAddress }:
     let

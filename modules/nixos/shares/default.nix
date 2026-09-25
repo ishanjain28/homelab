@@ -47,7 +47,9 @@ let
         Type = "oneshot";
         ExecStart = [
           "${pkgs.util-linux}/bin/mountpoint --quiet -- ${escapeShellArg share.hostPath}"
-          "${pkgs.coreutils}/bin/chown root:${hostGroupName shareId} ${escapeShellArg share.hostPath}"
+          "${pkgs.coreutils}/bin/chown ${
+            toString (containerUidOffset + share.gid)
+          }:${hostGroupName shareId} ${escapeShellArg share.hostPath}"
           "${pkgs.coreutils}/bin/chmod 2770 ${escapeShellArg share.hostPath}"
         ];
         RemainAfterExit = true;

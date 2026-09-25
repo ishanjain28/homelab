@@ -155,6 +155,7 @@
           "mongodb-ce"
           "omada-controller"
           "timescaledb"
+          "windmill"
         ];
 
       deploy = lib.mkDeploy {

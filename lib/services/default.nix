@@ -3,6 +3,7 @@ with lib;
 with lib.${namespace};
 let
   containerUidOffset = 131072;
+  certificatePath = id: "/run/certs/${id}";
   containerProfiles = import ../containers/default.nix;
   inherit (containerProfiles) getNspawnHardeningProfile getNspawnIsolationProfile;
   endpointType = types.submodule {
@@ -29,14 +30,6 @@ let
         attrValues endpoints
       )
     );
-
-  mkContainerMacAddress =
-    seed:
-    let
-      hash = builtins.hashString "sha256" seed;
-      octet = offset: builtins.substring offset 2 hash;
-    in
-    "02:${octet 0}:${octet 2}:${octet 4}:${octet 6}:${octet 8}";
 
   mkContainerVethName =
     name: vlan:
@@ -109,7 +102,7 @@ let
           index: vlan:
           nameValuePair "40-${vlanInterface vlan}" {
             matchConfig.Name = vlanInterface vlan;
-            linkConfig.MACAddress = mkContainerMacAddress "${name}:${toString vlan}";
+            linkConfig.MACAddress = mkMacAddress "${name}:${toString vlan}";
             networkConfig = {
               Description = "${name} service container VLAN ${toString vlan}";
               DHCP = "ipv4";
@@ -156,7 +149,6 @@ let
       documentation = disabled;
       environment.defaultPackages = mkForce [ ];
       environment.shellAliases = shellAliases;
-      environment.systemPackages = mkForce [ ];
       services.dbus.packages = [ config.systemd.package ];
       nix = disabled;
       programs.command-not-found = disabled;
@@ -166,6 +158,7 @@ let
       services.getty = disabled;
       services.timesyncd = disabled;
       system.nssModules = mkForce [ ];
+      services.resolved.settings.Resolve.DNSStubListener = false;
       systemd.oomd = enabled;
       systemd.settings.Manager.ShowStatus = false;
       systemd.services."console-getty" = disabled;
@@ -204,9 +197,13 @@ let
       check = "${pkgs.postgresql}/bin/pg_isready -q -h ${host} -p 5432 -d postgres -U ishan -t 5";
     in
     {
+      systemd.timers.database-ready = {
+        wantedBy = [ "timers.target" ];
+        timerConfig.OnActiveSec = 0;
+      };
+
       systemd.services.database-ready = {
         description = "Wait for ${database.name} on ${database.instance}";
-        wantedBy = [ "multi-user.target" ];
         after = [ "network-online.target" ];
         wants = [ "network-online.target" ];
         serviceConfig = {
@@ -242,6 +239,8 @@ let
       };
     };
 
+  ownerWritable = mode: bitAnd (toInt (builtins.substring 1 1 mode)) 2 != 0;
+
   # Default homelab service container: minimal NixOS guest plus arbitrary inner config.
   genServiceContainer =
     {
@@ -263,12 +262,34 @@ let
         ;
       mkSecretName = secretName: "${name}-${secretName}";
       databaseEnabled = service.database != null;
-      databaseUnitConfig = genAttrs databaseUnits (_unit: {
-        after = [ databaseReadyUnit ];
-        requires = [ databaseReadyUnit ];
-      });
+      databaseUnitConfig =
+        genAttrs databaseUnits (_unit: {
+          wantedBy = mkForce [ ];
+          after = [ databaseReadyUnit ];
+          requires = [ databaseReadyUnit ];
+        })
+        // {
+          database-ready.wants = map (unit: "${unit}.service") databaseUnits;
+        };
+      inherit (service) certificates;
     in
     mkMerge [
+      (mkIf (certificates != [ ]) {
+        ${namespace}.acme.consumers.${name} = {
+          uid = containerUidOffset + runtimeId;
+          inherit certificates;
+        };
+
+        containers.${name}.bindMounts = listToAttrs (
+          map (
+            id:
+            nameValuePair (certificatePath id) {
+              hostPath = "/var/lib/lego/deploy/${name}/${id}";
+              isReadOnly = true;
+            }
+          ) certificates
+        );
+      })
       {
         sops.secrets = mapAttrs' (
           secretName: secret:
@@ -278,7 +299,7 @@ let
             key = secret.key or "";
             uid = containerUidOffset + runtimeId;
             gid = containerUidOffset + runtimeId;
-            mode = "0400";
+            mode = secret.mode or "0400";
             restartUnits = [ "container@${name}.service" ];
           }
         ) secrets;
@@ -287,7 +308,7 @@ let
           secretName: secret:
           nameValuePair secret.mountPath {
             hostPath = "/run/secrets/${mkSecretName secretName}";
-            isReadOnly = true;
+            isReadOnly = !ownerWritable (secret.mode or "0400");
           }
         ) secrets;
       }
@@ -380,6 +401,10 @@ let
         ) "Gatus check conditions.";
       };
 
+      certificates =
+        mkOpt (types.listOf types.nonEmptyStr) [ ]
+          "Certificate IDs from the ACME secret, mounted at /run/certs/<id>/{fullchain,key}.pem.";
+
       database = mkOpt (types.nullOr (
         types.submodule {
           options = {
@@ -466,6 +491,7 @@ let
 in
 {
   inherit
+    certificatePath
     containerUidOffset
     mkContainerVethName
     postgresqlInstances
