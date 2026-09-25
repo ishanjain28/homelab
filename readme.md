@@ -70,6 +70,31 @@ sudo lvcreate -L 12345678b -n vm-143-0 pool
 ssh ishan@<backup-server-addr> 'cat /main/backups/vms/vm-143-0.raw' | sudo dd of=/dev/pool/vm-143-0 bs=4M iflag=fullblock status=progress conv=fsync 
 ```
 
+Fixing UEFI boot for VMs migrated from Proxmox
+
+Proxmox keeps the UEFI boot entries in a separate small EFI disk(`efidisk0`, the ~4MiB volume that starts with `_FVH`). That is OVMF NVRAM, not a disk, so don't copy it and
+don't add it to `disks`. The VM module creates a fresh `OVMF_VARS.fd` in `/var/lib/vms/<name>/` that has no boot entry for the guest OS, and Debian does not install the fallback
+`\EFI\BOOT\BOOTX64.EFI` by default. The VM sits in the firmware forever and it looks like networking is broken because the guest never sends any traffic.
+Confirm it with `info registers` on `/run/vms/<name>/monitor.sock`. `RIP` in the `0x7xxxxxxx` range means it is still in the firmware, a booted kernel will be at `0xffffffff...`.
+
+Fix it by copying shim into the fallback path along with `fbx64.efi`. On the first boot, shim runs `fbx64.efi` which reads `EFI/debian/BOOTX64.CSV`, recreates the boot entry in NVRAM and reboots.
+```
+# In bash, not fish
+sudo systemctl stop vm-work
+LOOP=$(sudo losetup -fP --show /dev/pool/work-linux-1)
+sudo mount ${LOOP}p1 /mnt
+sudo mkdir -p /mnt/EFI/BOOT
+sudo cp /mnt/EFI/debian/shimx64.efi /mnt/EFI/BOOT/BOOTX64.EFI
+sudo cp /mnt/EFI/debian/{fbx64,mmx64,grubx64}.efi /mnt/EFI/BOOT/
+sudo umount /mnt && sudo losetup -d $LOOP
+```
+
+After it boots, run this in the guest so grub/shim upgrades keep the fallback copy updated.
+```
+echo "grub-efi-amd64 grub2/force_efi_extra_removable boolean true" | sudo debconf-set-selections
+sudo dpkg-reconfigure -f noninteractive grub-efi-amd64
+```
+
 2. Networking
 
 I love predictable network interface names. Get the MAC addresses of interfaces and update `default.nix` with the interface names in `mkIfLink`.
