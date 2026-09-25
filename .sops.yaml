@@ -2,6 +2,7 @@ keys:
   - &turquoise ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAX88KLYCUWS1IKTGsgIRIHwGxTyfhsiRyAgtv65GEEm ishan@turquoise
   - &kepler age13ks0vqf5dnavpq29ukkuhwgk4a2r5cdk52g9ls0aalcd0wg6yy2sq2fpwc
   - &annapurna age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  - &kanchenjunga age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
 creation_rules:
   - path_regex: secrets/postgresql\.json$
     encrypted_regex: ^(users)$
@@ -10,9 +11,11 @@ creation_rules:
           - *turquoise
           - *kepler
           - *annapurna
+          - *kanchenjunga
   - path_regex: .*secrets/.*
     key_groups:
       - age:
           - *turquoise
           - *kepler
           - *annapurna
+          - *kanchenjunga

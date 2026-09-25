@@ -1,13 +1,13 @@
 { lib, namespace }: with lib.${namespace};
 {
-  work = disabled // {
+  work = enabled // {
     autoStart = true;
     runtimeId = 31001;
     os = "linux";
     cpus = 12;
     memory = "20000M";
     vlans = [ 10 ];
-    disks = [ "/dev/pool/vm-work" ];
+    disks = [ "/dev/pool/work-linux" ];
     extraArgs = [
       "-smbios"
       "type=1,uuid=f4503765-2f7c-4d0f-8344-ed257ffce88e"

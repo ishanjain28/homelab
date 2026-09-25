@@ -140,6 +140,8 @@
             inputs.deploy-rs.packages.${system}.deploy-rs
             pkgs.git
             pkgs.sops
+            pkgs.ssh-to-age
+            pkgs.neovim
           ];
           shellHook = shellAliasHook;
         };
