@@ -17,7 +17,7 @@ in
     inherit vms;
 
     hardware.vfio = enabled // {
-      iommu = "intel";
+      iommu = "amd";
       pciIds = [ ];
     };
 
