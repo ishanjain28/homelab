@@ -16,8 +16,8 @@ in
   options.${namespace}.services.ssh = {
     enable = mkEnableOption "Setup SSH";
     addRootKeys = mkBoolOpt false "Add the same keys to the root user";
-    keys = mkOpt (types.listOf types.nonEmptyStr) (builtins.split "\n" (
-      lib.removeSuffix "\n" (builtins.readFile "${inputs.self}/ssh-keys.txt")
+    keys = mkOpt (types.listOf types.nonEmptyStr) (filter (key: key != "") (
+      map trim (splitString "\n" (builtins.readFile "${inputs.self}/ssh-keys.txt"))
     )) "List of SSH keys to add";
     package = mkPackageOption pkgs "openssh" { };
     passwordAuth = mkBoolOpt true "Allow password authentication";
