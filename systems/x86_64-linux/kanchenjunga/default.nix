@@ -3,6 +3,7 @@ with lib;
 with lib.${namespace};
 let
   hostName = "kanchenjunga";
+  backups = import ./backups.nix;
   vms = import ./vms.nix { inherit lib namespace; };
 in
 {
@@ -14,6 +15,7 @@ in
   homelab = {
     profiles.server = enabled;
     metrics = enabled;
+    inherit backups;
     inherit vms;
 
     hardware.vfio = enabled // {

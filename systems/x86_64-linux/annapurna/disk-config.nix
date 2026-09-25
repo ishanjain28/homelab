@@ -36,7 +36,15 @@ _: {
     };
     lvm_vg.pool = {
       type = "lvm_vg";
-      lvs = { };
+      lvs.backups = {
+        size = "100G";
+        content = {
+          type = "filesystem";
+          format = "ext4";
+          mountpoint = "/var/lib/backups";
+          mountOptions = [ "nofail" ];
+        };
+      };
     };
   };
 }
