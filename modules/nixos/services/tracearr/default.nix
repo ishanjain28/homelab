@@ -68,7 +68,11 @@ in
     };
     serviceConfig = {
       EnvironmentFile = confPath;
-      StateDirectory = "tracearr";
+      # The package's data/image-cache symlink needs its target before startup.
+      StateDirectory = [
+        "tracearr"
+        "tracearr/image-cache"
+      ];
       StateDirectoryMode = "0700";
       WorkingDirectory = "/var/lib/tracearr";
     };

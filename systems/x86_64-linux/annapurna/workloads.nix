@@ -86,6 +86,20 @@
     ];
   };
 
+  bentopdf = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 50715;
+  };
+
+  tracearr = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "tracearr";
+    };
+    vlans = [ 50 ];
+    runtimeId = 30342;
+  };
+
   omada = enabled // {
     vlans = [ 99 ];
     runtimeId = 30349;
@@ -216,4 +230,106 @@
       };
     };
   };
+
+  pvr-movies-monitor = disabled // {
+    vlans = [ 50 ];
+    runtimeId = 20691;
+  };
+
+  huawei-sms = disabled // {
+    vlans = [ 50 ];
+    runtimeId = 27777;
+  };
+
+  asterisk = disabled // {
+    vlans = [ 140 ];
+    runtimeId = 30362;
+    logging = disabled;
+  };
+
+  lldap = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "ldap";
+    };
+    vlans = [ 50 ];
+    runtimeId = 25457;
+  };
+
+  authelia = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "authelia";
+    };
+    vlans = [ 50 ];
+    runtimeId = 20001;
+  };
+
+  windmill = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "windmill";
+    };
+    vlans = [ 50 ];
+    runtimeId = 30353;
+  };
+
+  vlan10-debug = enabled // {
+    vlans = [ 10 ];
+    runtimeId = 31010;
+  };
+
+  vlan20-debug = enabled // {
+    vlans = [ 20 ];
+    runtimeId = 31020;
+  };
+
+  vlan30-debug = enabled // {
+    vlans = [ 30 ];
+    runtimeId = 31030;
+  };
+
+  vlan40-debug = enabled // {
+    vlans = [ 40 ];
+    runtimeId = 31040;
+  };
+
+  vlan50-debug = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 31050;
+  };
+
+  vlan99-debug = enabled // {
+    vlans = [ 99 ];
+    runtimeId = 31099;
+  };
+
+  vlan140-debug = enabled // {
+    vlans = [ 140 ];
+    runtimeId = 31140;
+  };
+
+  vlan150-debug = enabled // {
+    vlans = [ 150 ];
+    runtimeId = 31150;
+  };
+
+  vlan160-debug = enabled // {
+    vlans = [ 160 ];
+    runtimeId = 31160;
+  };
+
+  alloy-syslog = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30346;
+  };
+
+  telegraf-snmp = enabled // {
+    vlans = [
+      50
+      99
+    ];
+    runtimeId = 36931;
+  };
+
 }
