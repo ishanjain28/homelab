@@ -22,14 +22,10 @@
     ];
   };
 
-  pvr-movies-monitor = enabled // {
+  actual-server = enabled // {
     vlans = [ 50 ];
-    runtimeId = 20691;
-  };
-
-  huawei-sms = enabled // {
-    vlans = [ 50 ];
-    runtimeId = 27777;
+    runtimeId = 30341;
+    volumes = [ "actual-server" ];
   };
 
   gitea = enabled // {
@@ -46,44 +42,6 @@
     vlans = [ 50 ];
     runtimeId = 36928;
     giteaURI = "http://10.0.50.20:3000";
-  };
-
-  asterisk = enabled // {
-    vlans = [ 140 ];
-    runtimeId = 30362;
-    logging = disabled;
-  };
-
-  windmill = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "windmill";
-    };
-    vlans = [ 50 ];
-    runtimeId = 30353;
-  };
-
-  bentopdf = enabled // {
-    vlans = [ 50 ];
-    runtimeId = 50715;
-  };
-
-  lldap = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "ldap";
-    };
-    vlans = [ 50 ];
-    runtimeId = 25457;
-  };
-
-  authelia = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "authelia";
-    };
-    vlans = [ 50 ];
-    runtimeId = 20001;
   };
 
   grafana = enabled // {
@@ -115,12 +73,6 @@
     volumes = [ "seerr" ];
   };
 
-  actual-server = enabled // {
-    vlans = [ 50 ];
-    runtimeId = 30341;
-    volumes = [ "actual-server" ];
-  };
-
   changedetection = enabled // {
     vlans = [ 50 ];
     runtimeId = 30344;
@@ -132,61 +84,6 @@
     runtimeId = 30345;
     volumes = [ "openvscode-server" ];
   };
-
-  vlan10-debug = enabled // {
-    vlans = [ 10 ];
-    runtimeId = 31010;
-  };
-
-  vlan20-debug = enabled // {
-    vlans = [ 20 ];
-    runtimeId = 31020;
-  };
-
-  vlan30-debug = enabled // {
-    vlans = [ 30 ];
-    runtimeId = 31030;
-  };
-
-  vlan40-debug = enabled // {
-    vlans = [ 40 ];
-    runtimeId = 31040;
-  };
-
-  vlan50-debug = enabled // {
-    vlans = [ 50 ];
-    runtimeId = 31050;
-  };
-
-  vlan99-debug = enabled // {
-    vlans = [ 99 ];
-    runtimeId = 31099;
-  };
-
-  vlan140-debug = enabled // {
-    vlans = [ 140 ];
-    runtimeId = 31140;
-  };
-
-  vlan150-debug = enabled // {
-    vlans = [ 150 ];
-    runtimeId = 31150;
-  };
-
-  vlan160-debug = enabled // {
-    vlans = [ 160 ];
-    runtimeId = 31160;
-  };
-
-  tracearr = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "tracearr";
-    };
-    vlans = [ 50 ];
-    runtimeId = 30342;
-  };
-
   loki = enabled // {
     vlans = [
       50
@@ -195,11 +92,6 @@
     ];
     runtimeId = 30343;
     volumes = [ "loki" ];
-  };
-
-  alloy-syslog = enabled // {
-    vlans = [ 50 ];
-    runtimeId = 30346;
   };
 
   victoriametrics = enabled // {
@@ -235,14 +127,6 @@
     vlans = [ 150 ];
     runtimeId = 36926;
     volumes = [ "ripe-atlas-primary" ];
-  };
-
-  telegraf-snmp = enabled // {
-    vlans = [
-      50
-      99
-    ];
-    runtimeId = 36931;
   };
 
   ripe-atlas-lte = enabled // {

@@ -90,7 +90,7 @@ let
 
   hostLokiPushUrl =
     logging.lokiPushUrls.${toString logging.hostVlan}
-      or (throw "No Loki push URL configured for host VLAN ${toString logging.hostVlan}");
+    or (throw "No Loki push URL configured for host VLAN ${toString logging.hostVlan}");
 
   fileSourceConfig =
     name: files:
