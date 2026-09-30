@@ -21,6 +21,11 @@ in
     };
     inherit backups;
     inherit volumes;
+    deletedVolumes.seerr = {
+      uuid = "51b42873-9fd6-47d2-aa7c-71af578c4f05";
+      after = "2026-09-30";
+      reason = "Seerr uses PostgreSQL and SOPS-managed settings.json; no dedicated data volume.";
+    };
     services = workloads;
     inherit vms;
     devices.render = {

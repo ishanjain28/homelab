@@ -3,7 +3,13 @@ keys:
   - &kepler age13ks0vqf5dnavpq29ukkuhwgk4a2r5cdk52g9ls0aalcd0wg6yy2sq2fpwc
   - &annapurna age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
   - &kanchenjunga age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+  - &manaslu age1hulfpgal23mhulj5v3cafkzpgj6u9fe8mx4q78gtma59306jh9uspyjyy5
 creation_rules:
+  - path_regex: secrets/manaslu/.*$
+    key_groups:
+      - age:
+          - *turquoise
+          - *manaslu
   # DNS changes are operator actions; server host keys do not need these credentials.
   - path_regex: (secrets/dns/.*)$
     key_groups:

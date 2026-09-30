@@ -319,6 +319,15 @@
     runtimeId = 31160;
   };
 
+  seerr = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "jellyseerr";
+    };
+    vlans = [ 50 ];
+    runtimeId = 30340;
+  };
+
   alloy-syslog = enabled // {
     vlans = [ 50 ];
     runtimeId = 30346;

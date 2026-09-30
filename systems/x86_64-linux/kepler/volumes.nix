@@ -23,12 +23,6 @@
     backup.groups = [ "daily" ];
   };
 
-  seerr = {
-    uuid = "51b42873-9fd6-47d2-aa7c-71af578c4f05";
-    size = "5G";
-    backup.groups = [ "daily" ];
-  };
-
   loki = {
     uuid = "9f67c61c-3d4c-45d2-b4df-6f1775331d9b";
     size = "20G";

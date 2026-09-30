@@ -63,16 +63,6 @@
     runtimeId = 30339;
   };
 
-  seerr = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "jellyseerr";
-    };
-    vlans = [ 50 ];
-    runtimeId = 30340;
-    volumes = [ "seerr" ];
-  };
-
   changedetection = enabled // {
     vlans = [ 50 ];
     runtimeId = 30344;
