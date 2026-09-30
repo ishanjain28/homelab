@@ -11,6 +11,7 @@ let
   srv = config.${namespace}.services;
   cfg = srv.seerr;
   confPath = "/run/container-secrets/seerr.env";
+  settingsPath = "/run/container-secrets/seerr.json";
 in
 {
   options.${namespace}.services.seerr = mkServiceOptions {
@@ -27,9 +28,15 @@ in
     service = cfg;
     package = pkgs.${namespace}.seerr;
     secrets.env = {
-      file = "secrets/seerr.env";
+      file = "secrets/seerr/vars.env";
       format = "dotenv";
       mountPath = confPath;
+    };
+    secrets.settings = {
+      file = "secrets/seerr/config.json";
+      format = "json";
+      key = "";
+      mountPath = settingsPath;
     };
     resources = {
       CPUQuota = "400%";
@@ -41,7 +48,6 @@ in
       HOST = "0.0.0.0";
       NODE_ENV = "production";
       LOG_LEVEL = "info";
-      # This should be stored on a persistent migratable volume!
       CONFIG_DIRECTORY = "/var/lib/seerr";
     };
     serviceConfig = {
