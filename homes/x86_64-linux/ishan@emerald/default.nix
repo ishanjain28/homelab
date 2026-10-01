@@ -9,7 +9,7 @@ with lib.${namespace};
 {
   ${namespace} = {
     profiles.shell = enabled;
-    programs.neovim = disabled;
+    programs.neovim = enabled;
   };
 
   home.packages = with pkgs; [

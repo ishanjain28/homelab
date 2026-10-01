@@ -157,6 +157,7 @@
       channels-config.allowUnfreePredicate =
         package:
         builtins.elem (inputs.nixpkgs.lib.getName package) [
+          "cmp-calc"
           "mongodb-ce"
           "omada-controller"
           "ookla-speedtest"
