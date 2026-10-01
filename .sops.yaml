@@ -45,3 +45,8 @@ creation_rules:
           - *kepler
           - *annapurna
           - *kanchenjunga
+  - path_regex: .*secrets/vaultwarden/.*
+    key_groups:
+      - age:
+          - *turquoise
+          - *delbgp
