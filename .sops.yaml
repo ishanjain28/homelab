@@ -4,12 +4,27 @@ keys:
   - &annapurna age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
   - &kanchenjunga age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
   - &manaslu age1hulfpgal23mhulj5v3cafkzpgj6u9fe8mx4q78gtma59306jh9uspyjyy5
+  - &work_macbook age1s45dwj5ger9hrnta0rguvcetkc5zjws4zac9g89g2jwvvuttmfgs2dudue
+  - &delbgp age1fdkaf04m4rkszpl0gcfkfm4pjztwn3n6ufhmzl6a2mvhnnwnzgwq0l865x
 creation_rules:
   - path_regex: secrets/manaslu/.*$
     key_groups:
       - age:
           - *turquoise
           - *manaslu
+  - path_regex: .gitconfig.work
+    key_groups:
+      - age:
+          - *work_macbook
+  - path_regex: .gitconfig
+    key_groups:
+      - age:
+          - *turquoise
+          - *kepler
+          - *annapurna
+          - *kanchenjunga
+          - *manaslu
+          - *delbgp
   # DNS changes are operator actions; server host keys do not need these credentials.
   - path_regex: (secrets/dns/.*)$
     key_groups:
