@@ -78,8 +78,7 @@ don't add it to `disks`. The VM module creates a fresh `OVMF_VARS.fd` in `/var/l
 Confirm it with `info registers` on `/run/vms/<name>/monitor.sock`. `RIP` in the `0x7xxxxxxx` range means it is still in the firmware, a booted kernel will be at `0xffffffff...`.
 
 Fix it by copying shim into the fallback path along with `fbx64.efi`. On the first boot, shim runs `fbx64.efi` which reads `EFI/debian/BOOTX64.CSV`, recreates the boot entry in NVRAM and reboots.
-```
-# In bash, not fish
+```bash
 sudo systemctl stop vm-work
 LOOP=$(sudo losetup -fP --show /dev/pool/work-linux-1)
 sudo mount ${LOOP}p1 /mnt
@@ -120,6 +119,18 @@ After deployment copy the generaated public key from the host(from `/etc/ssh/ssh
 Add the key in `.sops.yaml` and then run `find secrets -type f -exec sops updatekeys -y {} \;` to update all the secrets.
 
 
+## Homes
+
+Home-manager configs live in `homes/<system>/<user>@<name>`. `home-manager` is available in the dev shell.
+
+```console
+nix develop
+home-manager switch --flake .#<user>@<home> -b backup
+```
+
+`-b backup` renames existing files in the way (e.g. `~/.zshrc` → `~/.zshrc.backup`) instead of failing. Only needed on the first switch.
+
+
 ## Features
 
 
@@ -137,9 +148,7 @@ still add config generation but keep the domain and maybe some other fields priv
 My dnsconfig.js config generates DNS entries that go in Cloudflare for public access, the internal DNS servers with overrides so the same domains resolve to internal addresses rather than public
 address in cloudflare and then more DNS entries for internal services and devices.
 
-* create vms
-
-* Add deployment order dependency if possible.
+* Add deployment order dependency if possible. Already done for some situations like waiting for postgres to be online before starting a service that relies on postgres but this is specific to situation and there is no general deployment DAG.
 
 * [PARTIALLY DONE] Grow and shrink LVS based on updated values. Require user action if the LVS was shrunk!
 
@@ -162,13 +171,15 @@ it should call the reload command for the service rather than restarting it!
 
 * Windmill working with an email receiver. Ideally, I want to do an IMAP server just for this rather than giving it limited access to some other email account. This can be IPv6 only in my ASN and IPv6 only is fine in this context.
 
-* Credit card / Bank statement processing pipeline in windmill to auto save them to actual budget
+* Credit card / Bank statement processing pipeline in windmill to auto save them to actual budget. This is also done but the work is separate and was deployed to windmill directly.
 
 * MAC address for services is created from a hash of <svc-name>:<vlan-id>. A service with the exact same name deployed on 2 machines will have a conflict. I don't want this to be a hard error because this repo will deploy
 services on machines that are on completely different networks but maybe there should be a warning.
 
+* Auto-provision grafana dashboards from dashboards/ folder.
+
 ### remote bootstrap Notes
 
-1. got stuck on /dev/disk/by-label/nixos-minimal-26.11-x86_64 when booting with the virtual media option in jetkvm. FIX: Needs to be mounted as CD/DVD for it to show up in boot options and then mounted as disk not as cd/dvd for it to show up in /dev/disk/by-label/nix...
+1. got stuck on /dev/disk/by-label/nixos-minimal-26.11-x86_64 when booting with the virtual media option in jetkvm. FIX: Needs to be mounted as CD/DVD for it to show up in boot options and then mounted as disk not as cd/dvd for it to show up in /dev/disk/by-label/nix... This was a bug in JetKVM firmware.
 
 2. did not request an ip address using dhcp, did not use slaac for auto assignment. TODO: Machine should have a fallback address maybe 192.168.1.254 ? PROBLEM: The other side was only allowing vlan tagged traffic and bootstrap nix only works with untagged traffic.

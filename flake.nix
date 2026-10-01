@@ -78,6 +78,7 @@
       supportedSystems = [
         "x86_64-linux"
         "aarch64-linux"
+        "aarch64-darwin"
       ];
       hostRegistries = builtins.mapAttrs (
         _hostName: machine: machine.config.system.homelab.registry
@@ -122,7 +123,7 @@
             cat "$path"
           '';
         };
-      inherit ((import ./lib/module/default.nix { lib = inputs.nixpkgs.lib; })) shellAliases;
+      inherit ((import ./lib/module/default.nix { lib = inputs.nixpkgs.lib; })) shellAliases editorVariables;
       shellAliasHook = inputs.nixpkgs.lib.concatStringsSep "\n" (
         inputs.nixpkgs.lib.mapAttrsToList (
           name: command: "alias ${name}=${inputs.nixpkgs.lib.escapeShellArg command}"
@@ -137,12 +138,14 @@
           packages = [
             (configCommand pkgs)
             pkgs.age
-            inputs.deploy-rs.packages.${system}.deploy-rs
+            pkgs.deploy-rs
             pkgs.git
+            pkgs.home-manager
             pkgs.sops
             pkgs.ssh-to-age
             pkgs.neovim
           ];
+          env = editorVariables;
           shellHook = shellAliasHook;
         };
     in
@@ -156,6 +159,7 @@
         builtins.elem (inputs.nixpkgs.lib.getName package) [
           "mongodb-ce"
           "omada-controller"
+          "ookla-speedtest"
           "timescaledb"
           "windmill"
         ];
@@ -183,6 +187,10 @@
           kanchenjunga.modules = [ ];
           kepler.modules = [ ];
         };
+      };
+
+      homes = with inputs; {
+        modules = [ sops-nix.homeManagerModules.sops ];
       };
 
       outputs-builder = channels: {

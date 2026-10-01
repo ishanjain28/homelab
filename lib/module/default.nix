@@ -72,4 +72,16 @@ rec {
     vim = "nvim";
     tfirefox = "firefox -no-remote -new-instance -profile $(mktemp -d -p /tmp)";
   };
+
+  ## Shell experience shared by every home (profiles.shell).
+  editorVariables = {
+    EDITOR = "nvim";
+    VISUAL = "nvim";
+  };
+
+  fishInteractiveInit = ''
+    set -g fish_greeting
+    fish_add_path --global --prepend $HOME/.local/bin
+    fish_add_path --global --append $HOME/.opencode/bin
+  '';
 }
