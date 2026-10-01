@@ -144,6 +144,7 @@
             pkgs.sops
             pkgs.ssh-to-age
             pkgs.neovim
+            (treefmtModule pkgs ./treefmt.nix).config.build.wrapper
           ];
           env = editorVariables;
           shellHook = shellAliasHook;

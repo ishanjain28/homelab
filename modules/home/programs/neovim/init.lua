@@ -8,29 +8,29 @@ require("functions")
 -----------------------------------------------
 -- General settings
 -----------------------------------------------
-vim.opt.autoindent = true                -- take indent for new line from previous line
-vim.opt.smartindent = true               -- enable smart indentation
-vim.opt.autoread = true                  -- reload file if the file changes on the disk
-vim.opt.autowrite = true                 -- write when switching buffers
-vim.opt.autowriteall = true              -- write on :quit
+vim.opt.autoindent = true         -- take indent for new line from previous line
+vim.opt.smartindent = true        -- enable smart indentation
+vim.opt.autoread = true           -- reload file if the file changes on the disk
+vim.opt.autowrite = true          -- write when switching buffers
+vim.opt.autowriteall = true       -- write on :quit
 vim.opt.clipboard = "unnamedplus"
-vim.opt.colorcolumn = "81"               -- highlight the 80th column as an indicator
-vim.opt.cursorline = true                -- highlight the current line for the cursor
-vim.opt.expandtab = true                 -- expands tabs to spaces
-vim.opt.list = true                      -- show trailing whitespace
+vim.opt.colorcolumn = "81"        -- highlight the 80th column as an indicator
+vim.opt.cursorline = true         -- highlight the current line for the cursor
+vim.opt.expandtab = true          -- expands tabs to spaces
+vim.opt.list = true               -- show trailing whitespace
 vim.opt.listchars = { tab = "!·", trail = "·" }
-vim.opt.spell = false                    -- disable spelling
-vim.opt.swapfile = false                 -- disable swapfile usage
+vim.opt.spell = false             -- disable spelling
+vim.opt.swapfile = false          -- disable swapfile usage
 vim.opt.wrap = false
-vim.opt.errorbells = false               -- No bells!
-vim.opt.visualbell = false               -- I said, no bells!
-vim.opt.number = true                    -- show number ruler
-vim.opt.relativenumber = true            -- show relative numbers in the ruler
+vim.opt.errorbells = false        -- No bells!
+vim.opt.visualbell = false        -- I said, no bells!
+vim.opt.number = true             -- show number ruler
+vim.opt.relativenumber = true     -- show relative numbers in the ruler
 vim.opt.ruler = true
-vim.opt.formatoptions = "tcqronj"        -- set vims text formatting options
+vim.opt.formatoptions = "tcqronj" -- set vims text formatting options
 vim.opt.softtabstop = 2
 vim.opt.tabstop = 2
-vim.opt.title = true     -- let vim set the terminal title
+vim.opt.title = true -- let vim set the terminal title
 vim.opt.diffopt:append { "iwhite" }
 vim.opt.diffopt:append { "algorithm:patience" }
 vim.opt.diffopt:append { "indent-heuristic" }
@@ -65,9 +65,10 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   callback = function(args)
     vim.cmd([[silent! %s/\s\+$//e]])
 
-    -- Format on save with 200ms timeout, only when a language server can format this buffer
+    -- Format on save, only when a language server can format this buffer.
+    -- 3s timeout as a safety margin for slower formatters.
     if #vim.lsp.get_clients({ bufnr = args.buf, method = "textDocument/formatting" }) > 0 then
-      vim.lsp.buf.format({ bufnr = args.buf, timeout_ms = 200 })
+      vim.lsp.buf.format({ bufnr = args.buf, timeout_ms = 500 })
     end
   end,
 })
@@ -443,7 +444,18 @@ vim.lsp.config('lua_ls', {
   },
 })
 
-vim.lsp.enable({ "clangd", "ts_ls", "gopls", "lua_ls" })
+-- Nix, formatted by the project's treefmt from its dev shell (`nix develop`); no treefmt on PATH, no formatting
+vim.lsp.config('nixd', {
+  settings = {
+    nixd = {
+      formatting = {
+        command = { "treefmt", "--stdin", "buffer.nix" },
+      },
+    },
+  },
+})
+
+vim.lsp.enable({ "clangd", "ts_ls", "gopls", "lua_ls", "nixd" })
 
 -- Rust Analyzer setup (rust-analyzer comes from Nix)
 vim.g.rustaceanvim = {

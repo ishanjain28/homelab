@@ -59,6 +59,7 @@ in
       extraPackages = with pkgs; [
         gopls
         lua-language-server
+        nixd
         rust-analyzer
         typescript-language-server
       ];
