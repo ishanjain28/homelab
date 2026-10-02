@@ -25,6 +25,8 @@ let
       logging
       monitor
       name
+      networkPolicy
+      database
       runtimeId
       shares
       vlans

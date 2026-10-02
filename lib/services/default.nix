@@ -362,6 +362,8 @@ let
 
       endpoints = mkOpt (types.attrsOf endpointType) endpoints "Named listener endpoints for this service.";
 
+      networkPolicy = mkOpt firewallTypes.policy { } "Host-enforced ingress and egress permissions.";
+
       vlans = mkOption {
         type = types.addCheck (types.nonEmptyListOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
         description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
