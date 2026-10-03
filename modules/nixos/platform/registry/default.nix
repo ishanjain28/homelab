@@ -37,6 +37,7 @@ let
     host = {
       name = hostName;
       system = pkgs.stdenv.hostPlatform.system;
+      inherit (config.${namespace}.hardware.networking) domain;
     };
     services = mapAttrs mkService services;
     inherit shares volumes;

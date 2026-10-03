@@ -1,6 +1,7 @@
 { lib, namespace }: with lib.${namespace};
 {
   postgresql-home-primary = enabled // {
+    monitor.name = "PostgreSQL Primary";
     vlans = [ 50 ];
     runtimeId = 36932;
     volumes = [ "postgresql-home-primary" ];
@@ -49,6 +50,7 @@
   };
 
   postgresql-del-mirror = enabled // {
+    monitor.name = "PostgreSQL Secondary";
     vlans = [ 50 ];
     runtimeId = 36933;
     volumes = [ "postgresql-del-mirror" ];
@@ -101,6 +103,7 @@
   };
 
   omada = enabled // {
+    monitor.name = "Omada Controller";
     vlans = [ 99 ];
     runtimeId = 30349;
     volumes = [ "omada" ];
@@ -163,6 +166,7 @@
   };
 
   qbittorrent = enabled // {
+    monitor.name = "Qbitorrent";
     vlans = [ 50 ];
     runtimeId = 30361;
     volumes = [ "qbittorrent" ];
@@ -186,6 +190,7 @@
   };
 
   samba = enabled // {
+    monitor.name = "NAS";
     vlans = [ 50 ];
     runtimeId = 30363;
     shares = [
@@ -201,6 +206,7 @@
   };
 
   caddy = enabled // {
+    monitor.name = "Ingress Proxy IPv4";
     vlans = [
       50
       140
@@ -210,6 +216,7 @@
   };
 
   adguardhome = enabled // {
+    monitor.name = "DNS Plain";
     vlans = [ 99 ];
     runtimeId = 30373;
     configFile = "secrets/adguardhome/home.yaml";
@@ -320,6 +327,7 @@
   };
 
   seerr = enabled // {
+    monitor.name = "Jellyseerr";
     database = {
       instance = "postgresql-home-primary";
       name = "jellyseerr";
@@ -329,6 +337,7 @@
   };
 
   alloy-syslog = enabled // {
+    monitor.name = "Syslog";
     vlans = [ 50 ];
     runtimeId = 30346;
   };

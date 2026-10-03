@@ -18,7 +18,8 @@ in
     endpoints.web.port = 8686;
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/lidarr/ping";
     };
   };
 

@@ -20,7 +20,8 @@ in
     endpoints.web.port = 5055;
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/api/v1/status";
     };
   };
 

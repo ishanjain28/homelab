@@ -18,7 +18,8 @@ in
     endpoints.web.port = 6767;
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/bazarr/ping";
     };
   };
 

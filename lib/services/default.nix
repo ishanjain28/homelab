@@ -43,6 +43,7 @@ let
     {
       name,
       vlans,
+      hostNetwork ? false,
       config,
       isolationProfile ? "unprivileged",
       resources ? { },
@@ -73,7 +74,7 @@ let
       # Generate the container entry
       containers.${name} = isolationConfig // {
         autoStart = true;
-        privateNetwork = true;
+        privateNetwork = !hostNetwork;
         extraFlags = (isolationConfig.extraFlags or [ ]) ++ containerVethFlags;
 
         inherit config;
@@ -94,6 +95,7 @@ let
       name,
       endpoints,
       vlans,
+      hostNetwork ? false,
     }:
     let
       vlanInterface = vlan: "eth${toString vlan}";
@@ -136,8 +138,8 @@ let
 
       networking = {
         networkmanager = disabled;
-        useHostResolvConf = false;
-        firewall = enabled // {
+        useHostResolvConf = hostNetwork;
+        firewall = (if hostNetwork then disabled else enabled) // {
           allowedTCPPorts = portNumbersFor "tcp" endpoints;
           allowedUDPPorts = portNumbersFor "udp" endpoints;
         };
@@ -174,7 +176,7 @@ let
         RuntimeMaxUse = "64M";
       };
 
-      systemd.network = enabled // {
+      systemd.network = (if hostNetwork then disabled else enabled) // {
         networks = vlanNetworks;
       };
 
@@ -274,6 +276,14 @@ let
       inherit (service) certificates;
     in
     mkMerge [
+      {
+        assertions = [
+          {
+            assertion = (service.vlans != [ ]) != service.hostNetwork;
+            message = "${name}: configure either VLAN attachments or hostNetwork.";
+          }
+        ];
+      }
       (mkIf (certificates != [ ]) {
         ${namespace}.acme.consumers.${name} = {
           uid = containerUidOffset + runtimeId;
@@ -320,10 +330,11 @@ let
           resources
           containerTimeout
           ;
+        inherit (service) hostNetwork;
         config = mkMerge [
           (genContainerDefaults {
             inherit name vlans;
-            inherit (service) endpoints;
+            inherit (service) endpoints hostNetwork;
           })
           {
             users.groups.${runtimeUser.group}.gid = mkForce runtimeId;
@@ -363,9 +374,12 @@ let
       endpoints = mkOpt (types.attrsOf endpointType) endpoints "Named listener endpoints for this service.";
 
       vlans = mkOption {
-        type = types.addCheck (types.nonEmptyListOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
+        type = types.addCheck (types.listOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
+        default = [ ];
         description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
       };
+
+      hostNetwork = mkOpt types.bool false "Share the host's network namespace instead of a private network.";
 
       volumes = mkOpt (types.listOf types.nonEmptyStr) [ ] "Volume IDs to attach to this service container.";
 
@@ -384,7 +398,7 @@ let
         enable = mkBoolOpt monitor.enable "Whether to generate a Gatus check for this service.";
         endpoint = mkOpt (types.nullOr types.str) (monitor.endpoint or null) "Named endpoint checked by Gatus.";
         name = mkOpt types.str (monitor.name or name) "Gatus endpoint name.";
-        group = mkOpt types.str (monitor.group or "services") "Gatus endpoint group.";
+        group = mkOpt types.str (monitor.group or "Homelab") "Gatus endpoint group.";
         protocol = mkOpt (types.enum [
           "http"
           "https"
@@ -396,6 +410,7 @@ let
         address = mkOpt types.str (monitor.address or "") "Gatus check address.";
         path = mkOpt types.str (monitor.path or "/") "Gatus HTTP path.";
         interval = mkOpt types.str (monitor.interval or "30s") "Gatus check interval.";
+        alerts = mkOpt (types.listOf types.attrs) (monitor.alerts or [ { type = "pushover"; } ]) "Gatus alerts.";
         conditions = mkOpt (types.listOf types.str) (monitor.conditions
           or (if protocol == "http" || protocol == "https" then [ "[STATUS] == 200" ] else [ "[CONNECTED] == true" ])
         ) "Gatus check conditions.";
