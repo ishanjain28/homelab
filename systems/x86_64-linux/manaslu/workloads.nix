@@ -65,12 +65,20 @@
   gatus = enabled // {
     hostNetwork = true;
     runtimeId = 36924;
+    database = {
+      instance = "postgresql-del-primary";
+      name = "gatus";
+    };
   };
   vaultwarden = enabled // {
     monitor.group = "DEL";
     volumes = [ "vaultwarden" ];
     hostNetwork = true;
     runtimeId = 30390;
+    database = {
+      instance = "postgresql-del-primary";
+      name = "vaultwarden";
+    };
   };
   freshrss = enabled // {
     monitor.group = "DEL";

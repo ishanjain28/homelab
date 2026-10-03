@@ -79,7 +79,7 @@ in
         inherit virtualHost;
         database = {
           type = "pgsql";
-          host = "localhost";
+          host = "127.0.0.1";
           port = 5432;
           inherit (cfg.database) name;
           user = cfg.database.name;
