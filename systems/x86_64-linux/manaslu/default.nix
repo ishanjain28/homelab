@@ -123,6 +123,9 @@ in
     '';
   };
 
+  # resolved's mDNS responder binds UDP 5353 and steals queries meant for AdGuard Home.
+  services.resolved.settings.Resolve.MulticastDNS = false;
+
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
     "net.ipv6.conf.all.forwarding" = 1;
