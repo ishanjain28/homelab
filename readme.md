@@ -51,23 +51,23 @@ sudo rsync -aHAX --numeric-ids --delete --info=progress2 \
   root@<old-machine-ip>:/mnt/backup/volumes/ /var/lib/volumes/
 ```
 
-Copying VM thick LVM volumes 
+Copying VM thick LVM volumes
 
-Create a raw copy of the LVM volume using 
+Create a raw copy of the LVM volume using
 ```
 # For the example volume is called vm-143-0
 cd backups
 ssh ishan@<previous-server-address> 'zstd -1 -T0 -c /main/backups/vms/vm-143-0.raw' | zstd -d |  sudo dd of=/dev/pool/vm-143-0 bs=4M iflag=fullblock status=progress conv=fsync
 ```
 
-Restore it into an identical thick LVM volume using 
+Restore it into an identical thick LVM volume using
 ```
 stat -c %s vm-143-0  # Alternatively, you can also get size in bytes using ls -al
 12345678
 
-# On the new machine 
+# On the new machine
 sudo lvcreate -L 12345678b -n vm-143-0 pool
-ssh ishan@<backup-server-addr> 'cat /main/backups/vms/vm-143-0.raw' | sudo dd of=/dev/pool/vm-143-0 bs=4M iflag=fullblock status=progress conv=fsync 
+ssh ishan@<backup-server-addr> 'cat /main/backups/vms/vm-143-0.raw' | sudo dd of=/dev/pool/vm-143-0 bs=4M iflag=fullblock status=progress conv=fsync
 ```
 
 Fixing UEFI boot for VMs migrated from Proxmox
@@ -112,6 +112,8 @@ This assumes the machine to configure is called `tomato`. Use `nixos-anywhere` t
 ```console
 nix run github:nix-community/nixos-anywhere -- --flake .#tomato ishan@<address>
 ```
+
+Deploying from aarch64 to x64? Install `qemu-user-static`, add `extra-platforms = x86_64-linux` to `/etc/nix/nix.conf`, restart nix-daemon and then deploy.
 
 The persistent volumes are created on the initial deployment but services will fail to start because the secrets are encrypted with a different key. It uses SSH key on the host to encrypt credentials.
 This ssh key is generated on deployment and is not part of the repo. Optionally, It can be specified using `sshKeyFile`.
