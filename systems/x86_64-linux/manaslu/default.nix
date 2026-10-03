@@ -2,6 +2,7 @@
   inputs,
   lib,
   namespace,
+  pkgs,
   ...
 }:
 with lib;
@@ -162,6 +163,8 @@ in
       "wg-quick-wg-home-vpn.service"
     ];
   };
+
+  environment.systemPackages = [ pkgs.wireguard-tools ];
 
   users.users.ishan.extraGroups = [ "homelab-share-dl" ];
 

@@ -94,11 +94,11 @@
   };
   wireguard = enabled // {
     interfaces = {
-      wg-home-vpn = disabled // {
+      wg-home-vpn = enabled // {
         configFile = "secrets/wg-home-vpn.conf";
         listenPort = 51820;
       };
-      wg-ipv6 = disabled // {
+      wg-ipv6 = enabled // {
         configFile = "secrets/wg-ipv6.conf";
         listenPort = 51377;
       };
