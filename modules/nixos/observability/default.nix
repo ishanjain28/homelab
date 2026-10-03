@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   namespace,
   pkgs,
@@ -76,7 +77,6 @@ let
       ) enabledServices
     )
   );
-  gatus = config.${namespace}.services.gatus;
 
   serviceLokiPushUrl =
     name: service:
@@ -150,8 +150,9 @@ let
     }
   '';
 
+  fleet = inputs.self.lib.homelabRegistry;
   serviceEndpoints = mapAttrsToList (
-    serviceName: srv:
+    _id: srv:
     let
       inherit (srv) monitor;
       inherit (monitor)
@@ -162,8 +163,8 @@ let
         conditions
         ;
       inherit (monitor) name;
-      domain = config.${namespace}.hardware.networking.domain;
-      defaultAddress = if domain != "" then "${serviceName}.${domain}" else serviceName;
+      inherit (fleet.hosts.${srv.host}) domain;
+      defaultAddress = if domain != "" then "${srv.name}.${domain}" else srv.name;
       address = if monitor.address != "" then monitor.address else defaultAddress;
       port = srv.endpoints.${endpoint}.port;
       url =
@@ -174,10 +175,10 @@ let
     in
     {
       inherit name group url;
-      inherit (monitor) interval;
+      inherit (monitor) interval alerts;
       inherit conditions;
     }
-  ) (filterAttrs (_name: srv: (srv ? monitor) && srv.monitor.enable) enabledServices);
+  ) (filterAttrs (_id: srv: srv.monitor.enable) fleet.services);
 
   invalidMonitorEndpoints = mapAttrsToList (serviceName: srv: "${serviceName}:${toString srv.monitor.endpoint}") (
     filterAttrs (
@@ -185,7 +186,7 @@ let
     ) enabledServices
   );
 
-  gatusSettings.endpoints = serviceEndpoints ++ gatus.externalEndpoints;
+  gatusSettings.endpoints = serviceEndpoints;
 in
 {
   options.${namespace} = {

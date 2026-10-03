@@ -18,7 +18,8 @@ in
     endpoints.web.port = 9696;
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/prowlarr/ping";
     };
   };
 

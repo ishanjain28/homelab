@@ -18,7 +18,8 @@ in
     endpoints.web.port = 8989;
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/sonarr/ping";
     };
   };
 

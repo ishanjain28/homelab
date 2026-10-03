@@ -64,6 +64,7 @@
   };
 
   changedetection = enabled // {
+    monitor.name = "Change Detection";
     vlans = [ 50 ];
     runtimeId = 30344;
     volumes = [ "changedetection" ];
@@ -94,12 +95,6 @@
     vlans = [ 70 ];
     runtimeId = 30347;
     volumes = [ "cups" ];
-  };
-
-  gatus = disabled // {
-    vlans = [ 50 ];
-    runtimeId = 36924;
-    externalEndpoints = [ ];
   };
 
   multicaster = enabled // {

@@ -303,7 +303,7 @@ let
               primary_conninfo = "host=${cfg.replicaOf} port=5432 user=replica passfile=/run/postgresql/pgpass";
               primary_slot_name = "homelab";
             }
-            // cfg.settings;
+            // mapAttrs (_: mkForce) cfg.settings;
           };
 
           systemd.services.postgresql.serviceConfig.OOMScoreAdjust = -200;

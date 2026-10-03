@@ -18,7 +18,8 @@ in
     endpoints.web.port = 7878;
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/radarr/ping";
     };
   };
 

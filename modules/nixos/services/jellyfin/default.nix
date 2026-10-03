@@ -21,7 +21,8 @@ in
     };
     monitor = enabled // {
       endpoint = "web";
-      protocol = "tcp";
+      protocol = "http";
+      path = "/health";
     };
   };
 

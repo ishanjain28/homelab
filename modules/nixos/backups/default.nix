@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   namespace,
   pkgs,
@@ -12,7 +13,6 @@ let
   inherit (cfg) groups targets;
   registry = config.system.homelab.registry;
   volumes = config.${namespace}.volumes;
-  repoRoot = ../../..;
   volumeTool = getExe pkgs.${namespace}.volume;
   restic = getExe pkgs.restic;
 
@@ -169,7 +169,7 @@ let
   mkTargetSecrets =
     targetName: target:
     nameValuePair (secretName targetName) {
-      sopsFile = repoRoot + "/${target.passwordSecret}";
+      sopsFile = "${inputs.self}/${target.passwordSecret}";
       format = "binary";
     };
 in

@@ -207,7 +207,7 @@
     // {
       inherit (inputs) self;
       configs = {
-        gatus = self.nixosConfigurations.kepler.config.services.gatus.configFile;
+        gatus = self.nixosConfigurations.manaslu.config.services.gatus.configFile;
       };
       lib = lib // {
         homelabRegistry = fleetRegistry;
