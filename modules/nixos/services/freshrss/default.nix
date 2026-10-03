@@ -10,6 +10,7 @@ with lib.${namespace};
 let
   cfg = config.${namespace}.services.freshrss;
   passwordPath = "/run/container-secrets/freshrss-password";
+  databasePasswordPath = "/run/container-secrets/freshrss-database-password";
   virtualHost = "http://:${toString cfg.endpoints.web.port}";
 
   inherit (pkgs.freshrss-extensions) buildFreshRssExtension;
@@ -58,9 +59,14 @@ in
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
     secrets.password = {
-      file = "secrets/freshrss-password";
+      file = "secrets/freshrss/password";
       format = "binary";
       mountPath = passwordPath;
+    };
+    secrets.database-password = {
+      file = "secrets/freshrss/database-password";
+      format = "binary";
+      mountPath = databasePasswordPath;
     };
     containerConfig = {
       services.freshrss = {
@@ -77,6 +83,7 @@ in
           port = 5432;
           inherit (cfg.database) name;
           user = cfg.database.name;
+          passFile = databasePasswordPath;
         };
       };
       services.caddy = {

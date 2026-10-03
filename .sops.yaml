@@ -6,7 +6,7 @@ keys:
   - &work_macbook age1s45dwj5ger9hrnta0rguvcetkc5zjws4zac9g89g2jwvvuttmfgs2dudue
   - &manaslu age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
 creation_rules:
-  - path_regex: secrets/(vaultwarden/.*|caddy/delhi\.json|adguardhome/delhi\.yml|gatus/gatus\.env|bird\.password|freshrss-password|wg-home-vpn.conf|wg-ipv6.conf|znc/.*)$
+  - path_regex: secrets/(vaultwarden/.*|caddy/delhi\.json|adguardhome/delhi\.yml|gatus/gatus\.env|bird\.password|freshrss/.*|wg-home-vpn.conf|wg-ipv6.conf|znc/.*)$
     key_groups:
       - age:
           - *manaslu
