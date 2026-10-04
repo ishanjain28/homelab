@@ -8,7 +8,7 @@
     settings = {
       accept-flake-config = true;
       allowed-users = [ "ishan" ];
-      builders-use-substitutes = false;
+      builders-use-substitutes = true;
       experimental-features = lib.mkForce [
         "auto-allocate-uids"
         "ca-derivations"
@@ -23,7 +23,7 @@
       keep-outputs = true;
       log-lines = 20;
       max-jobs = "auto";
-      substitute = false;
+      substitute = true;
       trusted-users = [
         "root"
         "ishan"
