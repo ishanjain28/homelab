@@ -1,8 +1,10 @@
 { lib, namespace }: with lib.${namespace};
 {
   postgresql-del-primary = enabled // {
-    monitor.group = "DEL";
-    monitor.name = "PostgreSQL Primary";
+    monitor = {
+      group = "DEL";
+      name = "PostgreSQL Primary";
+    };
     volumes = [ "postgresql-del-primary" ];
     hostNetwork = true;
     runtimeId = 36934;
