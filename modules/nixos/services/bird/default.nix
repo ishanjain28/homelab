@@ -16,7 +16,7 @@ in
     package = mkPackageOption pkgs "bird3" { };
     config = mkOption {
       type = types.lines;
-      description = "BIRD configuration. secrets/bird.password is included first and defines `vultr_password`.";
+      description = "BIRD configuration. secrets/bird.password is included first and defines `bgp_password`.";
     };
   };
   config = lib.mkIf cfg.enable {
