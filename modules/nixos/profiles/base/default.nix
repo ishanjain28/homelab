@@ -30,7 +30,6 @@ in
       [
         gptfdisk
         pv
-        thin-provisioning-tools
       ]
       ++ map (p: p.terminfo) [
         kitty
