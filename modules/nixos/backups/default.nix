@@ -50,11 +50,12 @@ let
     ++ keepOption "yearly" keep.yearly
     ++ optional (keep.within != null) "--keep-within=${keep.within}";
 
-  secretName = targetName: "homelab-backups-${targetName}-password";
   resticEnvironment = targetName: {
     RESTIC_REPOSITORY = targets.${targetName}.repository;
-    RESTIC_PASSWORD_FILE = config.sops.secrets.${secretName targetName}.path;
+    RESTIC_PASSWORD_FILE = config.sops.secrets.homelab-backups-restic-password.path;
     RESTIC_CACHE_DIR = "/var/cache/restic/${targetName}";
+    # rclone writes refreshed OAuth tokens back to its config; root can write the secret in place.
+    RCLONE_CONFIG = config.sops.secrets.homelab-backups-rclone.path;
   };
 
   mkResticService =
@@ -74,6 +75,7 @@ let
       ''
       + script;
       environment = resticEnvironment targetName;
+      path = [ pkgs.rclone ];
       inherit (cfg) onFailure;
       wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
@@ -163,15 +165,10 @@ let
     pkgs.writeShellScriptBin "restic-${targetName}" ''
       ${toShellVars (resticEnvironment targetName)}
       export ${concatStringsSep " " (attrNames (resticEnvironment targetName))}
+      export PATH=${pkgs.rclone}/bin:$PATH
       exec ${restic} "$@"
     '';
 
-  mkTargetSecrets =
-    targetName: target:
-    nameValuePair (secretName targetName) {
-      sopsFile = "${inputs.self}/${target.passwordSecret}";
-      format = "binary";
-    };
 in
 {
   options.${namespace}.backups = {
@@ -182,10 +179,6 @@ in
             repository = mkOption {
               type = types.nonEmptyStr;
               description = "Restic repository location.";
-            };
-            passwordSecret = mkOption {
-              type = types.nonEmptyStr;
-              description = "Repository-relative SOPS file containing the Restic repository password.";
             };
             requiresMountsFor = mkOpt (types.listOf types.str) [ ] "Mount points that must be present before this target is used.";
             maintenance = mkOption {
@@ -244,6 +237,14 @@ in
       description = "Backup groups: a schedule and retention policy that volumes opt into.";
     };
 
+    passwordSecret =
+      mkOpt types.nonEmptyStr "secrets/backups/restic.password"
+        "Repository-relative SOPS file containing the Restic password shared by all targets.";
+
+    rcloneConfigSecret =
+      mkOpt types.nonEmptyStr "secrets/backups/rclone.conf"
+        "Repository-relative SOPS file containing the rclone config used by rclone: repositories.";
+
     onFailure = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -267,7 +268,16 @@ in
       }
     ];
 
-    sops.secrets = mapAttrs' mkTargetSecrets targets;
+    sops.secrets = {
+      homelab-backups-restic-password = {
+        sopsFile = "${inputs.self}/${cfg.passwordSecret}";
+        format = "binary";
+      };
+      homelab-backups-rclone = {
+        sopsFile = "${inputs.self}/${cfg.rcloneConfigSecret}";
+        format = "binary";
+      };
+    };
     environment.systemPackages = [ pkgs.restic ] ++ map mkWrapper (attrNames targets);
 
     systemd.services = (mapAttrs' mkGroupRunner activeGroups) // (mapAttrs' mkMaintenance maintainedTargets);

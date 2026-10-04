@@ -9,6 +9,7 @@ with lib;
 with lib.${namespace};
 let
   hostName = "manaslu";
+  backups = import ./backups.nix;
   volumes = import ./volumes.nix;
   workloads = import ./workloads.nix { inherit lib namespace; };
 in
@@ -20,6 +21,7 @@ in
 
   homelab = {
     profiles.server = enabled;
+    inherit backups;
     inherit volumes;
     services = workloads;
     logging.enable = mkForce false;

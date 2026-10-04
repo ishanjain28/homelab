@@ -1,8 +1,15 @@
 {
   targets.local = {
     repository = "/var/lib/backups/restic";
-    requiresMountsFor = [ "/var/lib/backups" ];
     maintenance.onCalendar = "Sun 04:00";
+  };
+
+  targets.gdrive = {
+    repository = "rclone:gdrive:homelab-backups/manaslu";
+    maintenance = {
+      onCalendar = "Sun 06:00";
+      readDataSubset = "1%";
+    };
   };
 
   groups = {
@@ -16,15 +23,14 @@
       };
     };
 
-    daily = {
-      target = "local";
+    offsite = {
+      target = "gdrive";
       onCalendar = "*-*-* 03:00";
-      randomizedDelaySec = "30m";
+      randomizedDelaySec = "60m";
       keep = {
-        last = 3;
-        daily = 14;
-        weekly = 8;
-        monthly = 6;
+        daily = 7;
+        weekly = 4;
+        monthly = 12;
       };
     };
   };
