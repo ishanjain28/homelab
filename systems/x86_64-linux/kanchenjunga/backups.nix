@@ -1,7 +1,6 @@
 {
   targets.local = {
     repository = "/var/lib/backups/restic";
-    passwordSecret = "secrets/backups/restic.password";
     requiresMountsFor = [ "/var/lib/backups" ];
     maintenance.onCalendar = "Sun 04:00";
   };

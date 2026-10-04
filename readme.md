@@ -120,6 +120,12 @@ This ssh key is generated on deployment and is not part of the repo. Optionally,
 After deployment copy the generaated public key from the host(from `/etc/ssh/ssh_host_ed25519_key.pub`) and update all the secrets using `echo '<key>' | nix run nixpkgs#ssh-to-age`.
 Add the key in `.sops.yaml` and then run `find secrets -type f -exec sops updatekeys -y {} \;` to update all the secrets.
 
+Google Drive backups: the remote must be called `gdrive`; every host reads `secrets/backups/rclone.conf`.
+```console
+rclone config create gdrive drive scope=drive.file --config /dev/shm/rclone.conf
+cp /dev/shm/rclone.conf secrets/backups/rclone.conf && sops -e -i secrets/backups/rclone.conf && shred -u /dev/shm/rclone.conf
+```
+
 
 ## Homes
 

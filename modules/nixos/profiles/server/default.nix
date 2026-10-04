@@ -18,6 +18,7 @@ in
       profiles.base = enabled;
       secrets = enabled;
       system.remoteRescue = enabled;
+      observability.alerts = enabled;
       services.chrony = enabled;
       logging = enabled;
     };

@@ -18,6 +18,14 @@ creation_rules:
           - *annapurna
           - *kanchenjunga
           - *manaslu
+  - path_regex: secrets/(backups|alerts)/.*$
+    key_groups:
+      - age:
+          - *turquoise
+          - *kepler
+          - *annapurna
+          - *kanchenjunga
+          - *manaslu
   - path_regex: secrets/tailscale/auth-key$
     key_groups:
       - age:
