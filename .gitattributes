@@ -1,0 +1,2 @@
+# Decrypted diffs for sops files; the textconv driver is configured by the dev shell.
+secrets/** diff=sops
