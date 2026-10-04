@@ -272,6 +272,13 @@
     runtimeId = 20001;
   };
 
+  stalwart = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30364;
+    volumes = [ "stalwart" ];
+    certificates = [ "mail-home" ];
+  };
+
   windmill = enabled // {
     database = {
       instance = "postgresql-home-primary";

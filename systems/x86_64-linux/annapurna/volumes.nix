@@ -88,4 +88,13 @@
       "offsite"
     ];
   };
+
+  stalwart = {
+    uuid = "4b1f1a89-9772-4212-a729-c4af50187715";
+    size = "2G";
+    backup.groups = [
+      "daily"
+      "offsite"
+    ];
+  };
 }
