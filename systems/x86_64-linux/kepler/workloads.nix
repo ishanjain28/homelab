@@ -28,30 +28,20 @@
     volumes = [ "actual-server" ];
   };
 
-  gitea = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "gitea";
-    };
+  pvr-movies-monitor = enabled // {
     vlans = [ 50 ];
-    runtimeId = 36930;
-    volumes = [ "gitea" ];
+    runtimeId = 20691;
+  };
+
+  huawei-sms = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 27777;
   };
 
   gitea-runner = enabled // {
     vlans = [ 50 ];
     runtimeId = 36928;
     giteaURI = "http://10.0.50.20:3000";
-  };
-
-  grafana = enabled // {
-    database = {
-      instance = "postgresql-home-primary";
-      name = "grafana";
-    };
-    vlans = [ 50 ];
-    runtimeId = 31918;
-    volumes = [ "grafana" ];
   };
 
   mathesar = enabled // {
@@ -75,22 +65,6 @@
     runtimeId = 30345;
     volumes = [ "openvscode-server" ];
   };
-  loki = enabled // {
-    vlans = [
-      50
-      70
-      99
-    ];
-    runtimeId = 30343;
-    volumes = [ "loki" ];
-  };
-
-  victoriametrics = enabled // {
-    vlans = [ 50 ];
-    runtimeId = 36929;
-    volumes = [ "victoriametrics" ];
-  };
-
   cups = enabled // {
     vlans = [ 70 ];
     runtimeId = 30347;
@@ -119,4 +93,5 @@
     runtimeId = 36927;
     volumes = [ "ripe-atlas-lte" ];
   };
+
 }
