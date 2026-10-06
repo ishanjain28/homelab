@@ -273,6 +273,10 @@
   };
 
   stalwart = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "stalwart";
+    };
     vlans = [ 50 ];
     runtimeId = 30364;
     volumes = [ "stalwart" ];
