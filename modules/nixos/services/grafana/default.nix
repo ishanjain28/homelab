@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   namespace,
   pkgs,
@@ -12,6 +13,7 @@ let
   cfg = srv.grafana;
   grafanaConfigPath = "/run/container-secrets/grafana.ini";
   ldapConfigPath = "/run/container-secrets/ldap.toml";
+  provisioning = pkgs.linkFarm "grafana-provisioning" { "dashboards/homelab.yaml" = ./dashboards.yaml; };
 in
 {
   options.${namespace}.services.grafana = mkServiceOptions {
@@ -42,6 +44,8 @@ in
       };
     };
 
+    containerConfig.environment.etc."grafana/dashboards".source = "${inputs.self}/dashboards";
+
     resources = {
       CPUQuota = "500%";
       MemoryMax = "3G";
@@ -51,7 +55,7 @@ in
     environment = {
       GF_PATHS_DATA = "/var/lib/grafana";
       GF_PATHS_PLUGINS = "/var/lib/grafana/plugins";
-      GF_PATHS_PROVISIONING = "/var/lib/grafana/provisioning";
+      GF_PATHS_PROVISIONING = "${provisioning}";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
       GF_SERVER_HTTP_ADDR = "0.0.0.0";
       GF_SERVER_HTTP_PORT = toString cfg.endpoints.web.port;

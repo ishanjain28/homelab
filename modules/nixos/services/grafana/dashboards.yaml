@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: homelab
+    type: file
+    folder: Homelab
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards

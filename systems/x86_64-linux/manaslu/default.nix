@@ -24,6 +24,7 @@ in
     inherit backups;
     inherit volumes;
     services = workloads;
+    logging.enable = mkForce false;
     metrics = enabled;
 
     shares.dl = {
