@@ -79,14 +79,11 @@ let
   );
 
   serviceLokiPushUrl =
-    name: service:
+    service:
     let
       configuredVlans = filter (vlan: hasAttr (toString vlan) logging.lokiPushUrls) service.vlans;
     in
-    if configuredVlans == [ ] then
-      throw "No Loki push URL configured for ${name} on VLANs ${concatMapStringsSep ", " toString service.vlans}"
-    else
-      logging.lokiPushUrls.${toString (head configuredVlans)};
+    if configuredVlans == [ ] then hostLokiPushUrl else logging.lokiPushUrls.${toString (head configuredVlans)};
 
   hostLokiPushUrl =
     logging.lokiPushUrls.${toString logging.hostVlan}
@@ -198,7 +195,7 @@ in
         "70" = "http://10.0.70.11:3100/loki/api/v1/push";
         "99" = "http://10.0.99.29:3100/loki/api/v1/push";
       } "Loki push API URLs keyed by VLAN.";
-      hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
+      hostVlan = mkOpt types.ints.positive 50 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
     };
 
     metrics = {
@@ -251,7 +248,7 @@ in
             Group = service.runtimeUser.group;
           };
 
-          environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl name service) service.logging.files;
+          environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl service) service.logging.files;
         };
       }) loggedServices;
     })
