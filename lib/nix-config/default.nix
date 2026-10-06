@@ -18,9 +18,9 @@
       ];
       flake-registry = "/etc/nix/registry.json";
       http-connections = 50;
-      keep-derivations = true;
+      keep-derivations = false;
       keep-going = true;
-      keep-outputs = true;
+      keep-outputs = false;
       log-lines = 20;
       max-jobs = "auto";
       substitute = true;
