@@ -1,9 +1,10 @@
 use anyhow::{bail, ensure, Context, Result};
 use std::{
     fs::{File, OpenOptions},
-    io::{self, BufRead, BufReader, Read, Write},
+    io::{self, BufRead, BufReader, ErrorKind, Read, Write},
     path::Path,
     process::{Command, Stdio},
+    time::{Duration, Instant},
 };
 
 use crate::{
@@ -15,36 +16,118 @@ use crate::{
     },
     models::{load_state, service_volumes, Volume},
     quiesce::QuiesceGuard,
-    util::{block_device_size, is_block_device, is_mounted, run_command},
+    util::{
+        block_device_size, install_interrupt_handler, interrupted, is_block_device, is_mounted,
+        run_command,
+    },
 };
 
 const SNAPSHOT_TAG: &str = "homelab-copy";
+const RECEIVING_TAG: &str = "homelab-receiving";
 const REMOTE_VOLUME: &str = "/run/current-system/sw/bin/volume";
+const CHUNK_SIZE: usize = 4 << 20;
+const PROGRESS_INTERVAL: Duration = Duration::from_secs(10);
 
-pub fn run_copy(state_file: &Path, owner_service: &str, target: &str) -> Result<()> {
-    validate_ssh_target(target)?;
+/// Pull every volume owned by a service from another host. Runs on the destination as root and
+/// starts `volume send` on the source through `ssh <source> sudo -n`.
+pub fn run_pull(state_file: &Path, owner_service: &str, source: &str) -> Result<()> {
+    validate_ssh_target(source)?;
+    install_interrupt_handler();
 
     let state = load_state(state_file)?;
     let volumes = service_volumes(&state, owner_service)?;
     ensure!(
-        volumes.iter().all(|volume| volume.owner_enabled),
-        "source service {owner_service:?} must be enabled in the deployed configuration"
+        volumes.iter().all(|volume| !volume.owner_enabled),
+        "service {owner_service:?} is enabled on {}; disable it before pulling its volumes",
+        state.host
     );
 
-    let _locks = VolumeLocks::acquire(&volumes, "copy")?;
+    let _locks = VolumeLocks::acquire(&volumes, "pull")?;
+    ensure_vg()?;
+
+    let mut missing = Vec::new();
+    for volume in &volumes {
+        if lv_exists(&volume.name)? {
+            activate_lv(&volume.name)?;
+            apply_volume(volume, true)?;
+            log::info!(volume = volume.id; "already present, skipping");
+        } else {
+            missing.push(volume);
+        }
+    }
+    if missing.is_empty() {
+        return Ok(());
+    }
+
+    let mut sender = Command::new("ssh")
+        .arg(source)
+        .args(["sudo", "-n", REMOTE_VOLUME, "send", owner_service])
+        .args(missing.iter().map(|volume| volume.id.as_str()))
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .spawn()
+        .with_context(|| format!("failed to start sender on {source}"))?;
+    let mut stream = BufReader::with_capacity(
+        CHUNK_SIZE,
+        sender.stdout.take().context("sender has no stdout")?,
+    );
+
+    let mut result = Ok(());
+    for volume in &missing {
+        result = receive_volume(volume, &mut stream)
+            .with_context(|| format!("[{}] pull failed", volume.id));
+        if result.is_err() {
+            break;
+        }
+    }
+    if result.is_err() {
+        let _ = sender.kill();
+    }
+    drop(stream);
+    let status = sender
+        .wait()
+        .with_context(|| format!("failed to wait for sender on {source}"))?;
+    result?;
+    ensure!(status.success(), "sender on {source} failed with {status}");
+    Ok(())
+}
+
+/// Snapshot the requested volumes of a service and write them to stdout, each preceded by a
+/// `VOLUME <id> <bytes>` line. Invoked by `volume pull` over SSH; logs go to stderr.
+pub fn run_send(state_file: &Path, owner_service: &str, volume_ids: &[String]) -> Result<()> {
+    install_interrupt_handler();
+
+    let state = load_state(state_file)?;
+    let owned = service_volumes(&state, owner_service)?;
+    let volumes = volume_ids
+        .iter()
+        .map(|id| {
+            owned
+                .iter()
+                .find(|volume| &volume.id == id)
+                .cloned()
+                .with_context(|| {
+                    format!("{owner_service:?} owns no volume {id:?} on {}", state.host)
+                })
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    let _locks = VolumeLocks::acquire(&volumes, "send")?;
     for volume in &volumes {
         validate_volume(volume).with_context(|| format!("[{}] validation failed", volume.id))?;
     }
 
-    if let Err(error) = snapshot_and_copy(&volumes, owner_service, target) {
-        cleanup_snapshots(&volumes)
-            .with_context(|| format!("snapshot cleanup after failed copy: {error:#}"))?;
-        return Err(error);
+    let result = snapshot_and_send(&volumes);
+    let cleanup = cleanup_snapshots(&volumes);
+    match (result, cleanup) {
+        (Err(error), Err(cleanup_error)) => {
+            Err(error.context(format!("snapshot cleanup also failed: {cleanup_error:#}")))
+        }
+        (result, cleanup) => result.and(cleanup),
     }
-    cleanup_snapshots(&volumes)
 }
 
-fn snapshot_and_copy(volumes: &[Volume], owner_service: &str, target: &str) -> Result<()> {
+fn snapshot_and_send(volumes: &[Volume]) -> Result<()> {
     let guard = QuiesceGuard::begin(&volumes[0].owner_unit)?;
     for volume in volumes {
         create_snapshot(
@@ -56,58 +139,25 @@ fn snapshot_and_copy(volumes: &[Volume], owner_service: &str, target: &str) -> R
         .with_context(|| format!("[{}] snapshot failed", volume.id))?;
     }
     guard.release()?;
+
+    let mut output = io::stdout().lock();
     for volume in volumes {
-        copy_snapshot(volume, owner_service, target)
-            .with_context(|| format!("[{}] copy failed", volume.id))?;
+        let snapshot = lv_path(&snapshot_name(volume)?);
+        let bytes = block_device_size(&snapshot)?;
+        writeln!(output, "VOLUME {} {bytes}", volume.id).context("failed to write header")?;
+        let mut input = File::open(&snapshot)
+            .with_context(|| format!("failed to open {}", snapshot.display()))?;
+        copy_exact(&mut input, &mut output, bytes, &volume.id)
+            .with_context(|| format!("[{}] send failed", volume.id))?;
+        output.flush().context("failed to flush stdout")?;
     }
     Ok(())
 }
 
-pub fn run_receive(
-    state_file: &Path,
-    owner_service: &str,
-    volume_id: &str,
-    source_bytes: u64,
-) -> Result<()> {
-    ensure!(
-        source_bytes > 0,
-        "source volume size must be greater than zero"
-    );
-
-    let state = load_state(state_file)?;
-    let volume = state.volumes.get(volume_id).cloned().with_context(|| {
-        format!(
-            "volume {volume_id:?} is not declared on target host {}",
-            state.host
-        )
-    })?;
-    ensure!(
-        volume.owner_service == owner_service,
-        "target volume {volume_id:?} belongs to {:?}, not {owner_service:?}",
-        volume.owner_service
-    );
-    ensure!(
-        !volume.owner_enabled,
-        "target service {owner_service:?} is enabled; disable it before receiving volume data"
-    );
-
-    let _locks = VolumeLocks::acquire(std::slice::from_ref(&volume), "receive")?;
-    ensure_vg()?;
-
-    if lv_exists(&volume.name)? {
-        activate_lv(&volume.name)?;
-        apply_volume(&volume, true)?;
-        ensure!(
-            block_device_size(&volume.lv)? >= source_bytes,
-            "existing target LV {} is smaller than the source snapshot",
-            volume.lv
-        );
-        send_handshake("SKIP")?;
-        return Ok(());
-    }
-
-    let receiving_name = receiving_name(&volume)?;
-    remove_receiving_lv(&volume, &receiving_name)?;
+fn receive_volume(volume: &Volume, stream: &mut impl BufRead) -> Result<()> {
+    let source_bytes = read_header(stream, &volume.id)?;
+    let receiving_name = receiving_name(volume)?;
+    remove_receiving_lv(volume, &receiving_name)?;
     run_command(
         "lvcreate",
         &[
@@ -117,7 +167,7 @@ pub fn run_receive(
             "--name",
             &receiving_name,
             "--addtag",
-            "homelab-receiving",
+            RECEIVING_TAG,
             "--addtag",
             &format!("homelab-volume-{}", volume.id),
             VG_NAME,
@@ -125,33 +175,40 @@ pub fn run_receive(
     )?;
     run_command("udevadm", &["settle"])?;
 
-    let receiving_path = lv_path(&receiving_name);
-    let receiving_bytes = block_device_size(&receiving_path)?;
-    if receiving_bytes < source_bytes {
-        remove_receiving_lv(&volume, &receiving_name)?;
-        bail!(
-            "target declaration for {volume_id:?} creates a {receiving_bytes}-byte LV, smaller than the {source_bytes}-byte source LV"
-        );
+    let result = fill_and_rename(volume, &receiving_name, source_bytes, stream);
+    if result.is_err() {
+        if let Err(error) = remove_receiving_lv(volume, &receiving_name) {
+            log::error!(volume = volume.id; "failed to remove {receiving_name}: {error:#}");
+        }
     }
+    result
+}
 
-    send_handshake("READY")?;
+fn fill_and_rename(
+    volume: &Volume,
+    receiving_name: &str,
+    source_bytes: u64,
+    stream: &mut impl Read,
+) -> Result<()> {
+    let receiving_path = lv_path(receiving_name);
+    let receiving_bytes = block_device_size(&receiving_path)?;
+    ensure!(
+        receiving_bytes >= source_bytes,
+        "declared size creates a {receiving_bytes}-byte LV, smaller than the {source_bytes}-byte source"
+    );
+
     let mut device = OpenOptions::new()
         .write(true)
         .open(&receiving_path)
         .with_context(|| format!("failed to open {}", receiving_path.display()))?;
-    let copied = io::copy(&mut io::stdin().lock().take(source_bytes), &mut device)
-        .with_context(|| format!("failed writing {}", receiving_path.display()))?;
-    ensure!(
-        copied == source_bytes,
-        "incomplete transfer for {volume_id:?}: received {copied} of {source_bytes} bytes"
-    );
+    copy_exact(stream, &mut device, source_bytes, &volume.id)?;
     device
         .sync_all()
         .with_context(|| format!("failed to flush {}", receiving_path.display()))?;
     drop(device);
 
     let mut received = volume.clone();
-    received.name = receiving_name.clone();
+    received.name = receiving_name.to_string();
     received.lv = receiving_path.to_string_lossy().into_owned();
     run_e2fsck(&received)?;
     ensure_filesystem(&received)?;
@@ -160,76 +217,59 @@ pub fn run_receive(
         ensure_filesystem(&received)?;
     }
 
-    run_command("lvrename", &[VG_NAME, &receiving_name, &volume.name])?;
+    run_command("lvrename", &[VG_NAME, receiving_name, &volume.name])?;
     run_command("udevadm", &["settle"])?;
-    ensure_filesystem(&volume)
+    ensure_filesystem(volume)
 }
 
-fn copy_snapshot(volume: &Volume, owner_service: &str, target: &str) -> Result<()> {
-    let snapshot = lv_path(&snapshot_name(volume)?);
-    let source_bytes = block_device_size(&snapshot)?;
-    log::info!(volume = volume.id; "copying {source_bytes} bytes to {target}");
-
-    let mut child = Command::new("ssh")
-        .arg(target)
-        .args([
-            REMOTE_VOLUME,
-            "receive",
-            owner_service,
-            &volume.id,
-            "--source-bytes",
-            &source_bytes.to_string(),
-        ])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()
-        .with_context(|| format!("failed to start receiver on {target}"))?;
-
-    let stdout = child.stdout.take().context("receiver has no stdout")?;
-    let mut handshake = String::new();
-    BufReader::new(stdout)
-        .read_line(&mut handshake)
-        .context("failed to read receiver handshake")?;
-
-    let transfer = match handshake.trim() {
-        "READY" => stream_snapshot(&snapshot, source_bytes, &mut child),
-        "SKIP" => {
-            drop(child.stdin.take());
-            log::info!(volume = volume.id; "target already contains this volume");
-            Ok(())
-        }
-        response => {
-            drop(child.stdin.take());
-            Err(anyhow::anyhow!("unexpected receiver response {response:?}"))
-        }
-    };
-
-    let status = child
-        .wait()
-        .with_context(|| format!("failed to wait for receiver on {target}"))?;
-    ensure!(
-        status.success(),
-        "receiver on {target} failed with {status}"
-    );
-    transfer
+fn read_header(stream: &mut impl BufRead, volume_id: &str) -> Result<u64> {
+    let mut line = String::new();
+    stream
+        .read_line(&mut line)
+        .context("failed to read volume header from sender")?;
+    let fields: Vec<&str> = line.split_whitespace().collect();
+    match fields.as_slice() {
+        ["VOLUME", id, bytes] if *id == volume_id => bytes
+            .parse()
+            .with_context(|| format!("invalid size in volume header {line:?}")),
+        [] => bail!("sender closed the stream before {volume_id:?}"),
+        _ => bail!("unexpected volume header {:?}, expected {volume_id:?}", line.trim()),
+    }
 }
 
-fn stream_snapshot(
-    snapshot: &Path,
-    source_bytes: u64,
-    child: &mut std::process::Child,
+/// Copy exactly `bytes` bytes, stopping early on SIGINT/SIGTERM/SIGHUP and logging progress.
+fn copy_exact(
+    reader: &mut impl Read,
+    writer: &mut impl Write,
+    bytes: u64,
+    volume_id: &str,
 ) -> Result<()> {
-    let mut input =
-        File::open(snapshot).with_context(|| format!("failed to open {}", snapshot.display()))?;
-    let mut remote_input = child.stdin.take().context("receiver has no stdin")?;
-    let copied = io::copy(&mut input, &mut remote_input)
-        .with_context(|| format!("failed to stream {}", snapshot.display()))?;
-    drop(remote_input);
-    ensure!(
-        copied == source_bytes,
-        "short read from {}: copied {copied} of {source_bytes} bytes",
-        snapshot.display()
-    );
+    let mut buffer = vec![0; CHUNK_SIZE];
+    let mut copied = 0;
+    let started = Instant::now();
+    let mut last_report = started;
+
+    while copied < bytes {
+        ensure!(!interrupted(), "interrupted after {copied} of {bytes} bytes");
+        let wanted = buffer.len().min((bytes - copied) as usize);
+        let read = match reader.read(&mut buffer[..wanted]) {
+            Ok(0) => bail!("stream ended after {copied} of {bytes} bytes"),
+            Ok(read) => read,
+            Err(error) if error.kind() == ErrorKind::Interrupted => continue,
+            Err(error) => return Err(error).context("read failed"),
+        };
+        writer.write_all(&buffer[..read]).context("write failed")?;
+        copied += read as u64;
+
+        if last_report.elapsed() >= PROGRESS_INTERVAL {
+            last_report = Instant::now();
+            let rate = copied as f64 / started.elapsed().as_secs_f64() / (1 << 20) as f64;
+            log::info!(
+                volume = volume_id;
+                "{} / {} MiB ({rate:.0} MiB/s)", copied >> 20, bytes >> 20
+            );
+        }
+    }
     Ok(())
 }
 
@@ -247,8 +287,7 @@ fn remove_receiving_lv(volume: &Volume, name: &str) -> Result<()> {
     let path = lv_path(name);
     let tags = lv_field(name, "lv_tags")?;
     ensure!(
-        has_tag(&tags, "homelab-receiving")
-            && has_tag(&tags, &format!("homelab-volume-{}", volume.id)),
+        has_tag(&tags, RECEIVING_TAG) && has_tag(&tags, &format!("homelab-volume-{}", volume.id)),
         "refusing to remove existing LV {name:?}: expected homelab receiving tags"
     );
     ensure!(
@@ -266,13 +305,6 @@ fn activate_lv(name: &str) -> Result<()> {
         run_command("udevadm", &["settle"])?;
     }
     Ok(())
-}
-
-fn send_handshake(value: &str) -> Result<()> {
-    let mut stdout = io::stdout().lock();
-    writeln!(stdout, "{value}")
-        .and_then(|()| stdout.flush())
-        .context("failed to write handshake")
 }
 
 fn snapshot_name(volume: &Volume) -> Result<String> {
@@ -296,7 +328,8 @@ fn validate_ssh_target(target: &str) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::validate_ssh_target;
+    use super::{copy_exact, read_header, validate_ssh_target};
+    use std::io::Cursor;
 
     #[test]
     fn validates_ssh_targets() {
@@ -304,5 +337,21 @@ mod tests {
         assert!(validate_ssh_target("root@10.0.99.8").is_ok());
         assert!(validate_ssh_target("-oProxyCommand=bad").is_err());
         assert!(validate_ssh_target("host;bad").is_err());
+    }
+
+    #[test]
+    fn parses_volume_headers() {
+        let mut stream = Cursor::new(b"VOLUME gitea 1024\n".to_vec());
+        assert_eq!(read_header(&mut stream, "gitea").unwrap(), 1024);
+        assert!(read_header(&mut Cursor::new(b"VOLUME loki 1\n".to_vec()), "gitea").is_err());
+        assert!(read_header(&mut Cursor::new(Vec::new()), "gitea").is_err());
+    }
+
+    #[test]
+    fn copies_exactly_and_rejects_short_streams() {
+        let mut output = Vec::new();
+        copy_exact(&mut Cursor::new(vec![7; 10]), &mut output, 6, "x").unwrap();
+        assert_eq!(output, vec![7; 6]);
+        assert!(copy_exact(&mut Cursor::new(vec![7; 3]), &mut Vec::new(), 6, "x").is_err());
     }
 }

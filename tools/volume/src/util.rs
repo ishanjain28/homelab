@@ -6,7 +6,32 @@ use std::{
     os::{fd::AsRawFd, unix::fs::FileTypeExt},
     path::Path,
     process::{Command, Output},
+    sync::atomic::{AtomicBool, Ordering},
 };
+
+static INTERRUPTED: AtomicBool = AtomicBool::new(false);
+
+extern "C" fn on_interrupt(_signal: libc::c_int) {
+    INTERRUPTED.store(true, Ordering::SeqCst);
+}
+
+/// Turn SIGINT, SIGTERM and SIGHUP into a flag, so long transfers can stop and clean up their
+/// temporary LVs. The handler is installed without SA_RESTART so blocked reads return EINTR.
+pub fn install_interrupt_handler() {
+    for signal in [libc::SIGINT, libc::SIGTERM, libc::SIGHUP] {
+        // SAFETY: the handler only stores to an atomic, which is async-signal-safe.
+        unsafe {
+            let mut action: libc::sigaction = std::mem::zeroed();
+            action.sa_sigaction = on_interrupt as extern "C" fn(libc::c_int) as usize;
+            libc::sigemptyset(&mut action.sa_mask);
+            libc::sigaction(signal, &action, std::ptr::null_mut());
+        }
+    }
+}
+
+pub fn interrupted() -> bool {
+    INTERRUPTED.load(Ordering::SeqCst)
+}
 
 pub fn confirm(assume_yes: bool, prompt: &str) -> Result<bool> {
     if assume_yes {

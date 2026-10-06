@@ -2,7 +2,7 @@ use crate::{
     apply::run_apply,
     backup::{run_backup_cleanup, run_backup_prepare},
     retire::run_retire,
-    transfer::{run_copy, run_receive},
+    transfer::{run_pull, run_send},
 };
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -32,23 +32,23 @@ enum VolumeCommand {
         volume_ids: Vec<String>,
     },
 
-    /// Copy every volume owned by a service to another declared host over SSH.
-    Copy {
+    /// Pull every volume owned by a service from another host over SSH. Run on the
+    /// destination, where the service must be declared but disabled.
+    Pull {
         owner_service: String,
 
-        /// SSH hostname or address of the destination host.
+        /// SSH destination of the host that holds the volumes; it runs `sudo -n volume send`.
         #[arg(long)]
-        to: String,
+        from: String,
     },
 
-    /// Receive one raw volume stream. Invoked by `volume copy` over SSH.
+    /// Snapshot a service's volumes and stream them to stdout. Invoked by `volume pull` over SSH.
     #[command(hide = true)]
-    Receive {
+    Send {
         owner_service: String,
-        volume_id: String,
 
-        #[arg(long)]
-        source_bytes: u64,
+        #[arg(required = true)]
+        volume_ids: Vec<String>,
     },
 
     /// Permanently remove an LV covered by a deployed deletion tombstone.
@@ -91,12 +91,13 @@ pub fn run() -> Result<()> {
 
     match cli.command {
         VolumeCommand::Apply { yes, volume_ids } => run_apply(&cli.state_file, yes, volume_ids),
-        VolumeCommand::Copy { owner_service, to } => run_copy(&cli.state_file, &owner_service, &to),
-        VolumeCommand::Receive {
+        VolumeCommand::Pull { owner_service, from } => {
+            run_pull(&cli.state_file, &owner_service, &from)
+        }
+        VolumeCommand::Send {
             owner_service,
-            volume_id,
-            source_bytes,
-        } => run_receive(&cli.state_file, &owner_service, &volume_id, source_bytes),
+            volume_ids,
+        } => run_send(&cli.state_file, &owner_service, &volume_ids),
         VolumeCommand::Retire { volume_id, yes } => run_retire(&cli.state_file, &volume_id, yes),
         VolumeCommand::BackupPrepare { group, owner, wait } => {
             run_backup_prepare(&cli.state_file, &group, &owner, Duration::from_secs(wait))

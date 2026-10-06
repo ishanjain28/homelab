@@ -126,6 +126,8 @@ rclone config create gdrive drive scope=drive.file --config /dev/shm/rclone.conf
 cp /dev/shm/rclone.conf secrets/backups/rclone.conf && sops -e -i secrets/backups/rclone.conf && shred -u /dev/shm/rclone.conf
 ```
 
+Moving a service between hosts: declare it (same `runtimeId`, same volume `uuid`/`size`) on the target as `disabled`, deploy both, then on the target run `sudo volume pull <service> --from <user>@<source>`; enable it on the target, deploy, remove it from the source and `lvremove` the old LVs.
+
 
 ## Homes
 
