@@ -39,7 +39,7 @@ in
     containerConfig = {
       services.bazarr = enabled // {
         openFirewall = false;
-        listenPort = cfg.endpoints.web.port;
+        settings.general.port = cfg.endpoints.web.port;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
       };
