@@ -1,6 +1,5 @@
 {
   mkNixConfig = { lib }: {
-    generateNixPathFromInputs = true;
     generateRegistryFromInputs = true;
     linkInputs = true;
     optimise.automatic = true;
