@@ -52,6 +52,7 @@ in
         CONFIG_FILE = configFile;
         RSA_KEY_FILENAME = rsaKey;
         TZ = "Asia/Kolkata";
+        LOG_LEVEL = "warn";
       };
     };
   });
