@@ -85,7 +85,7 @@ let
 
       systemd.services."container@${name}".serviceConfig = {
         TimeoutStartSec = mkForce (if containerTimeout == null then "1min" else containerTimeout);
-        TimeoutStopSec = mkForce (if containerTimeout == null then "25s" else containerTimeout);
+        TimeoutStopSec = mkForce (if containerTimeout == null then "1min" else containerTimeout);
       }
       // resources;
     };
@@ -284,6 +284,9 @@ let
           }
         ];
       }
+      (mkIf databaseEnabled {
+        systemd.services."container@${name}".after = [ "container@${service.database.instance}.service" ];
+      })
       (mkIf (certificates != [ ]) {
         ${namespace}.acme.consumers.${name} = {
           uid = containerUidOffset + runtimeId;
