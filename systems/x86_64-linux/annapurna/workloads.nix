@@ -184,6 +184,42 @@
     devices = [ "render" ];
   };
 
+  gitea = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "gitea";
+    };
+    vlans = [ 50 ];
+    runtimeId = 36930;
+    volumes = [ "gitea" ];
+  };
+
+  loki = enabled // {
+    vlans = [
+      50
+      70
+      99
+    ];
+    runtimeId = 30343;
+    volumes = [ "loki" ];
+  };
+
+  victoriametrics = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 36929;
+    volumes = [ "victoriametrics" ];
+  };
+
+  grafana = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "grafana";
+    };
+    vlans = [ 50 ];
+    runtimeId = 31918;
+    volumes = [ "grafana" ];
+  };
+
   nitter = enabled // {
     vlans = [ 50 ];
     runtimeId = 30351;
@@ -236,16 +272,6 @@
         expose = true;
       };
     };
-  };
-
-  pvr-movies-monitor = disabled // {
-    vlans = [ 50 ];
-    runtimeId = 20691;
-  };
-
-  huawei-sms = disabled // {
-    vlans = [ 50 ];
-    runtimeId = 27777;
   };
 
   asterisk = disabled // {
