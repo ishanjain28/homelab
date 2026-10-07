@@ -95,7 +95,8 @@ let
       local.file_match "logs" {
         path_targets = [
           ${concatMapStringsSep "\n" (
-            path: ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "host" = ${builtins.toJSON config.networking.hostName}, "source" = "file" },''
+            path:
+            ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "host" = ${builtins.toJSON config.networking.hostName}, "source" = "file" },''
           ) files}
         ]
       }

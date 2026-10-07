@@ -42,7 +42,7 @@ in
       environment.systemPackages = [ package ];
 
       systemd.services.garmin-sync = {
-        description = cfg.description;
+        inherit (cfg) description;
         after = [ "network-online.target" ];
         wants = [ "network-online.target" ];
         path = [
