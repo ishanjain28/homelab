@@ -35,7 +35,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     command = "${pkgs.samba}/sbin/smbd --foreground --no-process-group --configfile=${configPath}";
-    hardeningProfile = "file-server";
+    serviceProfile = "file-server";
 
     secrets = {
       config = {

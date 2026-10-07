@@ -73,7 +73,7 @@ in
     (mkSingleServiceContainer {
       service = cfg;
       package = pkgs.gatus;
-      hardeningProfile = "network-monitor";
+      serviceProfile = "raw-sockets";
       secrets = {
         env = {
           file = "secrets/gatus/gatus.env";

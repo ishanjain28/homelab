@@ -33,6 +33,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.changedetection-io = "default";
     resources = {
       CPUQuota = "400%";
       MemoryMax = "4G";
@@ -72,6 +73,7 @@ in
         wantedBy = [ "multi-user.target" ];
         before = [ "changedetection-io.service" ];
         after = [ "network.target" ];
+        path = [ pkgs.procps ];
         environment = {
           APP_DIR = "${pkgs.${namespace}.browserless}/lib/node_modules/browserless-chrome";
           CHROME_BINARY_LOCATION = "${pkgs.chromium}/bin/chromium";
@@ -85,7 +87,7 @@ in
           XDG_CONFIG_HOME = "${chromiumPath}/config";
           WORKSPACE_DIR = "/run/browserless";
         };
-        serviceConfig = getNspawnHardeningProfile "default" // {
+        serviceConfig = getServiceProfile "browser" // {
           ExecStart = "${pkgs.${namespace}.browserless}/bin/browserless";
           Restart = "always";
           RestartSec = "10s";

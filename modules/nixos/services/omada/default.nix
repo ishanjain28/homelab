@@ -48,6 +48,7 @@ in
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
+    serviceProfile = "jit";
     inherit package;
     exec = "/bin/omada-controller";
     containerTimeout = "3min";

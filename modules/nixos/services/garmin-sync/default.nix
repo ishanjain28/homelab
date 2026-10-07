@@ -21,6 +21,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.garmin-sync = "default";
     secrets = {
       env = {
         file = "secrets/garmin/garmin.env";

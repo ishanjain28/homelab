@@ -1,5 +1,5 @@
 let
-  isolationProfiles = {
+  containerProfiles = {
     unprivileged = {
       privateUsers = 131072;
       extraFlags = [ "--private-users-ownership=chown" ];
@@ -10,21 +10,22 @@ let
     };
   };
 
-  hardeningProfiles = rec {
-    default = {
+  serviceProfiles = rec {
+    minimal = {
       NoNewPrivileges = true;
-      AmbientCapabilities = "";
-      CapabilityBoundingSet = "";
+      AmbientCapabilities = [ ];
+      CapabilityBoundingSet = [ ];
       RemoveIPC = true;
       SystemCallArchitectures = "native";
       UMask = "0077";
     };
 
-    strict = default // {
+    default = minimal // {
       LockPersonality = true;
       MemoryDenyWriteExecute = true;
       PrivateDevices = true;
       PrivateTmp = true;
+      ProcSubset = "pid";
       ProtectClock = true;
       ProtectControlGroups = true;
       ProtectHome = true;
@@ -32,32 +33,46 @@ let
       ProtectKernelLogs = true;
       ProtectKernelModules = true;
       ProtectKernelTunables = true;
-      ProtectSystem = "strict";
+      ProtectProc = "invisible";
+      ProtectSystem = "full";
+      RestrictAddressFamilies = [
+        "AF_UNIX"
+        "AF_INET"
+        "AF_INET6"
+        "AF_NETLINK"
+      ];
       RestrictNamespaces = true;
       RestrictRealtime = true;
       RestrictSUIDSGID = true;
-    };
-
-    network-monitor = default // {
-      AmbientCapabilities = "CAP_NET_RAW";
-      CapabilityBoundingSet = "CAP_NET_RAW";
-    };
-
-    privileged-ports = default // {
-      AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-      CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+      SystemCallErrorNumber = "EPERM";
+      SystemCallFilter = [
+        "@system-service"
+        "~@privileged"
+      ];
     };
 
     # SystemCallArchitectures strips CAP_SETUID from root services, which smbd needs to impersonate users.
-    file-server = builtins.removeAttrs default [ "SystemCallArchitectures" ] // {
-      CapabilityBoundingSet = "CAP_CHOWN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_FSETID CAP_KILL CAP_LEASE CAP_NET_BIND_SERVICE CAP_SETGID CAP_SETUID CAP_SYS_RESOURCE";
+    file-server = builtins.removeAttrs minimal [ "SystemCallArchitectures" ] // {
+      CapabilityBoundingSet = [
+        "CAP_CHOWN"
+        "CAP_DAC_OVERRIDE"
+        "CAP_DAC_READ_SEARCH"
+        "CAP_FOWNER"
+        "CAP_FSETID"
+        "CAP_KILL"
+        "CAP_LEASE"
+        "CAP_NET_BIND_SERVICE"
+        "CAP_SETGID"
+        "CAP_SETUID"
+        "CAP_SYS_RESOURCE"
+      ];
     };
 
-    device-access = default // {
+    device-access = minimal // {
       ProtectHome = false;
     };
 
-    nesting = default // {
+    nesting = minimal // {
       RestrictNamespaces = false;
     };
 
@@ -73,14 +88,56 @@ let
     media = device-access;
   };
 
-  getProfile =
-    kind: profiles: profile:
-    profiles.${profile} or (throw "Unknown ${kind} profile '${profile}'");
+  grant = capability: {
+    AmbientCapabilities = [ capability ];
+    CapabilityBoundingSet = [ capability ];
+  };
+
+  serviceTraits = {
+    jit.MemoryDenyWriteExecute = false;
+    procfs.ProcSubset = "all";
+    setuid.SystemCallFilter = [ "@setuid" ];
+    privileged-ports = grant "CAP_NET_BIND_SERVICE";
+    raw-sockets = grant "CAP_NET_RAW";
+    browser = {
+      MemoryDenyWriteExecute = false;
+      RestrictNamespaces = false;
+      SystemCallFilter = [
+        "capset"
+        "chroot"
+        "mincore"
+      ];
+    };
+  };
+
+  addTrait =
+    profile: trait:
+    profile // builtins.mapAttrs (name: value: if builtins.isList value then profile.${name} or [ ] ++ value else value) trait;
+
+  capabilitiesToString =
+    profile:
+    profile
+    // builtins.mapAttrs (_: builtins.concatStringsSep " ") (
+      builtins.intersectAttrs {
+        AmbientCapabilities = null;
+        CapabilityBoundingSet = null;
+      } profile
+    );
+
+  getServiceProfile =
+    names:
+    let
+      list = if builtins.isList names then names else [ names ];
+      base = if serviceProfiles ? ${builtins.head list} then builtins.head list else "default";
+      traits = map (name: serviceTraits.${name} or (throw "Unknown service profile '${name}'")) (
+        builtins.filter (name: name != base) list
+      );
+    in
+    capabilitiesToString (builtins.foldl' addTrait serviceProfiles.${base} traits);
+
+  getContainerProfile =
+    name: containerProfiles.${name} or (throw "Unknown container profile '${name}'");
 in
 {
-  nspawnHardeningProfiles = hardeningProfiles;
-  nspawnIsolationProfiles = isolationProfiles;
-
-  getNspawnHardeningProfile = getProfile "service hardening" hardeningProfiles;
-  getNspawnIsolationProfile = getProfile "container isolation" isolationProfiles;
+  inherit getContainerProfile getServiceProfile;
 }

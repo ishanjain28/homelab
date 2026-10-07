@@ -38,6 +38,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.windmill-server = "jit";
     databaseUnits = [
       "windmill-server"
       "windmill-worker"

@@ -29,7 +29,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     command = "${pkgs.stalwart_0_16}/bin/stalwart --config ${stateDir}/config.json";
-    hardeningProfile = "privileged-ports";
+    serviceProfile = "privileged-ports";
     containerConfig.environment.systemPackages = [ pkgs.stalwart-cli ];
     resources = {
       CPUQuota = "200%";

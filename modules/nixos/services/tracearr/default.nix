@@ -25,6 +25,7 @@ in
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
+    serviceProfile = "jit";
     package = pkgs.${namespace}.tracearr;
     after = [
       "network-online.target"

@@ -53,6 +53,6 @@ in
       LLDAP_KEY_FILE = containerKeyPath;
     };
 
-    hardeningProfile = "privileged-ports";
+    serviceProfile = "privileged-ports";
   });
 }

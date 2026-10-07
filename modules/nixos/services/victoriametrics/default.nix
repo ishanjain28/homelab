@@ -24,6 +24,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.victoriametrics = "default";
     resources = {
       CPUQuota = "400%";
       MemoryMax = "2G";

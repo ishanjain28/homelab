@@ -40,7 +40,10 @@ in
       TasksMax = 256;
     };
 
-    hardeningProfile = "privileged-ports";
+    serviceProfile = [
+      "privileged-ports"
+      "jit"
+    ];
     serviceConfig = {
       StateDirectory = serviceName;
       StateDirectoryMode = "0700";

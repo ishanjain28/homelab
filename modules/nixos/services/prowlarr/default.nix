@@ -25,6 +25,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.prowlarr = "jit";
     secrets.config = {
       file = "secrets/prowlarr.xml";
       format = "binary";

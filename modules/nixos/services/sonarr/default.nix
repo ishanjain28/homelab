@@ -25,6 +25,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.sonarr = "jit";
     secrets.env = {
       file = "secrets/sonarr.env";
       format = "dotenv";

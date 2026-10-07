@@ -25,6 +25,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.bazarr = "default";
     secrets.config = {
       file = "secrets/bazarr.yml";
       format = "yaml";

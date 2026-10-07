@@ -64,6 +64,7 @@ in
 
     (mkSingleServiceContainer {
       service = cfg;
+      serviceProfile = "minimal";
       package = pkgs.openvscode-server;
       command = concatStringsSep " " [
         "${pkgs.openvscode-server}/bin/openvscode-server"
