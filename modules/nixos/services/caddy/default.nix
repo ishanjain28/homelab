@@ -41,7 +41,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     command = "${pkgs.${namespace}.caddy}/bin/caddy run --config ${configPath}";
-    hardeningProfile = "privileged-ports";
+    serviceProfile = "privileged-ports";
 
     secrets.config = {
       file = cfg.configFile;

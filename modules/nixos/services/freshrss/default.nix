@@ -58,6 +58,7 @@ in
     };
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.caddy = "privileged-ports";
     secrets.password = {
       file = "secrets/freshrss/password";
       format = "binary";

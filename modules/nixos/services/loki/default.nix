@@ -30,6 +30,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.loki = "default";
     resources = {
       CPUQuota = "400%";
       MemoryMax = "2G";

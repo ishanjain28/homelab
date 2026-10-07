@@ -21,6 +21,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.unpackerr = "default";
     secrets.config = {
       file = "secrets/unpackerr.conf";
       format = "binary";

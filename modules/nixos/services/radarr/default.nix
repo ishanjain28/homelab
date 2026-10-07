@@ -25,6 +25,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles.radarr = "jit";
     secrets.env = {
       file = "secrets/radarr.env";
       format = "dotenv";

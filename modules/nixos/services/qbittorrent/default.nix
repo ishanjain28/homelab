@@ -52,7 +52,7 @@ in
     service = cfg;
     package = pkgs.qbittorrent-nox;
     exec = "/bin/qbittorrent-nox --confirm-legal-notice --profile=${profileDir} --webui-port=${toString cfg.endpoints.web.port} --torrenting-port=\${PIA_PORT}";
-    hardeningProfile = "strict";
+    serviceProfile = "default";
     serviceConfig = {
       EnvironmentFile = portEnvFile;
       StateDirectory = "qbittorrent";
@@ -108,7 +108,7 @@ in
           PIA_REGION = cfg.vpnRegion;
           PIA_CA = "${piaCa}";
         };
-        serviceConfig = getNspawnHardeningProfile "default" // {
+        serviceConfig = getServiceProfile "minimal" // {
           EnvironmentFile = environmentFile;
           ExecStart = "${piaVpn}/bin/pia-vpn";
           RuntimeDirectory = "pia";

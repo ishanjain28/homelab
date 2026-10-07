@@ -4,8 +4,8 @@ with lib.${namespace};
 let
   containerUidOffset = 131072;
   certificatePath = id: "/run/certs/${id}";
-  containerProfiles = import ../containers/default.nix;
-  inherit (containerProfiles) getNspawnHardeningProfile getNspawnIsolationProfile;
+  profiles = import ../containers/default.nix;
+  inherit (profiles) getContainerProfile getServiceProfile;
   endpointType = types.submodule {
     options = {
       port = mkOption {
@@ -45,12 +45,12 @@ let
       vlans,
       hostNetwork ? false,
       config,
-      isolationProfile ? "unprivileged",
+      containerProfile ? "unprivileged",
       resources ? { },
       containerTimeout ? null,
     }:
     let
-      isolationConfig = getNspawnIsolationProfile isolationProfile;
+      containerProfileConfig = getContainerProfile containerProfile;
       containerVethFlags = map (vlan: "--network-veth-extra=${mkContainerVethName name vlan}:eth${toString vlan}") vlans;
       hostVethNetworks = listToAttrs (
         map (
@@ -72,10 +72,10 @@ let
     in
     {
       # Generate the container entry
-      containers.${name} = isolationConfig // {
+      containers.${name} = containerProfileConfig // {
         autoStart = true;
         privateNetwork = !hostNetwork;
-        extraFlags = (isolationConfig.extraFlags or [ ]) ++ containerVethFlags;
+        extraFlags = (containerProfileConfig.extraFlags or [ ]) ++ containerVethFlags;
 
         inherit config;
       };
@@ -249,10 +249,11 @@ let
       service,
       secrets ? { },
       containerConfig ? { },
-      isolationProfile ? "unprivileged",
+      containerProfile ? "unprivileged",
       resources ? { },
       containerTimeout ? null,
       databaseUnits ? [ service.name ],
+      serviceProfiles ? { },
     }:
     let
       repoRoot = ../..;
@@ -329,7 +330,7 @@ let
         inherit
           name
           vlans
-          isolationProfile
+          containerProfile
           resources
           containerTimeout
           ;
@@ -351,6 +352,11 @@ let
             (genDatabaseClientConfig service)
             { systemd.services = databaseUnitConfig; }
           ]))
+          {
+            systemd.services = mapAttrs (_unit: profile: {
+              serviceConfig = mapAttrs (_: mkDefault) (getServiceProfile profile);
+            }) serviceProfiles;
+          }
           containerConfig
         ];
       })
@@ -453,8 +459,8 @@ let
       environment ? { },
       serviceConfig ? { },
       containerConfig ? { },
-      isolationProfile ? "unprivileged",
-      hardeningProfile ? "default",
+      containerProfile ? "unprivileged",
+      serviceProfile ? "default",
       after ? [ ],
       wants ? [ ],
       resources ? { },
@@ -463,7 +469,7 @@ let
     let
       inherit (service) name;
       inherit (service) runtimeUser;
-      hardeningConfig = getNspawnHardeningProfile hardeningProfile;
+      serviceProfileConfig = getServiceProfile serviceProfile;
       execStart =
         if command != null then
           command
@@ -475,7 +481,7 @@ let
     genServiceContainer {
       inherit
         service
-        isolationProfile
+        containerProfile
         resources
         containerTimeout
         secrets
@@ -498,7 +504,7 @@ let
               User = runtimeUser.name;
               Group = runtimeUser.group;
             }
-            // hardeningConfig
+            // serviceProfileConfig
             // optionalAttrs (service.shares != [ ]) { UMask = "0007"; }
             // serviceConfig;
           };

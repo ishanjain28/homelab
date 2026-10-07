@@ -49,7 +49,10 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     command = "${pkgs.adguardhome}/bin/AdGuardHome --no-check-update --config ${configPath} --work-dir ${stateDir}";
-    hardeningProfile = "privileged-ports";
+    serviceProfile = [
+      "privileged-ports"
+      "procfs"
+    ];
 
     secrets.config = {
       file = cfg.configFile;

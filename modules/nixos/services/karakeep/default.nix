@@ -26,6 +26,11 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles = {
+      karakeep-web = "jit";
+      karakeep-workers = "jit";
+      karakeep-browser = "browser";
+    };
     secrets = {
       karakeep = {
         file = "secrets/karakeep/karakeep.env";

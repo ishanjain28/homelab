@@ -27,6 +27,7 @@ in
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
+    serviceProfile = "jit";
     package = pkgs.${namespace}.seerr;
     secrets.env = {
       file = "secrets/seerr/vars.env";

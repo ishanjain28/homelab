@@ -55,7 +55,10 @@ let
           mountPath = "/var/lib/ripe-atlas/probe_key.pub";
         };
       };
-      hardeningProfile = "network-monitor";
+      serviceProfile = [
+        "raw-sockets"
+        "setuid"
+      ];
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       resources = {
