@@ -94,4 +94,13 @@
     volumes = [ "ripe-atlas-lte" ];
   };
 
+  garmin-sync = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30365;
+  };
+
+  backrest = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30366;
+  };
 }

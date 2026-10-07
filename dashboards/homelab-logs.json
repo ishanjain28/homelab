@@ -52,6 +52,39 @@
       },
       {
         "type": "query",
+        "name": "host",
+        "label": "Host",
+        "description": "Host the logs come from.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "query": {
+          "label": "host",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "definition": "label_values(host)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "allowCustomValue": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      },
+      {
+        "type": "query",
         "name": "container",
         "label": "Container",
         "description": "Host or service container.",
@@ -62,10 +95,10 @@
         "query": {
           "label": "container",
           "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "",
+          "stream": "{host=~\"$host\"}",
           "type": 1
         },
-        "definition": "label_values(container)",
+        "definition": "label_values({host=~\"$host\"}, container)",
         "refresh": 2,
         "regex": "",
         "sort": 1,
@@ -95,10 +128,10 @@
         "query": {
           "label": "unit",
           "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "{container=~\"$container\"}",
+          "stream": "{host=~\"$host\", container=~\"$container\"}",
           "type": 1
         },
-        "definition": "label_values({container=~\"$container\"}, unit)",
+        "definition": "label_values({host=~\"$host\", container=~\"$container\"}, unit)",
         "refresh": 2,
         "regex": "",
         "sort": 1,
@@ -241,7 +274,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum(count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -301,7 +334,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum(count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -365,7 +398,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum(count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -429,7 +462,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "count(sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
+          "expr": "count(sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -489,7 +522,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "count(sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
+          "expr": "count(sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -549,7 +582,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum(bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum(bytes_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -609,7 +642,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (priority) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto]))",
+          "expr": "sum by (priority) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
@@ -824,11 +857,11 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "topk(15, sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto])))",
+          "expr": "topk(15, sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto])))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
-          "legendFormat": "{{container}}"
+          "legendFormat": "{{host}}/{{container}}"
         }
       ],
       "fieldConfig": {
@@ -931,7 +964,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -943,7 +976,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "B",
           "editorMode": "code",
           "queryType": "instant",
@@ -955,7 +988,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "C",
           "editorMode": "code",
           "queryType": "instant",
@@ -967,7 +1000,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container) (bytes_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "D",
           "editorMode": "code",
           "queryType": "instant",
@@ -1166,7 +1199,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "instant",
@@ -1178,7 +1211,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "B",
           "editorMode": "code",
           "queryType": "instant",
@@ -1190,7 +1223,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "C",
           "editorMode": "code",
           "queryType": "instant",
@@ -1202,7 +1235,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container, unit) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "expr": "sum by (host, container, unit) (bytes_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "D",
           "editorMode": "code",
           "queryType": "instant",
@@ -1402,11 +1435,11 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__auto]))",
+          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__auto]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
-          "legendFormat": "{{container}} {{unit}}"
+          "legendFormat": "{{host}}/{{container}} {{unit}}"
         }
       ],
       "fieldConfig": {
@@ -1496,11 +1529,11 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__auto]))",
+          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__auto]))",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
-          "legendFormat": "{{container}} {{unit}}"
+          "legendFormat": "{{host}}/{{container}} {{unit}}"
         }
       ],
       "fieldConfig": {
@@ -1603,7 +1636,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\" | $parser",
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\" | $parser",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
@@ -1655,7 +1688,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\" | $parser",
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\" | $parser",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
@@ -1707,7 +1740,7 @@
             "type": "loki",
             "uid": "${loki}"
           },
-          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser",
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser",
           "refId": "A",
           "editorMode": "code",
           "queryType": "range",
@@ -1771,7 +1804,7 @@
                 "type": "loki",
                 "uid": "${loki}"
               },
-              "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
+              "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
               "refId": "A",
               "editorMode": "code",
               "queryType": "range",

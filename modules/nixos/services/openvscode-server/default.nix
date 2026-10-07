@@ -106,7 +106,9 @@ in
         environment.systemPackages = shellPackages;
 
         nix = mkForce enabled;
-        programs.fish = enabled;
+        programs.fish = enabled // {
+          interactiveShellInit = fishKeyBindings;
+        };
         programs.nix-ld = enabled;
         users.users.${cfg.runtimeUser.name}.shell = pkgs.bashInteractive;
       };

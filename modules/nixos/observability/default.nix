@@ -95,7 +95,7 @@ let
       local.file_match "logs" {
         path_targets = [
           ${concatMapStringsSep "\n" (
-            path: ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "source" = "file" },''
+            path: ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "host" = ${builtins.toJSON config.networking.hostName}, "source" = "file" },''
           ) files}
         ]
       }
@@ -134,7 +134,7 @@ let
     loki.source.journal "systemd" {
       forward_to    = [loki.write.local.receiver]
       relabel_rules = loki.relabel.journal.rules
-      labels        = {container = "${name}", source = "journald"}
+      labels        = {container = "${name}", host = "${config.networking.hostName}", source = "journald"}
       max_age       = "24h"
     }
 
