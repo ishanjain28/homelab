@@ -35,10 +35,7 @@ let
   };
 
   # Shorthand for generating network configuration
-  genNetworkIf = { config, name }: {
-    matchConfig.Name = name;
-    inherit (config) networkConfig ipv6AcceptRAConfig;
-  };
+  genNetworkIf = { config, name }: config // { matchConfig.Name = name; };
 
 in
 {

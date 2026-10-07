@@ -84,6 +84,7 @@ in
         (mkNetworkIf {
           name = "vlan99";
           config = {
+            linkConfig.MACAddress = mkMacAddress "${hostName}:99";
             networkConfig = {
               Description = "Tagged VLAN99 interface for accessing the host";
               DHCP = "ipv4";
