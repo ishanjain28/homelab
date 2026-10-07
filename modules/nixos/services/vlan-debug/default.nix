@@ -131,7 +131,9 @@ let
           };
         };
 
-        programs.fish = enabled;
+        programs.fish = enabled // {
+          interactiveShellInit = fishKeyBindings;
+        };
 
         environment.shells = with pkgs; [
           bashInteractive

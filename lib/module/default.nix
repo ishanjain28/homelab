@@ -79,9 +79,18 @@ rec {
     VISUAL = "nvim";
   };
 
+  fishKeyBindings = ''
+    bind ctrl-delete kill-word
+    bind ctrl-backspace backward-kill-word
+    bind ctrl-h backward-kill-word
+    bind ctrl-left backward-word
+    bind ctrl-right forward-word
+  '';
+
   fishInteractiveInit = ''
     set -g fish_greeting
     fish_add_path --global --prepend $HOME/.local/bin
     fish_add_path --global --append $HOME/.opencode/bin
-  '';
+  ''
+  + fishKeyBindings;
 }

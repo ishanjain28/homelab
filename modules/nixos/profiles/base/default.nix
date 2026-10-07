@@ -17,7 +17,9 @@ in
     time.timeZone = timeZone;
 
     environment.shellAliases = shellAliases;
-    programs.fish = enabled;
+    programs.fish = enabled // {
+      interactiveShellInit = fishKeyBindings;
+    };
     users.defaultUserShell = pkgs.fish;
 
     environment.shells = with pkgs; [

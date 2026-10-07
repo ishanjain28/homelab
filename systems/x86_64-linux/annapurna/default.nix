@@ -74,6 +74,14 @@ in
       };
     };
 
+    hardware.spindown = enabled // {
+      disks = [
+        "/dev/disk/by-id/ata-ST10000NM018G-3CD103_ZRT0GQBA"
+        "/dev/disk/by-id/ata-ST10000NM018G-3CD103_ZRT0DZRE"
+        "/dev/disk/by-id/ata-ST10000NM018G-3CD103_ZRT0GWJC"
+      ];
+    };
+
     hardware.vfio = enabled // {
       iommu = "intel";
       pciIds = [ ];

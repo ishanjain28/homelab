@@ -1065,7 +1065,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(rate(cgroup_cpu_stat_usage_usec{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}[$__rate_interval]), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\")) / 1e6",
+          "expr": "max by (host, service) (label_replace(rate(cgroup_cpu_stat_usage_usec{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}[$__rate_interval]), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\")) / 1e6",
           "refId": "B",
           "legendFormat": "",
           "instant": true,
@@ -1077,7 +1077,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (host, service) (label_replace(cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "C",
           "legendFormat": "",
           "instant": true,
@@ -1089,7 +1089,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace((cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (host, service) (label_replace((cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "D",
           "legendFormat": "",
           "instant": true,
@@ -1101,7 +1101,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(100 * (cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}) / (cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (host, service) (label_replace(100 * (cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}) / (cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "E",
           "legendFormat": "",
           "instant": true,
@@ -1113,7 +1113,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(cgroup_memory_swap_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (host, service) (label_replace(cgroup_memory_swap_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "F",
           "legendFormat": "",
           "instant": true,
@@ -1123,11 +1123,8 @@
       ],
       "transformations": [
         {
-          "id": "joinByField",
-          "options": {
-            "byField": "service",
-            "mode": "outer"
-          }
+          "id": "merge",
+          "options": {}
         },
         {
           "id": "filterFieldsByName",
@@ -2539,9 +2536,9 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "sum by (service) (label_replace(rate(cgroup_cpu_stat_usage_usec{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}[$__rate_interval]), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\")) / 1e6",
+          "expr": "sum by (host, service) (label_replace(rate(cgroup_cpu_stat_usage_usec{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}[$__rate_interval]), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\")) / 1e6",
           "refId": "A",
-          "legendFormat": "{{service}}"
+          "legendFormat": "{{host}}/{{service}}"
         }
       ],
       "fieldConfig": {
@@ -2634,9 +2631,9 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "max by (service) (label_replace(100 * (cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}) / (cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+          "expr": "max by (host, service) (label_replace(100 * (cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}) / (cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
           "refId": "A",
-          "legendFormat": "{{service}}"
+          "legendFormat": "{{host}}/{{service}}"
         }
       ],
       "fieldConfig": {
@@ -2737,9 +2734,9 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "sort_by_label(label_set(rate(net_bytes_recv{host=~\"$host\", service!=\"\", service=~\"${service:regex}\"}[$__rate_interval]), \"dir\", \"rx\") or label_set(-rate(net_bytes_sent{host=~\"$host\", service!=\"\", service=~\"${service:regex}\"}[$__rate_interval]), \"dir\", \"tx\"), \"service\", \"dir\")",
+          "expr": "sort_by_label(label_set(rate(net_bytes_recv{host=~\"$host\", service!=\"\", service=~\"${service:regex}\"}[$__rate_interval]), \"dir\", \"rx\") or label_set(-rate(net_bytes_sent{host=~\"$host\", service!=\"\", service=~\"${service:regex}\"}[$__rate_interval]), \"dir\", \"tx\"), \"host\", \"service\", \"dir\")",
           "refId": "A",
-          "legendFormat": "{{service}}"
+          "legendFormat": "{{host}}/{{service}}"
         }
       ],
       "fieldConfig": {
@@ -2922,8 +2919,8 @@
                 "uid": "efyik59h6cbnkc"
               },
               "refId": "A",
-              "legendFormat": "{{service}} used",
-              "expr": "max by (service) (label_replace(cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
+              "legendFormat": "{{host}}/{{service}} used",
+              "expr": "max by (host, service) (label_replace(cgroup_memory_stat_anon{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} + cgroup_memory_stat_shmem{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
             },
             {
               "datasource": {
@@ -2931,8 +2928,8 @@
                 "uid": "efyik59h6cbnkc"
               },
               "refId": "B",
-              "legendFormat": "{{service}} incl. cache",
-              "expr": "max by (service) (label_replace(cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
+              "legendFormat": "{{host}}/{{service}} incl. cache",
+              "expr": "max by (host, service) (label_replace(cgroup_memory_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
             },
             {
               "datasource": {
@@ -2940,8 +2937,8 @@
                 "uid": "efyik59h6cbnkc"
               },
               "refId": "C",
-              "legendFormat": "{{service}} limit",
-              "expr": "max by (service) (label_replace((cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
+              "legendFormat": "{{host}}/{{service}} limit",
+              "expr": "max by (host, service) (label_replace((cgroup_memory_max{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"} < 1e18), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))"
             }
           ],
           "fieldConfig": {
@@ -3082,9 +3079,9 @@
                 "type": "victoriametrics-metrics-datasource",
                 "uid": "efyik59h6cbnkc"
               },
-              "expr": "max by (service) (label_replace(cgroup_memory_swap_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+              "expr": "max by (host, service) (label_replace(cgroup_memory_swap_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
               "refId": "A",
-              "legendFormat": "{{service}}"
+              "legendFormat": "{{host}}/{{service}}"
             }
           ],
           "fieldConfig": {
@@ -3176,9 +3173,9 @@
                 "type": "victoriametrics-metrics-datasource",
                 "uid": "efyik59h6cbnkc"
               },
-              "expr": "sum by (service) (label_replace(rate(cgroup_cpu_stat_nr_throttled{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}[$__rate_interval]), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+              "expr": "sum by (host, service) (label_replace(rate(cgroup_cpu_stat_nr_throttled{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}[$__rate_interval]), \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
               "refId": "A",
-              "legendFormat": "{{service}}"
+              "legendFormat": "{{host}}/{{service}}"
             }
           ],
           "fieldConfig": {
@@ -3270,9 +3267,9 @@
                 "type": "victoriametrics-metrics-datasource",
                 "uid": "efyik59h6cbnkc"
               },
-              "expr": "max by (service) (label_replace(cgroup_pids_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
+              "expr": "max by (host, service) (label_replace(cgroup_pids_current{host=~\"$host\", path=~\".*container@(${service:regex})[.]service\"}, \"service\", \"$1\", \"path\", \".*container@(.+)[.]service\"))",
               "refId": "A",
-              "legendFormat": "{{service}}"
+              "legendFormat": "{{host}}/{{service}}"
             }
           ],
           "fieldConfig": {
