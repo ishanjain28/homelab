@@ -1,2484 +1,1808 @@
 {
-  "annotations": [
-    {
-      "kind": "AnnotationQuery",
-      "spec": {
-        "builtIn": true,
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "query": {
-          "datasource": {
-            "name": "-- Grafana --"
-          },
-          "group": "grafana",
-          "kind": "DataQuery",
-          "spec": {},
-          "version": "v0"
-        }
-      }
-    }
-  ],
-  "cursorSync": "Crosshair",
+  "uid": "homelab-logs",
+  "title": "Homelab Logs",
   "description": "Journald logs from hosts and nspawn service containers, collected by Alloy and stored in Loki. Fields that Alloy attaches as structured metadata (Caddy access logs) are always filterable; switch Parser to JSON or logfmt to parse other services' lines at query time.",
-  "editable": true,
-  "elements": {
-    "panel-11": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "C"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "D"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": [
-              {
-                "group": "merge",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {}
-                }
-              },
-              {
-                "group": "filterFieldsByName",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {
-                    "exclude": {
-                      "pattern": "^Time.*"
-                    }
-                  }
-                }
-              },
-              {
-                "group": "organize",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {
-                    "excludeByName": {},
-                    "indexByName": {
-                      "Errors": 3,
-                      "Lines": 1,
-                      "Volume": 4,
-                      "Warnings": 2,
-                      "container": 0
-                    },
-                    "renameByName": {
-                      "Value #A": "Lines",
-                      "Value #B": "Warnings",
-                      "Value #C": "Errors",
-                      "Value #D": "Volume"
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "description": "Per-container log counts for the selected time range. Click a column header to sort.",
-        "id": 11,
-        "links": [],
-        "title": "Containers",
-        "vizConfig": {
-          "group": "table",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "custom": {
-                  "align": "auto",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "filterable": true,
-                  "footer": {
-                    "reducers": []
-                  },
-                  "inspect": false
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                }
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Lines"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "short"
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Warnings"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "short"
-                    },
-                    {
-                      "id": "custom.cellOptions",
-                      "value": {
-                        "type": "color-text"
-                      }
-                    },
-                    {
-                      "id": "thresholds",
-                      "value": {
-                        "mode": "absolute",
-                        "steps": [
-                          {
-                            "color": "green",
-                            "value": 0
-                          },
-                          {
-                            "color": "orange",
-                            "value": 1
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Errors"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "short"
-                    },
-                    {
-                      "id": "custom.cellOptions",
-                      "value": {
-                        "type": "color-text"
-                      }
-                    },
-                    {
-                      "id": "thresholds",
-                      "value": {
-                        "mode": "absolute",
-                        "steps": [
-                          {
-                            "color": "green",
-                            "value": 0
-                          },
-                          {
-                            "color": "red",
-                            "value": 1
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Volume"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "bytes"
-                    }
-                  ]
-                }
-              ]
-            },
-            "options": {
-              "cellHeight": "sm",
-              "showHeader": true,
-              "sortBy": [
-                {
-                  "desc": true,
-                  "displayName": "Lines"
-                }
-              ]
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-12": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "C"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container, unit) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-                      "format": "table",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "D"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": [
-              {
-                "group": "merge",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {}
-                }
-              },
-              {
-                "group": "filterFieldsByName",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {
-                    "exclude": {
-                      "pattern": "^Time.*"
-                    }
-                  }
-                }
-              },
-              {
-                "group": "organize",
-                "kind": "Transformation",
-                "spec": {
-                  "options": {
-                    "excludeByName": {},
-                    "indexByName": {
-                      "Errors": 4,
-                      "Lines": 2,
-                      "Volume": 5,
-                      "Warnings": 3,
-                      "container": 0,
-                      "unit": 1
-                    },
-                    "renameByName": {
-                      "Value #A": "Lines",
-                      "Value #B": "Warnings",
-                      "Value #C": "Errors",
-                      "Value #D": "Volume"
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "description": "Per-unit log counts for the selected time range. Click a column header to sort.",
-        "id": 12,
-        "links": [],
-        "title": "Units",
-        "vizConfig": {
-          "group": "table",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "custom": {
-                  "align": "auto",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "filterable": true,
-                  "footer": {
-                    "reducers": []
-                  },
-                  "inspect": false
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                }
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Lines"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "short"
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Warnings"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "short"
-                    },
-                    {
-                      "id": "custom.cellOptions",
-                      "value": {
-                        "type": "color-text"
-                      }
-                    },
-                    {
-                      "id": "thresholds",
-                      "value": {
-                        "mode": "absolute",
-                        "steps": [
-                          {
-                            "color": "green",
-                            "value": 0
-                          },
-                          {
-                            "color": "orange",
-                            "value": 1
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Errors"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "short"
-                    },
-                    {
-                      "id": "custom.cellOptions",
-                      "value": {
-                        "type": "color-text"
-                      }
-                    },
-                    {
-                      "id": "thresholds",
-                      "value": {
-                        "mode": "absolute",
-                        "steps": [
-                          {
-                            "color": "green",
-                            "value": 0
-                          },
-                          {
-                            "color": "red",
-                            "value": 1
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Volume"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "bytes"
-                    }
-                  ]
-                }
-              ]
-            },
-            "options": {
-              "cellHeight": "sm",
-              "showHeader": true,
-              "sortBy": [
-                {
-                  "desc": true,
-                  "displayName": "Lines"
-                }
-              ]
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-13": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__auto]))",
-                      "legendFormat": "{{container}} {{unit}}",
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Warning-priority lines per interval, stacked by unit.",
-        "id": 13,
-        "links": [],
-        "title": "Warnings by unit",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic-by-name"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 70,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 0,
-                  "pointSize": 4,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "sum",
-                  "max"
-                ],
-                "displayMode": "table",
-                "enableFacetedFilter": false,
-                "overflow": "ellipsis",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-14": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__auto]))",
-                      "legendFormat": "{{container}} {{unit}}",
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Error-and-above lines per interval, stacked by unit.",
-        "id": 14,
-        "links": [],
-        "title": "Errors by unit",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic-by-name"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 70,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 0,
-                  "pointSize": 4,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "sum",
-                  "max"
-                ],
-                "displayMode": "table",
-                "enableFacetedFilter": false,
-                "overflow": "ellipsis",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-16": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\" | $parser",
-                      "legendFormat": "",
-                      "maxLines": 500,
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Application lines at warning priority or higher. Expand a line and use the filter buttons on a field to add it to the field filters above.",
-        "id": 16,
-        "links": [],
-        "title": "Warnings and errors",
-        "vizConfig": {
-          "group": "logs",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "options": {
-              "dedupStrategy": "none",
-              "displayedFields": [],
-              "enableInfiniteScrolling": true,
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showControls": false,
-              "showFieldSelector": false,
-              "showLabels": false,
-              "showLevel": true,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "syntaxHighlighting": true,
-              "timestampResolution": "ms",
-              "unwrappedColumns": false,
-              "wrapLogMessage": false
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-17": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\" | $parser",
-                      "legendFormat": "",
-                      "maxLines": 500,
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Any-priority lines whose message mentions a failure, error, panic or OOM.",
-        "id": 17,
-        "links": [],
-        "title": "Failure signals",
-        "vizConfig": {
-          "group": "logs",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "options": {
-              "dedupStrategy": "none",
-              "displayedFields": [],
-              "enableInfiniteScrolling": true,
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showControls": false,
-              "showFieldSelector": false,
-              "showLabels": false,
-              "showLevel": true,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "syntaxHighlighting": true,
-              "timestampResolution": "ms",
-              "unwrappedColumns": false,
-              "wrapLogMessage": false
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-18": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser",
-                      "legendFormat": "",
-                      "maxLines": 500,
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "All application lines matching the filters. JSON lines are parsed: use the field selector on the left to show only the fields you want, and the filter buttons in log details to filter on a field value.",
-        "id": 18,
-        "links": [],
-        "title": "Application logs",
-        "vizConfig": {
-          "group": "logs",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "options": {
-              "dedupStrategy": "none",
-              "displayedFields": [],
-              "enableInfiniteScrolling": true,
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showControls": true,
-              "showFieldSelector": true,
-              "showLabels": false,
-              "showLevel": true,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "syntaxHighlighting": true,
-              "timestampResolution": "ms",
-              "unwrappedColumns": false,
-              "wrapLogMessage": false
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-19": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
-                      "legendFormat": "",
-                      "maxLines": 500,
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Container and host boot/system plumbing lines, kept out of the application views.",
-        "id": 19,
-        "links": [],
-        "title": "Boot and system logs",
-        "vizConfig": {
-          "group": "logs",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "options": {
-              "dedupStrategy": "none",
-              "displayedFields": [],
-              "enableInfiniteScrolling": true,
-              "enableLogDetails": true,
-              "prettifyLogMessage": false,
-              "showCommonLabels": false,
-              "showControls": false,
-              "showFieldSelector": false,
-              "showLabels": false,
-              "showLevel": true,
-              "showTime": true,
-              "sortOrder": "Descending",
-              "syntaxHighlighting": true,
-              "timestampResolution": "ms",
-              "unwrappedColumns": false,
-              "wrapLogMessage": false
-            }
-          },
-          "version": ""
-        }
-      }
-    },
-    "panel-2": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Application log lines in the selected time range.",
-        "id": 2,
-        "links": [],
-        "title": "Log lines",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "none",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "value",
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-3": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Lines at warning priority in the selected time range.",
-        "id": 3,
-        "links": [],
-        "title": "Warnings",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "none",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "value",
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-4": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Lines at err, crit, alert or emerg priority in the selected time range.",
-        "id": 4,
-        "links": [],
-        "title": "Errors",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "none",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "value",
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-5": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "count(sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Hosts and service containers that produced application logs.",
-        "id": 5,
-        "links": [],
-        "title": "Containers logging",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "none"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "none",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "value",
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-6": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "count(sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Systemd units that produced application logs.",
-        "id": 6,
-        "links": [],
-        "title": "Units logging",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "none"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "none",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "value",
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-7": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-                      "legendFormat": "",
-                      "queryType": "instant"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Bytes of application log lines in the selected time range.",
-        "id": 7,
-        "links": [],
-        "title": "Log volume",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "bytes"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "none",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "value",
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-8": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum by (priority) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto]))",
-                      "legendFormat": "{{priority}}",
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Application log lines per interval, stacked by journald priority.",
-        "id": 8,
-        "links": [],
-        "title": "Log lines by priority",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic-by-name"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 70,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 0,
-                  "pointSize": 4,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "emerg"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "dark-red",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "alert"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "dark-red",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "crit"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "dark-red",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "err"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "red",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "warning"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "orange",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "notice"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "blue",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "info"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "green",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "debug"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#888888",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "sum",
-                  "max"
-                ],
-                "displayMode": "table",
-                "enableFacetedFilter": false,
-                "overflow": "ellipsis",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    },
-    "panel-9": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${loki}"
-                    },
-                    "group": "loki",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "topk(15, sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto])))",
-                      "legendFormat": "{{container}}",
-                      "queryType": "range"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "Application log lines per interval for the busiest containers.",
-        "id": 9,
-        "links": [],
-        "title": "Log lines by container",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic-by-name"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 70,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 0,
-                  "pointSize": 4,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "sum",
-                  "max"
-                ],
-                "displayMode": "table",
-                "enableFacetedFilter": false,
-                "overflow": "ellipsis",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "desc"
-              }
-            }
-          },
-          "version": "13.1.4"
-        }
-      }
-    }
-  },
-  "layout": {
-    "kind": "RowsLayout",
-    "spec": {
-      "rows": [
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": false,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-2"
-                      },
-                      "height": 4,
-                      "width": 4,
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-3"
-                      },
-                      "height": 4,
-                      "width": 4,
-                      "x": 4,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-4"
-                      },
-                      "height": 4,
-                      "width": 4,
-                      "x": 8,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-5"
-                      },
-                      "height": 4,
-                      "width": 4,
-                      "x": 12,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-6"
-                      },
-                      "height": 4,
-                      "width": 4,
-                      "x": 16,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-7"
-                      },
-                      "height": 4,
-                      "width": 4,
-                      "x": 20,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-8"
-                      },
-                      "height": 9,
-                      "width": 12,
-                      "x": 0,
-                      "y": 4
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-9"
-                      },
-                      "height": 9,
-                      "width": 12,
-                      "x": 12,
-                      "y": 4
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "Overview"
-          }
-        },
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": false,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-11"
-                      },
-                      "height": 10,
-                      "width": 12,
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-12"
-                      },
-                      "height": 10,
-                      "width": 12,
-                      "x": 12,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-13"
-                      },
-                      "height": 9,
-                      "width": 12,
-                      "x": 0,
-                      "y": 10
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-14"
-                      },
-                      "height": 9,
-                      "width": 12,
-                      "x": 12,
-                      "y": 10
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "Containers and units"
-          }
-        },
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": false,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-16"
-                      },
-                      "height": 9,
-                      "width": 24,
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-17"
-                      },
-                      "height": 9,
-                      "width": 24,
-                      "x": 0,
-                      "y": 9
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-18"
-                      },
-                      "height": 14,
-                      "width": 24,
-                      "x": 0,
-                      "y": 18
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "Logs"
-          }
-        },
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": true,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-19"
-                      },
-                      "height": 12,
-                      "width": 24,
-                      "x": 0,
-                      "y": 0
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "System"
-          }
-        }
-      ]
-    }
-  },
-  "links": [],
-  "liveNow": false,
-  "preload": false,
   "tags": [
     "homelab",
     "logs",
     "loki",
     "journald"
   ],
-  "timeSettings": {
-    "autoRefresh": "1m",
-    "autoRefreshIntervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ],
-    "fiscalYearStartMonth": 0,
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
     "from": "now-6h",
-    "hideTimepicker": false,
-    "timezone": "browser",
     "to": "now"
   },
-  "title": "Homelab Logs",
-  "variables": [
-    {
-      "kind": "DatasourceVariable",
-      "spec": {
-        "allowCustomValue": true,
+  "timezone": "browser",
+  "refresh": "1m",
+  "timepicker": {},
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "loki",
+        "label": "Loki",
+        "query": "loki",
+        "hide": 2,
+        "refresh": 1,
+        "regex": "",
         "current": {
           "text": "homelab-loki",
-          "value": "cfwgsjsykszr4d"
+          "value": "homelab-loki"
         },
-        "hide": "hideVariable",
-        "includeAll": false,
-        "label": "Loki",
-        "multi": false,
-        "name": "loki",
-        "options": [],
-        "pluginId": "loki",
-        "refresh": "onDashboardLoad",
-        "regex": "",
-        "skipUrlSync": false
-      }
-    },
-    {
-      "kind": "ConstantVariable",
-      "spec": {
+        "options": []
+      },
+      {
+        "type": "constant",
+        "name": "noise",
+        "query": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service",
+        "hide": 2,
         "current": {
           "text": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service",
           "value": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service"
         },
-        "hide": "hideVariable",
-        "name": "noise",
-        "query": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service",
-        "skipUrlSync": true
-      }
-    },
-    {
-      "kind": "QueryVariable",
-      "spec": {
-        "allValue": ".+",
-        "allowCustomValue": true,
-        "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
+        "options": []
+      },
+      {
+        "type": "query",
+        "name": "container",
+        "label": "Container",
+        "description": "Host or service container.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "query": {
+          "label": "container",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
         },
         "definition": "label_values(container)",
-        "description": "Host or service container.",
-        "hide": "dontHide",
-        "includeAll": true,
-        "label": "Container",
-        "multi": true,
-        "name": "container",
-        "options": [],
-        "query": {
-          "datasource": {
-            "name": "${loki}"
-          },
-          "group": "loki",
-          "kind": "DataQuery",
-          "spec": {
-            "label": "container",
-            "refId": "LokiVariableQueryEditor-VariableQuery",
-            "stream": "",
-            "type": 1
-          },
-          "version": "v0"
-        },
-        "refresh": "onTimeRangeChanged",
+        "refresh": 2,
         "regex": "",
-        "regexApplyTo": "value",
-        "skipUrlSync": false,
-        "sort": "alphabeticalAsc"
-      }
-    },
-    {
-      "kind": "QueryVariable",
-      "spec": {
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
         "allValue": ".+",
         "allowCustomValue": true,
         "current": {
-          "text": "All",
+          "text": [
+            "All"
+          ],
           "value": [
             "$__all"
           ]
+        },
+        "options": []
+      },
+      {
+        "type": "query",
+        "name": "unit",
+        "label": "Unit",
+        "description": "Systemd unit inside the selected containers.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "query": {
+          "label": "unit",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{container=~\"$container\"}",
+          "type": 1
         },
         "definition": "label_values({container=~\"$container\"}, unit)",
-        "description": "Systemd unit inside the selected containers.",
-        "hide": "dontHide",
-        "includeAll": true,
-        "label": "Unit",
-        "multi": true,
-        "name": "unit",
-        "options": [],
-        "query": {
-          "datasource": {
-            "name": "${loki}"
-          },
-          "group": "loki",
-          "kind": "DataQuery",
-          "spec": {
-            "label": "unit",
-            "refId": "LokiVariableQueryEditor-VariableQuery",
-            "stream": "{container=~\"$container\"}",
-            "type": 1
-          },
-          "version": "v0"
-        },
-        "refresh": "onTimeRangeChanged",
+        "refresh": 2,
         "regex": "",
-        "regexApplyTo": "value",
-        "skipUrlSync": false,
-        "sort": "alphabeticalAsc"
-      }
-    },
-    {
-      "kind": "QueryVariable",
-      "spec": {
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
         "allValue": ".+",
         "allowCustomValue": true,
         "current": {
-          "text": "All",
+          "text": [
+            "All"
+          ],
           "value": [
             "$__all"
           ]
         },
-        "definition": "label_values(priority)",
-        "description": "Journald priority.",
-        "hide": "dontHide",
-        "includeAll": true,
-        "label": "Priority",
-        "multi": true,
+        "options": []
+      },
+      {
+        "type": "query",
         "name": "priority",
-        "options": [],
-        "query": {
-          "datasource": {
-            "name": "${loki}"
-          },
-          "group": "loki",
-          "kind": "DataQuery",
-          "spec": {
-            "label": "priority",
-            "refId": "LokiVariableQueryEditor-VariableQuery",
-            "stream": "",
-            "type": 1
-          },
-          "version": "v0"
+        "label": "Priority",
+        "description": "Journald priority.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
         },
-        "refresh": "onTimeRangeChanged",
+        "query": {
+          "label": "priority",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "definition": "label_values(priority)",
+        "refresh": 2,
         "regex": "",
-        "regexApplyTo": "value",
-        "skipUrlSync": false,
-        "sort": "alphabeticalAsc"
-      }
-    },
-    {
-      "kind": "TextVariable",
-      "spec": {
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "allowCustomValue": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      },
+      {
+        "type": "textbox",
+        "name": "search",
+        "label": "Search regex",
+        "description": "Regex applied to the raw log line before parsing.",
+        "query": "",
         "current": {
           "text": "",
           "value": ""
         },
-        "description": "Regex applied to the raw log line before parsing.",
-        "hide": "dontHide",
-        "label": "Search regex",
-        "name": "search",
-        "query": "",
-        "skipUrlSync": false
-      }
-    },
-    {
-      "kind": "CustomVariable",
-      "spec": {
-        "allowCustomValue": true,
+        "options": []
+      },
+      {
+        "type": "custom",
+        "name": "parser",
+        "label": "Parser",
+        "description": "Query-time parser for log lines. None is cheapest and still exposes structured metadata that Alloy attached at ingest (Caddy fields). JSON and logfmt parse every line; lines that do not match are kept unparsed.",
+        "query": "None : __error__=\"\",JSON : json | drop __error__\\, __error_details__,logfmt : logfmt | drop __error__\\, __error_details__",
+        "multi": false,
+        "includeAll": false,
         "current": {
           "text": "None",
           "value": "__error__=\"\""
         },
-        "description": "Query-time parser for log lines. None is cheapest and still exposes structured metadata that Alloy attached at ingest (Caddy fields). JSON and logfmt parse every line; lines that do not match are kept unparsed.",
-        "hide": "dontHide",
-        "includeAll": false,
-        "label": "Parser",
-        "multi": false,
-        "name": "parser",
-        "options": [],
-        "query": "None : __error__=\"\",JSON : json | drop __error__\\, __error_details__,logfmt : logfmt | drop __error__\\, __error_details__",
-        "skipUrlSync": false,
-        "valuesFormat": "csv"
+        "options": [
+          {
+            "text": "None",
+            "value": "__error__=\"\"",
+            "selected": true
+          },
+          {
+            "text": "JSON",
+            "value": "json | drop __error__, __error_details__",
+            "selected": false
+          },
+          {
+            "text": "logfmt",
+            "value": "logfmt | drop __error__, __error_details__",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "type": "adhoc",
+        "name": "filters",
+        "label": "Field filters",
+        "description": "Filters on stream labels or parsed JSON fields, e.g. status = 502 or request_host = git.ishanjain.me. Applied to every panel.",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "filters": [],
+        "baseFilters": [],
+        "allowCustomValue": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Log lines",
+      "description": "Application log lines in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
       }
     },
     {
+      "id": 3,
+      "type": "stat",
+      "title": "Warnings",
+      "description": "Lines at warning priority in the selected time range.",
       "datasource": {
-        "name": "${loki}"
+        "type": "loki",
+        "uid": "${loki}"
       },
-      "group": "loki",
-      "kind": "AdhocVariable",
-      "spec": {
-        "allowCustomValue": true,
-        "baseFilters": [],
-        "defaultKeys": [],
-        "description": "Filters on stream labels or parsed JSON fields, e.g. status = 502 or request_host = git.ishanjain.me. Applied to every panel.",
-        "enableGroupBy": false,
-        "filters": [],
-        "hide": "dontHide",
-        "label": "Field filters",
-        "name": "filters",
-        "skipUrlSync": false
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
       }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Errors",
+      "description": "Lines at err, crit, alert or emerg priority in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Containers logging",
+      "description": "Hosts and service containers that produced application logs.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "count(sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Units logging",
+      "description": "Systemd units that produced application logs.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "count(sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Log volume",
+      "description": "Bytes of application log lines in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Log lines by priority",
+      "description": "Application log lines per interval, stacked by journald priority.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (priority) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{priority}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "emerg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alert"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "crit"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "err"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warning"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "notice"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "debug"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#888888"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Log lines by container",
+      "description": "Application log lines per interval for the busiest containers.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "topk(15, sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{container}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Containers and units",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Containers",
+      "description": "Per-container log counts for the selected time range. Click a column header to sort.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "B",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "C",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "D",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "exclude": {
+              "pattern": "^Time.*"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "Lines",
+              "Value #B": "Warnings",
+              "Value #C": "Errors",
+              "Value #D": "Volume"
+            },
+            "indexByName": {
+              "container": 0,
+              "Lines": 1,
+              "Warnings": 2,
+              "Errors": 3,
+              "Volume": 4
+            },
+            "excludeByName": {}
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lines"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warnings"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Errors"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Volume"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Lines",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Units",
+      "description": "Per-unit log counts for the selected time range. Click a column header to sort.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "B",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "C",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (bytes_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
+          "refId": "D",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "exclude": {
+              "pattern": "^Time.*"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "Lines",
+              "Value #B": "Warnings",
+              "Value #C": "Errors",
+              "Value #D": "Volume"
+            },
+            "indexByName": {
+              "container": 0,
+              "unit": 1,
+              "Lines": 2,
+              "Warnings": 3,
+              "Errors": 4,
+              "Volume": 5
+            },
+            "excludeByName": {}
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Lines"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warnings"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Errors"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Volume"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        },
+        "sortBy": [
+          {
+            "displayName": "Lines",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Warnings by unit",
+      "description": "Warning-priority lines per interval, stacked by unit.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{container}} {{unit}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Errors by unit",
+      "description": "Error-and-above lines per interval, stacked by unit.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (container, unit) (count_over_time({source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{container}} {{unit}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": "row",
+      "title": "Logs",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "panels": []
+    },
+    {
+      "id": 16,
+      "type": "logs",
+      "title": "Warnings and errors",
+      "description": "Application lines at warning priority or higher. Expand a line and use the filter buttons on a field to add it to the field filters above.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\" | $parser",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 500
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showFieldSelector": false,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
+      "id": 17,
+      "type": "logs",
+      "title": "Failure signals",
+      "description": "Any-priority lines whose message mentions a failure, error, panic or OOM.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\" | $parser",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 500
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showFieldSelector": false,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
+      "id": 18,
+      "type": "logs",
+      "title": "Application logs",
+      "description": "All application lines matching the filters. JSON lines are parsed: use the field selector on the left to show only the fields you want, and the filter buttons in log details to filter on a field value.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"journald\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 500
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": true,
+        "showFieldSelector": true,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "System",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      },
+      "panels": [
+        {
+          "id": 19,
+          "type": "logs",
+          "title": "Boot and system logs",
+          "description": "Container and host boot/system plumbing lines, kept out of the application views.",
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 68
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki}"
+              },
+              "expr": "{source=\"journald\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
+              "refId": "A",
+              "editorMode": "code",
+              "queryType": "range",
+              "legendFormat": "",
+              "maxLines": 500
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "options": {
+            "dedupStrategy": "none",
+            "enableInfiniteScrolling": true,
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showControls": false,
+            "showFieldSelector": false,
+            "displayedFields": [],
+            "showLabels": false,
+            "showLevel": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "timestampResolution": "ms",
+            "unwrappedColumns": false,
+            "wrapLogMessage": false,
+            "syntaxHighlighting": true
+          }
+        }
+      ]
     }
   ]
 }
