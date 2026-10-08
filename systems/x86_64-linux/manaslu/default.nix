@@ -127,6 +127,16 @@ in
     '';
   };
 
+  networking.nftables.tables.wg-clients = {
+    family = "ip";
+    content = ''
+      chain postrouting {
+        type nat hook postrouting priority srcnat;
+        oifname "wg-home-vpn" ip saddr != 10.1.1.0/24 masquerade
+      }
+    '';
+  };
+
   # resolved's mDNS responder binds UDP 5353 and steals queries meant for AdGuard Home.
   services.resolved.settings.Resolve.MulticastDNS = false;
 
