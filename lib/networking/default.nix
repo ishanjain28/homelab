@@ -37,8 +37,6 @@ let
   # Shorthand for generating network configuration
   genNetworkIf = { config, name }: config // { matchConfig.Name = name; };
 
-in
-{
   mkMacAddress =
     seed:
     let
@@ -46,6 +44,26 @@ in
       octet = offset: builtins.substring offset 2 hash;
     in
     "02:${octet 0}:${octet 2}:${octet 4}:${octet 6}:${octet 8}";
+
+  ipv6Prefixes = {
+    "10" = "2a0a:6040:4004:10";
+    "20" = "2a0a:6040:4004:20";
+    "30" = "2a0a:6040:4004:30";
+    "40" = "2a0a:6040:4004:40";
+    "50" = "2a0a:6040:4004:50";
+    "99" = "2a0a:6040:4004:99";
+  };
+
+  mkIpv6Address =
+    name: vlan:
+    let
+      hash = builtins.hashString "sha256" "${name}:${toString vlan}";
+      octet = offset: builtins.substring offset 2 hash;
+    in
+    "${ipv6Prefixes.${toString vlan}}:${octet 0}:${octet 2}ff:fe${octet 4}:${octet 6}${octet 8}";
+in
+{
+  inherit ipv6Prefixes mkIpv6Address mkMacAddress;
 
   mkIfLink =
     { name, macAddress }:

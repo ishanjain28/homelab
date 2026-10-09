@@ -43,7 +43,22 @@
     };
   };
   adguardhome = enabled // {
-    monitor.group = "DEL";
+    monitor = {
+      name = "Public DNS";
+      group = "DEL";
+      endpoint = "tls";
+      protocol = "tls";
+      address = "dns.vax.ovh";
+      client = {
+        dns-resolver = "tcp://1.1.1.1:53";
+        network = "ip4";
+      };
+      conditions = [
+        "[CONNECTED] == true"
+        "[CERTIFICATE_EXPIRATION] > 96h"
+        "[IP] == 139.84.164.110"
+      ];
+    };
     hostNetwork = true;
     runtimeId = 30373;
     configFile = "secrets/adguardhome/delhi.yml";

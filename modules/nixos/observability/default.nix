@@ -173,7 +173,7 @@ let
     in
     {
       inherit name group url;
-      inherit (monitor) interval alerts;
+      inherit (monitor) interval alerts client;
       inherit conditions;
     }
   ) (filterAttrs (_id: srv: srv.monitor.enable) fleet.services);
@@ -191,17 +191,18 @@ in
     logging = {
       enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
       lokiPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
-        # Eventually, I either want a v6 only auto derived addresses here or maybe just DNS.
-        "50" = "http://10.0.50.23:3100/loki/api/v1/push";
+        "50" = "http://[${mkIpv6Address "loki" 50}]:3100/loki/api/v1/push";
         "70" = "http://10.0.70.11:3100/loki/api/v1/push";
-        "99" = "http://10.0.99.29:3100/loki/api/v1/push";
+        "99" = "http://[${mkIpv6Address "loki" 99}]:3100/loki/api/v1/push";
       } "Loki push API URLs keyed by VLAN.";
       hostVlan = mkOpt types.ints.positive 50 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
     };
 
     metrics = {
       enable = mkBoolOpt false "Whether to enable metrics collection.";
-      victoriaMetricsUrl = mkOpt types.nonEmptyStr "http://10.0.50.21:8428" "VictoriaMetrics URL";
+      victoriaMetricsUrl =
+        mkOpt types.nonEmptyStr "http://[${mkIpv6Address "victoriametrics" 50}]:8428"
+          "VictoriaMetrics URL";
       intelGpu.enable = mkBoolOpt false "Whether to collect Intel GPU video engine, frequency and power metrics on this host.";
     };
   };

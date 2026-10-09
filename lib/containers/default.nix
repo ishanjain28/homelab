@@ -112,7 +112,8 @@ let
 
   addTrait =
     profile: trait:
-    profile // builtins.mapAttrs (name: value: if builtins.isList value then profile.${name} or [ ] ++ value else value) trait;
+    profile
+    // builtins.mapAttrs (name: value: if builtins.isList value then profile.${name} or [ ] ++ value else value) trait;
 
   capabilitiesToString =
     profile:
@@ -135,8 +136,7 @@ let
     in
     capabilitiesToString (builtins.foldl' addTrait serviceProfiles.${base} traits);
 
-  getContainerProfile =
-    name: containerProfiles.${name} or (throw "Unknown container profile '${name}'");
+  getContainerProfile = name: containerProfiles.${name} or (throw "Unknown container profile '${name}'");
 in
 {
   inherit getContainerProfile getServiceProfile;

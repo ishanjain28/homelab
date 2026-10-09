@@ -166,7 +166,6 @@
   };
 
   qbittorrent = enabled // {
-    monitor.name = "Qbitorrent";
     vlans = [ 50 ];
     runtimeId = 30361;
     volumes = [ "qbittorrent" ];
@@ -252,7 +251,10 @@
   };
 
   adguardhome = enabled // {
-    monitor.name = "DNS Plain";
+    monitor = {
+      name = "Home DNS";
+      group = "Homelab";
+    };
     vlans = [ 99 ];
     runtimeId = 30373;
     configFile = "secrets/adguardhome/home.yaml";

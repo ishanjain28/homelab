@@ -29,7 +29,7 @@ in
     hardware.networking = enabled // {
       inherit hostName;
 
-      domain = "direct.home.ishanjain.me";
+      domain = "home.direct.ishanjain.me";
       # Rename PHYs to values I like using the permanent
       # MAC address as reference.
       links = mkIfLink {
