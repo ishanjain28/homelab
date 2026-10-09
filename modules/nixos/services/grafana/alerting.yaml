@@ -1,0 +1,177 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: pushover
+    receivers:
+      - uid: pushover
+        type: pushover
+        settings:
+          apiToken: $PUSHOVER_TOKEN
+          userKey: $PUSHOVER_USER
+
+policies:
+  - orgId: 1
+    receiver: pushover
+    group_by:
+      - alertname
+      - host
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 12h
+
+groups:
+  - orgId: 1
+    name: homelab
+    folder: Homelab
+    interval: 1m
+    rules:
+      - uid: disk-filling-up
+        title: Disk filling up
+        condition: B
+        for: 15m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.path }} is {{ printf \"%.0f\" $values.A.Value }}% full"
+        data:
+          - refId: A
+            datasourceUid: efyik59h6cbnkc
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: max by (host, path) (disk_used_percent)
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 95
+
+      - uid: smart-unhealthy
+        title: SMART health failing
+        condition: B
+        for: 5m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.device }} reports SMART health failing"
+        data:
+          - refId: A
+            datasourceUid: efyik59h6cbnkc
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: min by (host, device) (smart_device_health_ok)
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: lt
+                    params:
+                      - 1
+
+      - uid: smart-bad-sectors
+        title: Disk has bad sectors
+        condition: B
+        for: 5m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.device }} ({{ $labels.serial_no }}) has {{ $values.A.Value }} reallocated, pending or uncorrectable sectors"
+        data:
+          - refId: A
+            datasourceUid: efyik59h6cbnkc
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: max by (host, device, serial_no) ({__name__=~"smart_device_(reallocated_sectors_count|pending_sector_count|uncorrectable_sector_count)"})
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+
+      - uid: unit-restart-loop
+        title: Unit restart loop
+        condition: B
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.container }} restarted {{ $values.A.Value }} times in 15 minutes"
+        data:
+          - refId: A
+            datasourceUid: cfwgsjsykszr4d
+            relativeTimeRange:
+              from: 900
+              to: 0
+            model:
+              refId: A
+              expr: sum by (host, container) (count_over_time({source="journald"} |= "Scheduled restart job" [15m]))
+              queryType: instant
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 3
+
+      - uid: log-error-burst
+        title: Error burst in logs
+        condition: B
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.container }} logged {{ $values.A.Value }} errors in 10 minutes"
+        data:
+          - refId: A
+            datasourceUid: cfwgsjsykszr4d
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: sum by (host, container) (count_over_time({source="journald", priority=~"err|crit|alert|emerg"} [10m]))
+              queryType: instant
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 50
