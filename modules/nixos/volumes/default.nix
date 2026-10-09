@@ -11,7 +11,6 @@ let
   json = pkgs.formats.json { };
   volumePackage = pkgs.${namespace}.volume;
   volumeStateFile = json.generate "homelab-volumes.json" config.system.homelab.volumeState;
-  cfg = config.${namespace};
   registry = config.system.homelab.registry;
   inherit (registry) services volumes;
   enabledServices = filterAttrs (_name: service: service.enable) services;
@@ -61,7 +60,6 @@ let
       volumeId: volume: optional (!(hasAttr volume.ownerService services)) "${volumeId}:${volume.ownerService}"
     ) volumes
   );
-
 
   duplicateValues = values: unique (filter (value: length (filter (candidate: candidate == value) values) > 1) values);
   duplicateLvNames = duplicateValues (map (volume: volume.name) (attrValues volumes));

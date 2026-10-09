@@ -296,8 +296,8 @@ let
               log_min_error_statement = "error";
               log_checkpoints = false;
               log_autovacuum_min_duration = -1;
-              log_connections = true;
-              log_disconnections = true;
+              log_connections = false;
+              log_disconnections = false;
             }
             // optionalAttrs (cfg.replicaOf != null) {
               primary_conninfo = "host=${cfg.replicaOf} port=5432 user=replica passfile=/run/postgresql/pgpass";

@@ -44,6 +44,7 @@ in
       "kernel.keys.maxkeys" = 1000000;
       "kernel.keys.maxbytes" = 25000000;
       "net.core.rmem_max" = 134217728;
+      "vm.overcommit_memory" = 1;
     };
 
     boot.kernelModules = [ "wireguard" ];
