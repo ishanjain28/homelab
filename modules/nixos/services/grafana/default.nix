@@ -13,7 +13,11 @@ let
   cfg = srv.grafana;
   grafanaConfigPath = "/run/container-secrets/grafana.ini";
   ldapConfigPath = "/run/container-secrets/ldap.toml";
-  provisioning = pkgs.linkFarm "grafana-provisioning" { "dashboards/homelab.yaml" = ./dashboards.yaml; };
+  alertingEnvPath = "/run/container-secrets/grafana-alerting.env";
+  provisioning = pkgs.linkFarm "grafana-provisioning" {
+    "dashboards/homelab.yaml" = ./dashboards.yaml;
+    "alerting/homelab.yaml" = ./alerting.yaml;
+  };
 in
 {
   options.${namespace}.services.grafana = mkServiceOptions {
@@ -42,6 +46,11 @@ in
         format = "binary";
         mountPath = ldapConfigPath;
       };
+      alerting = {
+        file = "secrets/grafana/alerting.env";
+        format = "dotenv";
+        mountPath = alertingEnvPath;
+      };
     };
 
     containerConfig.environment.etc."grafana/dashboards".source = "${inputs.self}/dashboards";
@@ -62,6 +71,7 @@ in
     };
 
     serviceConfig = {
+      EnvironmentFile = alertingEnvPath;
       RuntimeDirectory = "grafana";
       StateDirectory = "grafana";
       StateDirectoryMode = "0700";
