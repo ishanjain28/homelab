@@ -20,7 +20,10 @@
   boot.supportedFilesystems.zfs = true;
   boot.zfs.extraPools = [ "main" ];
   boot.zfs.forceImportRoot = false;
-  services.zfs.autoScrub.enable = true;
+  services.zfs.autoScrub = {
+    enable = true;
+    interval = "*-*-01,16 00:00:00";
+  };
 
   fileSystems."/mnt/wd-4tb" = {
     device = "/dev/disk/by-id/wwn-0x50014ee2bef0ead0-part1";
