@@ -1,7 +1,6 @@
 use crate::{
     apply::run_apply,
     backup::{run_backup_cleanup, run_backup_prepare},
-    retire::run_retire,
     transfer::{run_pull, run_send},
 };
 use anyhow::Result;
@@ -51,13 +50,6 @@ enum VolumeCommand {
         volume_ids: Vec<String>,
     },
 
-    /// Permanently remove an LV covered by a deployed deletion tombstone.
-    Retire {
-        volume_id: String,
-        #[arg(long)]
-        yes: bool,
-    },
-
     /// Quiesce a service, snapshot its volumes in one backup group, and mount
     /// the snapshots read-only under /run/homelab-backup/<group>/.
     BackupPrepare {
@@ -98,7 +90,6 @@ pub fn run() -> Result<()> {
             owner_service,
             volume_ids,
         } => run_send(&cli.state_file, &owner_service, &volume_ids),
-        VolumeCommand::Retire { volume_id, yes } => run_retire(&cli.state_file, &volume_id, yes),
         VolumeCommand::BackupPrepare { group, owner, wait } => {
             run_backup_prepare(&cli.state_file, &group, &owner, Duration::from_secs(wait))
         }

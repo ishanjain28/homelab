@@ -8,8 +8,6 @@ pub struct State {
     pub schema_version: u32,
     pub host: String,
     pub volumes: BTreeMap<String, Volume>,
-    #[serde(default)]
-    pub deleted_volumes: BTreeMap<String, DeletedVolume>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -51,15 +49,6 @@ impl Default for BackupPolicy {
 
 fn default_snapshot_size() -> String {
     "20%ORIGIN".to_string()
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DeletedVolume {
-    pub name: String,
-    pub uuid: String,
-    pub after: String,
-    pub reason: String,
 }
 
 pub fn load_state(state_file: &Path) -> Result<State> {

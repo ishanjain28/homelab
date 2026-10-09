@@ -14,7 +14,6 @@ let
   cfg = config.${namespace};
   registry = config.system.homelab.registry;
   inherit (registry) services volumes;
-  inherit (cfg) deletedVolumes;
   enabledServices = filterAttrs (_name: service: service.enable) services;
   activeVolumes = filterAttrs (_volumeId: volume: services.${volume.ownerService}.enable) volumes;
 
@@ -63,7 +62,6 @@ let
     ) volumes
   );
 
-  activeDeletedVolumes = filter (volumeId: hasAttr volumeId volumes) (attrNames deletedVolumes);
 
   duplicateValues = values: unique (filter (value: length (filter (candidate: candidate == value) values) > 1) values);
   duplicateLvNames = duplicateValues (map (volume: volume.name) (attrValues volumes));
@@ -238,24 +236,6 @@ in
       )
     )) { } "Global service volume registry.";
 
-    deletedVolumes = mkOpt (types.attrsOf (
-      types.submodule (
-        { name, ... }: {
-          options = {
-            name = mkOpt (types.strMatching "[a-z0-9][a-z0-9-]*") name "Retired LVM logical volume name.";
-            uuid = mkOption {
-              type = types.nonEmptyStr;
-              description = "UUID of the deleted volume.";
-            };
-            after = mkOption {
-              type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
-              description = "Date after which manual GC may remove the volume.";
-            };
-            reason = mkOpt types.str "" "Reason for deleting the volume.";
-          };
-        }
-      )
-    )) { } "Explicit tombstones for volumes that may be garbage collected manually.";
   };
 
   config = mkMerge [
@@ -284,10 +264,6 @@ in
           message = "Every volume ownerService must point at a service with runtimeUser.";
         }
         {
-          assertion = activeDeletedVolumes == [ ];
-          message = "Volumes are both active and tombstoned: ${concatStringsSep ", " activeDeletedVolumes}";
-        }
-        {
           assertion = duplicateLvNames == [ ];
           message = "Duplicate homelab volume LV names on ${registry.host.name}: ${concatStringsSep ", " duplicateLvNames}";
         }
@@ -304,14 +280,6 @@ in
         schemaVersion = 1;
         host = registry.host.name;
         volumes = config.system.homelab.volumes;
-        deletedVolumes = mapAttrs (_volumeId: volume: {
-          inherit (volume)
-            after
-            name
-            reason
-            uuid
-            ;
-        }) deletedVolumes;
       };
     }
 
