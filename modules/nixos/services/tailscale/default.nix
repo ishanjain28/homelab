@@ -25,6 +25,7 @@ in
       useRoutingFeatures = if cfg.advertiseRoutes == [ ] then "client" else "server";
       inherit (cfg) authKeyFile;
       extraUpFlags = mkIf (cfg.advertiseRoutes != [ ]) [ "--advertise-routes=${concatStringsSep "," cfg.advertiseRoutes}" ];
+      extraSetFlags = [ "--accept-dns=false" ];
     };
 
     boot.kernel.sysctl = mkIf (cfg.advertiseRoutes != [ ]) {

@@ -32,9 +32,12 @@ in
     };
     containerConfig = {
       services.victoriametrics = enabled // {
-        listenAddress = "0.0.0.0:${toString cfg.endpoints.web.port}";
+        listenAddress = ":${toString cfg.endpoints.web.port}";
         retentionPeriod = "1y";
-        extraOptions = [ "-usePromCompatibleNaming" ];
+        extraOptions = [
+          "-enableTCP6"
+          "-usePromCompatibleNaming"
+        ];
       };
 
       systemd.services.victoriametrics.serviceConfig = {

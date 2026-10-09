@@ -75,7 +75,7 @@ let
       containers.${name} = containerProfileConfig // {
         autoStart = true;
         privateNetwork = !hostNetwork;
-        extraFlags = (containerProfileConfig.extraFlags or [ ]) ++ containerVethFlags;
+        extraFlags = (containerProfileConfig.extraFlags or [ ]) ++ [ "--timezone=off" ] ++ containerVethFlags;
 
         inherit config;
       };
@@ -412,12 +412,14 @@ let
           "http"
           "https"
           "tcp"
+          "tls"
           "udp"
           "icmp"
           "icmpv6"
         ]) protocol "Gatus check protocol.";
         address = mkOpt types.str (monitor.address or "") "Gatus check address.";
         path = mkOpt types.str (monitor.path or "/") "Gatus HTTP path.";
+        client = mkOpt types.attrs (monitor.client or { }) "Gatus client settings.";
         interval = mkOpt types.str (monitor.interval or "30s") "Gatus check interval.";
         alerts = mkOpt (types.listOf types.attrs) (monitor.alerts or [ { type = "pushover"; } ]) "Gatus alerts.";
         conditions = mkOpt (types.listOf types.str) (monitor.conditions

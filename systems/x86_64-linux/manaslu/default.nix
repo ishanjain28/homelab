@@ -35,7 +35,7 @@ in
 
     hardware.networking = enabled // {
       inherit hostName;
-      domain = "direct.del.ishanjain.me";
+      domain = "del.direct.ishanjain.me";
       links = {
         "10-public" = {
           matchConfig.MACAddress = "56:00:04:5a:55:50";
@@ -69,10 +69,7 @@ in
   };
 
   networking = {
-    nameservers = [
-      "127.0.0.1"
-      "1.1.1.1"
-    ];
+    resolvconf.extraConfig = "name_servers='127.0.0.1'";
     firewall = {
       filterForward = true;
       extraForwardRules = ''
@@ -137,8 +134,7 @@ in
     '';
   };
 
-  # resolved's mDNS responder binds UDP 5353 and steals queries meant for AdGuard Home.
-  services.resolved.settings.Resolve.MulticastDNS = false;
+  services.resolved = disabled;
 
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;

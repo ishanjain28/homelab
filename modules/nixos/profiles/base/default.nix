@@ -16,6 +16,8 @@ in
   config = mkIf cfg.enable {
     time.timeZone = timeZone;
 
+    services.resolved.settings.Resolve.DNSStubListener = false;
+
     environment.shellAliases = shellAliases;
     programs.fish = enabled // {
       interactiveShellInit = fishKeyBindings;

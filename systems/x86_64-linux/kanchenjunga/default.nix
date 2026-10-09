@@ -30,7 +30,7 @@ in
 
     hardware.networking = enabled // {
       inherit hostName;
-      domain = "direct.home.ishanjain.me";
+      domain = "home.direct.ishanjain.me";
 
       links =
         mkIfLink {

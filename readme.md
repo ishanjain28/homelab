@@ -193,6 +193,7 @@ home-manager switch --flake .#<user>@<home> -b backup
 * systemd-networkd with interfaces renamed by permanent MAC.
 * WireGuard between home and Delhi, BIRD BGP for announcing my IPv6 prefixes, Tailscale subnet routes.
 * QEMU VMs with VFIO PCI and USB passthrough, hugepages and VLAN attachments.
+* DNS entries are managed by DNSControl. There is a basic config with all the DNS records I need and the rest are generated using secrets/dns/dns.json as the source. The DNS updates are pushed to AdGuardHome instances and Cloudflare.
 
 **Hosts and shells**
 * Immutable users, SSH keys from `ssh-keys.txt`.
@@ -210,11 +211,6 @@ home-manager switch --flake .#<user>@<home> -b backup
 I am not sure if I am actually going to implement this. I don't believe in security by obscurity but I do like to keep the domain names private just to avoid bot traffic.
 I tried caddy config generation directly from service definition but I also need to specify the domain there which will be in plain text and part of the repo. In future, I will likely
 still add config generation but keep the domain and maybe some other fields private in a secret.
-
-* Maybe generate dnsconfig.js from services data.
-
-My dnsconfig.js config generates DNS entries that go in Cloudflare for public access, the internal DNS servers with overrides so the same domains resolve to internal addresses rather than public
-address in cloudflare and then more DNS entries for internal services and devices.
 
 * [PARTIALLY DONE] Grow and shrink LVS based on updated values. Require user action if the LVS was shrunk!
 

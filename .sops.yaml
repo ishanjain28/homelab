@@ -26,6 +26,15 @@ creation_rules:
           - *annapurna
           - *kanchenjunga
           - *manaslu
+  - path_regex: secrets/dns/records\.json$
+    key_groups:
+      - age:
+          - *turquoise
+          - *kepler
+          - *annapurna
+          - *kanchenjunga
+          - *manaslu
+          - *work_macbook
   - path_regex: secrets/tailscale/auth-key$
     key_groups:
       - age:

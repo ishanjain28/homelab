@@ -44,7 +44,8 @@ in
     // (with types; {
       vpnRegion = mkOpt nonEmptyStr "sg" "PIA region id; must support port forwarding.";
       lanNetworks = mkOpt (listOf nonEmptyStr) [
-        "10.0.0.0/8"
+        "10.0.50.0/24"
+        "10.1.1.3/32"
       ] "Networks qBittorrent may reach outside the tunnel (web UI clients, *arr apps).";
     });
 
@@ -72,6 +73,13 @@ in
     containerConfig = {
       networking.firewall.trustedInterfaces = [ "wg0" ];
 
+      systemd.network.networks."40-eth50".routes = [
+        {
+          Destination = "10.1.1.3/32";
+          Gateway = "_dhcp4";
+        }
+      ];
+
       # Drop anything the qbittorrent user sends that is not going to wg0 or the LAN.
       # WireGuard encrypts packets in place, so the encrypted copy leaving eth50 still
       # carries qbittorrent's socket owner; it is recognised by the fwmark instead.
@@ -83,7 +91,7 @@ in
               type filter hook output priority filter; policy accept;
               meta mark 51820 accept
               meta skuid ${toString cfg.runtimeId} oifname != { "lo", "wg0" } ip daddr != { ${concatStringsSep ", " cfg.lanNetworks} } counter drop
-              meta skuid ${toString cfg.runtimeId} oifname != { "lo", "wg0" } meta nfproto ipv6 counter drop
+              meta skuid ${toString cfg.runtimeId} oifname != { "lo", "wg0" } ip6 daddr != 2a0a:6040:4004::/48 counter drop
             }
           '';
         };

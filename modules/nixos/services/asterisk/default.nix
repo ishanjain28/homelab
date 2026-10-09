@@ -23,7 +23,10 @@ in
       sip-tcp.port = 5060;
       sip-tls.port = 5061;
     };
-    monitor = disabled;
+    monitor = enabled // {
+      endpoint = "sip-tcp";
+      protocol = "tcp";
+    };
   };
 
   config = mkIf cfg.enable (mkServiceContainer {
