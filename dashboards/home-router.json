@@ -1889,7 +1889,7 @@
                     "type": "value",
                     "options": {
                       "1": {
-                        "text": "\u00b0C",
+                        "text": "°C",
                         "index": 0
                       },
                       "2": {
@@ -1993,6 +1993,18 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              },
+              {
+                "color": "orange",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 7
               }
             ]
           },
@@ -2147,7 +2159,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "(1 - avg_over_time((interface_ifOperStatus{agent_host=\"$router\", ifDescr=\"$fiber\"} == bool 1)[$__range:30s])) * $__range_s",
+          "expr": "count_ne_over_time(interface_ifOperStatus{agent_host=\"$router\", ifDescr=\"$fiber\"}[$__range], 1) * 30",
           "refId": "A",
           "legendFormat": "",
           "instant": true,
@@ -2356,6 +2368,18 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              },
+              {
+                "color": "orange",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 7
               }
             ]
           },
@@ -3388,6 +3412,18 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              },
+              {
+                "color": "orange",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 7
               }
             ]
           },
@@ -3542,7 +3578,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "(1 - avg_over_time((interface_ifOperStatus{agent_host=\"$router\", ifDescr=\"$backup\"} == bool 1)[$__range:30s])) * $__range_s",
+          "expr": "count_ne_over_time(interface_ifOperStatus{agent_host=\"$router\", ifDescr=\"$backup\"}[$__range], 1) * 30",
           "refId": "A",
           "legendFormat": "",
           "instant": true,
@@ -3751,6 +3787,18 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              },
+              {
+                "color": "orange",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 7
               }
             ]
           },

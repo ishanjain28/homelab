@@ -54,7 +54,7 @@ groups:
                 - evaluator:
                     type: gt
                     params:
-                      - 95
+                      - 98
 
       - uid: smart-unhealthy
         title: SMART health failing
