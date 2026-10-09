@@ -71,7 +71,7 @@
         "sort": 1,
         "multi": true,
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": ".+",
         "allowCustomValue": true,
         "current": {
           "text": [
