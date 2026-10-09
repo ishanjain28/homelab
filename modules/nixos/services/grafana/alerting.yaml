@@ -1,5 +1,4 @@
 apiVersion: 1
-
 contactPoints:
   - orgId: 1
     name: pushover
@@ -9,7 +8,6 @@ contactPoints:
         settings:
           apiToken: $PUSHOVER_TOKEN
           userKey: $PUSHOVER_USER
-
 policies:
   - orgId: 1
     receiver: pushover
@@ -19,7 +17,6 @@ policies:
     group_wait: 1m
     group_interval: 10m
     repeat_interval: 12h
-
 groups:
   - orgId: 1
     name: homelab
@@ -55,7 +52,6 @@ groups:
                     type: gt
                     params:
                       - 98
-
       - uid: smart-unhealthy
         title: SMART health failing
         condition: B
@@ -85,7 +81,6 @@ groups:
                     type: lt
                     params:
                       - 1
-
       - uid: smart-bad-sectors
         title: Disk has bad sectors
         condition: B
@@ -115,7 +110,6 @@ groups:
                     type: gt
                     params:
                       - 0
-
       - uid: unit-restart-loop
         title: Unit restart loop
         condition: B
@@ -145,7 +139,6 @@ groups:
                     type: gt
                     params:
                       - 3
-
       - uid: log-error-burst
         title: Error burst in logs
         condition: B

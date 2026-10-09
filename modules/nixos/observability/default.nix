@@ -232,6 +232,7 @@ in
       containers = mapAttrs (name: service: {
         config = {
           services.alloy = enabled // {
+            package = pkgs.grafana-alloy;
             extraFlags = [
               "--disable-reporting"
               "--server.http.enable-pprof=false"
