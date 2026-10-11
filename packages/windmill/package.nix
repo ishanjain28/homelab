@@ -78,6 +78,7 @@ stdenv.mkDerivation (finalAttrs: {
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ stdenv.cc.cc ]} \
       --prefix PATH : ${
         lib.makeBinPath [
+          bash
           python312
           procps
           coreutils
