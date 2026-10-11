@@ -93,6 +93,7 @@ in
         windmill-worker = {
           description = "Windmill Execution Worker";
           wantedBy = [ "multi-user.target" ];
+          path = [ pkgs.git ];
           after = [ "network-online.target" ];
           wants = [ "network-online.target" ];
           environment = commonEnvironment // {
