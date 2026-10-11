@@ -103,4 +103,9 @@
     vlans = [ 50 ];
     runtimeId = 30366;
   };
+
+  bulwark = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30393;
+  };
 }

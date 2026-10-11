@@ -10,6 +10,7 @@ with lib.${namespace};
 let
   cfg = config.${namespace}.services.stalwart;
   stateDir = "/var/lib/stalwart";
+  configPath = "/run/container-secrets/stalwart.json";
 in
 {
   options.${namespace}.services.stalwart = mkServiceOptions {
@@ -28,7 +29,12 @@ in
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
-    command = "${pkgs.stalwart_0_16}/bin/stalwart --config ${stateDir}/config.json";
+    command = "${pkgs.stalwart_0_16}/bin/stalwart --config ${configPath}";
+    secrets.config = {
+      file = "secrets/stalwart/config.json";
+      format = "json";
+      mountPath = configPath;
+    };
     serviceProfile = "privileged-ports";
     containerConfig.environment.systemPackages = [ pkgs.stalwart-cli ];
     resources = {
