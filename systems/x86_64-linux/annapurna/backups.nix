@@ -6,7 +6,7 @@
   };
 
   targets.gdrive = {
-    repository = "rclone:gdrive:homelab-backups/annapurna";
+    repository = "rclone:gdrive:annapurna";
     maintenance = {
       onCalendar = "Sun 06:00";
       readDataSubset = "1%";

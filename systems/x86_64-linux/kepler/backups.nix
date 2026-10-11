@@ -6,7 +6,7 @@
   };
 
   targets.gdrive = {
-    repository = "rclone:gdrive:homelab-backups/kepler";
+    repository = "rclone:gdrive:kepler";
     maintenance = {
       onCalendar = "Sun 06:00";
       readDataSubset = "1%";
