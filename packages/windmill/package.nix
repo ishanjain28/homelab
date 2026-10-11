@@ -17,6 +17,7 @@
   gnumake,
   nsjail,
   node-gyp,
+  nodejs,
   php,
   pkg-config,
   powershell,
@@ -79,6 +80,7 @@ stdenv.mkDerivation (finalAttrs: {
       --prefix PATH : ${
         lib.makeBinPath [
           bash
+          nodejs
           python312
           procps
           coreutils
@@ -97,6 +99,7 @@ stdenv.mkDerivation (finalAttrs: {
       --set BASH_PATH "${bash}/bin/bash" \
       --set POWERSHELL_PATH "${powershell}/bin/pwsh" \
       --set BUN_PATH "${bun}/bin/bun" \
+      --set NODE_BIN_PATH "${nodejs}/bin/node" \
       --set UV_PATH "$out/bin/windmill-uv" \
       --set DOTNET_PATH "${dotnet-sdk_9}/bin/dotnet" \
       --set DOTNET_ROOT "${dotnet-sdk_9}/share/dotnet" \
