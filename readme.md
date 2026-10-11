@@ -231,8 +231,6 @@ it should call the reload command for the service rather than restarting it!
 
 * Windmill working with an email receiver. Ideally, I want to do an IMAP server just for this rather than giving it limited access to some other email account. This can be IPv6 only in my ASN and IPv6 only is fine in this context.
 
-* Credit card / Bank statement processing pipeline in windmill to auto save them to actual budget. This is also done but the work is separate and was deployed to windmill directly.
-
 ### remote bootstrap Notes
 
 1. got stuck on /dev/disk/by-label/nixos-minimal-26.11-x86_64 when booting with the virtual media option in jetkvm. FIX: Needs to be mounted as CD/DVD for it to show up in boot options and then mounted as disk not as cd/dvd for it to show up in /dev/disk/by-label/nix... This was a bug in JetKVM firmware.
