@@ -19,12 +19,14 @@ D("ishanjain.me!public", REG_PORKBUN, DnsProvider(DSP_CLOUDFLARE),
 
   MX("@", 10, "in1-smtp.messagingengine.com.", TTL("1h")),
   MX("@", 20, "in2-smtp.messagingengine.com.", TTL("1h")),
+  MX("mail.home", 10, "mx.mail.home.ishanjain.me."),
 
   TXT("@", "google-site-verification=X_no9RSVWSYBGpZ55dwUXB4cehJYYGLRCWHv7WoXbQ8"),
   TXT("@", "v=spf1 include:spf.messagingengine.com -all"),
   TXT("_atproto", "did=did:plc:injz2aaiflg5mho3mqqoqujr"),
   TXT("_discord", "dh=8d45b2a248fb5c4045912c8ffa8f8cd158e252e2"),
   TXT("_dmarc", "v=DMARC1; p=quarantine; rua=mailto:d20a42b634154a888ad7eb473efc9f39@dmarc-reports.cloudflare.net,mailto:contact@ishanjain.me"),
+  TXT("_dmarc.mail.home", "v=DMARC1; p=quarantine; rua=mailto:contact@ishanjain.me"),
   TXT("hibp-verify", "dweb_kpwnpur2gudb1eco3r6nkicm"),
 
   SRV("_autodiscover._tcp", 0, 1, 443, "autodiscover.fastmail.com."),
@@ -46,6 +48,7 @@ D("ishanjain.me!public", REG_PORKBUN, DnsProvider(DSP_CLOUDFLARE),
   A("del.irc", delhi.v4[0]),
 
   addressRecords("ech", { via: ["caddy-delhi"] }),
+  addressRecords("mx.mail.home", { v6: config.services.stalwart.direct.home.v6 }),
 
   serviceRecords("public", "ishanjain.me")
 );

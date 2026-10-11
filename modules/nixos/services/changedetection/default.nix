@@ -33,7 +33,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
-    serviceProfiles.changedetection-io = "default";
+    serviceProfiles.changedetection-io = "jit";
     resources = {
       CPUQuota = "400%";
       MemoryMax = "4G";
@@ -59,6 +59,7 @@ in
           ALLOW_IANA_RESTRICTED_ADDRESSES = "true";
           DEFAULT_FETCH_BACKEND = "html_webdriver";
           HOME = datastorePath;
+          LOGGER_LEVEL = "WARNING";
           PLAYWRIGHT_DRIVER_URL = "ws://127.0.0.1:${toString browserPort}/?stealth=1&--disable-web-security=true&--disable-crashpad=true&--disable-crash-reporter=true&--crash-dumps-dir=${chromiumPath}/crashes";
         };
         serviceConfig = {
