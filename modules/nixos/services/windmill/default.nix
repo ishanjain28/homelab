@@ -12,7 +12,7 @@ let
   environmentFile = "/run/container-secrets/windmill.env";
   commonEnvironment = {
     JSON_FMT = "true";
-    RUST_LOG = "info";
+    RUST_LOG = "warn";
   };
   commonServiceConfig = {
     EnvironmentFile = environmentFile;
