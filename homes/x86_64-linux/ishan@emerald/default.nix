@@ -31,7 +31,7 @@ with lib.${namespace};
   sops = {
     age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
     secrets.gitconfig = {
-      sopsFile = lib.snowfall.fs.get-file ".gitconfig";
+      sopsFile = lib.snowfall.fs.get-file "secrets/git/gitconfig";
       format = "binary";
     };
   };

@@ -43,11 +43,11 @@ creation_rules:
           - *annapurna
           - *kanchenjunga
           - *manaslu
-  - path_regex: .gitconfig.work
+  - path_regex: secrets/git/gitconfig\.work$
     key_groups:
       - age:
           - *work_macbook
-  - path_regex: .gitconfig
+  - path_regex: secrets/git/gitconfig$
     key_groups:
       - age:
           - *turquoise
