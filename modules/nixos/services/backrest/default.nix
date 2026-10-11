@@ -51,13 +51,14 @@ in
       BACKREST_DATA = stateDir;
       BACKREST_PORT = ":${toString cfg.endpoints.web.port}";
       BACKREST_RESTIC_COMMAND = "${pkgs.restic}/bin/restic";
-      RCLONE_CONFIG = rcloneConfigPath;
+      RCLONE_CONFIG = "${stateDir}/rclone.conf";
       XDG_CACHE_HOME = "${stateDir}/cache";
     };
     serviceConfig = {
       StateDirectory = "backrest";
       StateDirectoryMode = "0700";
       WorkingDirectory = stateDir;
+      ExecStartPre = "${pkgs.coreutils}/bin/install -m 0600 ${rcloneConfigPath} ${stateDir}/rclone.conf";
     };
   });
 }

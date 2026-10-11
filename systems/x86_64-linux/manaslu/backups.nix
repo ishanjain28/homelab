@@ -5,7 +5,7 @@
   };
 
   targets.gdrive = {
-    repository = "rclone:gdrive:homelab-backups/manaslu";
+    repository = "rclone:gdrive:manaslu";
     maintenance = {
       onCalendar = "Sun 06:00";
       readDataSubset = "1%";
