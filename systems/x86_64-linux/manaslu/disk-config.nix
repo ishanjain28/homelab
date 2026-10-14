@@ -35,7 +35,7 @@ _: {
         content = {
           type = "filesystem";
           format = "ext4";
-          mountpoint = "/home/ishan/dl";
+          mountpoint = "/srv/dl";
           mountOptions = [ "nofail" ];
         };
       };

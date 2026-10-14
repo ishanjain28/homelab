@@ -28,7 +28,7 @@ in
     metrics = enabled;
 
     shares.dl = {
-      hostPath = "/home/ishan/dl";
+      hostPath = "/srv/dl";
       gid = 30393;
       readOnly = true;
     };
