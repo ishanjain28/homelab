@@ -72,11 +72,13 @@ let
       inherit description;
       script = ''
         ${restic} cat config > /dev/null 2>&1 || ${restic} init
+        ${restic} unlock
       ''
       + script;
       environment = resticEnvironment targetName;
       path = [ pkgs.rclone ];
       inherit (cfg) onFailure;
+      restartIfChanged = false;
       wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
       unitConfig.RequiresMountsFor = target.requiresMountsFor;
@@ -152,7 +154,6 @@ let
       inherit targetName;
       description = "Prune and check backup target '${targetName}'";
       script = ''
-        ${restic} unlock
         ${restic} prune
         ${restic} check ${
           optionalString (target.maintenance.readDataSubset != null) "--read-data-subset=${target.maintenance.readDataSubset}"
