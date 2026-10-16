@@ -53,6 +53,7 @@ in
         RSA_KEY_FILENAME = rsaKey;
         TZ = "Asia/Kolkata";
         LOG_LEVEL = "warn";
+        EXPERIMENTAL_CLIENT_FEATURE_FLAGS = "pm-32413-multi-client-password-management,ssh-agent-v2,pm-32009-new-item-types,pm-34171-card-scanner,enable-basic-auth-response";
       };
     };
   });

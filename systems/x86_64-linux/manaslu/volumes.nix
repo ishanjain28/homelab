@@ -2,7 +2,7 @@
   postgresql-del-primary = {
     uuid = "3ab2c243-fc4f-436d-8fcd-fc6207008209";
     mountPath = "/var/lib/postgresql";
-    size = "2G";
+    size = "4G";
     backup.groups = [
       "hourly"
       "offsite"
