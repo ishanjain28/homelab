@@ -4,3 +4,6 @@ result/*
 .cache/*
 **/target/**
 .gcroots/
+windmill-scripts/
+bank/*
+credit-cards/*

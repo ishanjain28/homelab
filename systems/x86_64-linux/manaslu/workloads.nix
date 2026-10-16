@@ -17,6 +17,7 @@
       shared_buffers = "128MB";
       wal_level = "replica";
       max_wal_senders = 10;
+      max_slot_wal_keep_size = "1GB";
       timezone = "Asia/Kolkata";
     };
   };
