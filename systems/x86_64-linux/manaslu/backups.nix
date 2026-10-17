@@ -1,7 +1,7 @@
 {
   targets.local = {
     repository = "/var/lib/backups/restic";
-    maintenance.onCalendar = "Sun 04:00";
+    maintenance.onCalendar = "Sun 00:30";
   };
 
   targets.gdrive = {

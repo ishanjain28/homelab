@@ -112,6 +112,7 @@ let
       [
         restic
         "backup"
+        "--retry-lock=1h"
         "--one-file-system"
         "--tag=group:${groupName}"
         "--tag=volume:${volume.id}"
@@ -140,7 +141,7 @@ let
       script = ''
         failed=0
         ${concatStringsSep "\n" (mapAttrsToList runOwner volumesByOwner)}
-        ${restic} forget --tag=group:${groupName} --group-by=tags,paths ${concatStringsSep " " (keepOptions group.keep)} || failed=1
+        ${restic} forget --retry-lock=1h --tag=group:${groupName} --group-by=tags,paths ${concatStringsSep " " (keepOptions group.keep)} || failed=1
         exit "$failed"
       '';
       serviceConfig.ExecStopPost = map (
@@ -154,8 +155,8 @@ let
       inherit targetName;
       description = "Prune and check backup target '${targetName}'";
       script = ''
-        ${restic} prune
-        ${restic} check ${
+        ${restic} prune --retry-lock=1h
+        ${restic} check --retry-lock=1h ${
           optionalString (target.maintenance.readDataSubset != null) "--read-data-subset=${target.maintenance.readDataSubset}"
         }
       '';

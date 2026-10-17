@@ -18,14 +18,15 @@ in
   config = mkIf cfg.enable {
     services.chrony = enabled // {
       enableRTCTrimming = false;
+      enableNTS = true;
       extraConfig = ''
         makestep 1.0 3
         driftfile /var/lib/chrony/drift
       '';
       servers = [
         "time.cloudflare.com"
-        "time.google.com"
-        "time.windows.com"
+        "nts.netnod.se"
+        "ptbtime1.ptb.de"
       ];
     };
   };
