@@ -21,6 +21,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    databaseUnits = [ ];
     serviceProfiles.garmin-sync = "default";
     secrets = {
       env = {
@@ -44,8 +45,12 @@ in
 
       systemd.services.garmin-sync = {
         inherit (cfg) description;
-        after = [ "network-online.target" ];
+        after = [
+          "network-online.target"
+          "database-ready.service"
+        ];
         wants = [ "network-online.target" ];
+        requires = [ "database-ready.service" ];
         path = [
           package
           pkgs.coreutils

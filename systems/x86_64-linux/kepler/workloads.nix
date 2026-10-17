@@ -95,6 +95,10 @@
   };
 
   garmin-sync = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "garmin_data";
+    };
     vlans = [ 50 ];
     runtimeId = 30365;
   };
