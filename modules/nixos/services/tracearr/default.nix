@@ -64,7 +64,7 @@ in
       HOST = "0.0.0.0";
       PORT = toString cfg.endpoints.web.port;
       NODE_ENV = "production";
-      LOG_LEVEL = "info";
+      LOG_LEVEL = "warn";
       REDIS_URL = "redis://127.0.0.1:6379";
     };
     serviceConfig = {
