@@ -40,6 +40,10 @@ in
       };
 
       systemd.services.unpackerr = {
+        environment = {
+          UN_ACTIVITY = "true";
+          UN_LOG_QUEUES = "1h";
+        };
         serviceConfig = {
           ExecStart = mkForce "${pkgs.unpackerr}/bin/unpackerr";
           UMask = "0007";

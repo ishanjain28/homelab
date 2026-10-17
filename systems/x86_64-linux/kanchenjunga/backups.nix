@@ -2,7 +2,7 @@
   targets.local = {
     repository = "/var/lib/backups/restic";
     requiresMountsFor = [ "/var/lib/backups" ];
-    maintenance.onCalendar = "Sun 04:00";
+    maintenance.onCalendar = "Sun 00:30";
   };
 
   groups = {

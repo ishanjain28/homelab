@@ -79,7 +79,7 @@ in
             address             = "0.0.0.0:514"
             protocol            = "tcp"
             syslog_format       = "rfc3164"
-            use_incoming_timestamp = true
+            use_incoming_timestamp = false
             rfc3164_default_to_current_year = true
             labels              = { source = "syslog" }
           }
@@ -87,7 +87,7 @@ in
             address             = "0.0.0.0:514"
             protocol            = "udp"
             syslog_format       = "rfc3164"
-            use_incoming_timestamp = true
+            use_incoming_timestamp = false
             rfc3164_default_to_current_year = true
             labels              = { source = "syslog" }
           }

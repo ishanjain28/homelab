@@ -14,14 +14,14 @@ in
     enable = mkBoolOpt false "Whether or not to enable networking support";
     domain = mkOpt str "" "The domain name of the machine";
     hostName = mkOpt str "nixos" "The hostname of the machine";
-    hosts = mkOpt attrs { } (mdDoc "An attribute set to merge with `networking.hosts`");
+    hosts = mkOpt attrs { } "An attribute set to merge with `networking.hosts`";
     tcpPorts = mkOpt (listOf port) [ 80 443 8080 ] "A list of ports to open in the firewall";
-    vlans = mkOpt attrs { } (msDoc "List of VLAN interfaces to configure");
-    links = mkOpt attrs { } (msDoc "List of PHY links to configure");
-    interfaces = mkOpt attrs { } (msDoc "List of interfaces to configure");
+    vlans = mkOpt attrs { } "List of VLAN interfaces to configure";
+    links = mkOpt attrs { } "List of PHY links to configure";
+    interfaces = mkOpt attrs { } "List of interfaces to configure";
 
-    networks = mkOpt attrs { } (msDoc "List of networks devices to configure");
-    netdevs = mkOpt attrs { } (msDoc "List of virtual network devices to configure");
+    networks = mkOpt attrs { } "List of networks devices to configure";
+    netdevs = mkOpt attrs { } "List of virtual network devices to configure";
   };
 
   config = mkIf cfg.enable {

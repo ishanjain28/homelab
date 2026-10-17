@@ -276,7 +276,7 @@
     };
   };
 
-  asterisk = disabled // {
+  asterisk = enabled // {
     vlans = [ 140 ];
     runtimeId = 30362;
     logging = disabled;
@@ -377,7 +377,10 @@
 
   alloy-syslog = enabled // {
     monitor.name = "Syslog";
-    vlans = [ 50 ];
+    vlans = [
+      50
+      99
+    ];
     runtimeId = 30346;
   };
 
