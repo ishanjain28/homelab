@@ -445,7 +445,6 @@ let
 
       logging = {
         enable = mkBoolOpt logging.enable "Whether this service container should push journald logs to Loki.";
-        files = mkOpt (types.listOf types.str) [ ] "Log file paths or glob patterns that Alloy should also push to Loki.";
       };
     };
 

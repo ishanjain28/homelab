@@ -53,10 +53,7 @@ in
       mutableUsers = false;
       users.ishan = {
         uid = 1000;
-        extraGroups = [
-          "wheel"
-          "networkmanager"
-        ];
+        extraGroups = [ "wheel" ];
         group = "users";
         createHome = true;
         home = "/home/ishan";

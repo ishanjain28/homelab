@@ -78,36 +78,35 @@ let
     )
   );
 
-  serviceLokiPushUrl =
-    service:
-    let
-      configuredVlans = filter (vlan: hasAttr (toString vlan) logging.lokiPushUrls) service.vlans;
-    in
-    if configuredVlans == [ ] then hostLokiPushUrl else logging.lokiPushUrls.${toString (head configuredVlans)};
-
   hostLokiPushUrl =
     logging.lokiPushUrls.${toString logging.hostVlan}
     or (throw "No Loki push URL configured for host VLAN ${toString logging.hostVlan}");
 
-  fileSourceConfig =
-    name: files:
-    optionalString (files != [ ]) ''
-      local.file_match "logs" {
-        path_targets = [
-          ${concatMapStringsSep "\n" (
-            path:
-            ''{ "__path__" = ${builtins.toJSON path}, "container" = ${builtins.toJSON name}, "host" = ${builtins.toJSON config.networking.hostName}, "source" = "file" },''
-          ) files}
-        ]
-      }
+  alloyComponentName = name: replaceStrings [ "-" ] [ "_" ] name;
 
-      loki.source.file "logs" {
-        targets    = local.file_match.logs.targets
-        forward_to = [loki.write.local.receiver]
-      }
-    '';
+  journalSource =
+    id: container: path:
+    concatStringsSep "\n" (
+      [ "loki.source.journal \"${id}\" {" ]
+      ++ optional (path != null) "  path          = \"${path}\""
+      ++ [
+        "  forward_to    = [loki.write.local.receiver]"
+        "  relabel_rules = loki.relabel.journal.rules"
+        "  labels        = {container = \"${container}\", host = \"${config.networking.hostName}\", source = \"journald\"}"
+        "  max_age       = \"24h\""
+        "}"
+        ""
+      ]
+    );
 
-  alloyConfig = name: lokiPushUrl: files: ''
+  containerJournalSources = concatStringsSep "\n" (
+    mapAttrsToList (
+      name: _service:
+      journalSource "container_${alloyComponentName name}" name "/var/lib/nixos-containers/${name}/var/log/journal"
+    ) loggedServices
+  );
+
+  alloyConfig = ''
     logging {
       level = "warn"
     }
@@ -132,18 +131,11 @@ let
       }
     }
 
-    loki.source.journal "systemd" {
-      forward_to    = [loki.write.local.receiver]
-      relabel_rules = loki.relabel.journal.rules
-      labels        = {container = "${name}", host = "${config.networking.hostName}", source = "journald"}
-      max_age       = "24h"
-    }
-
-    ${fileSourceConfig name files}
-
+    ${journalSource "systemd" "host" null}
+    ${containerJournalSources}
     loki.write "local" {
       endpoint {
-        url = "${lokiPushUrl}"
+        url = "${hostLokiPushUrl}"
       }
     }
   '';
@@ -195,7 +187,7 @@ in
         "70" = "http://10.0.70.11:3100/loki/api/v1/push";
         "99" = "http://[${mkIpv6Address "loki" 99}]:3100/loki/api/v1/push";
       } "Loki push API URLs keyed by VLAN.";
-      hostVlan = mkOpt types.ints.positive 50 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
+      hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
     };
 
     metrics = {
@@ -225,35 +217,16 @@ in
         ];
       };
 
-      systemd.services.alloy.serviceConfig.SupplementaryGroups = mkAfter [ "adm" ];
-
-      environment.etc."alloy/config.alloy".text = alloyConfig "host" hostLokiPushUrl [ ];
-
-      containers = mapAttrs (name: service: {
-        config = {
-          services.alloy = enabled // {
-            package = pkgs.grafana-alloy;
-            extraFlags = [
-              "--disable-reporting"
-              "--server.http.enable-pprof=false"
-            ];
-          };
-
-          systemd.services.alloy.serviceConfig = {
-            SupplementaryGroups = mkAfter [
-              "adm"
-              "systemd-journal"
-            ];
-          }
-          // optionalAttrs (service.logging.files != [ ]) {
-            DynamicUser = mkForce false;
-            User = service.runtimeUser.name;
-            Group = service.runtimeUser.group;
-          };
-
-          environment.etc."alloy/config.alloy".text = alloyConfig name (serviceLokiPushUrl service) service.logging.files;
+      systemd.services.alloy = {
+        after = mapAttrsToList (name: _service: "container@${name}.service") loggedServices;
+        serviceConfig = {
+          SupplementaryGroups = mkAfter [ "adm" ];
+          AmbientCapabilities = [ "CAP_DAC_READ_SEARCH" ];
+          CapabilityBoundingSet = [ "CAP_DAC_READ_SEARCH" ];
         };
-      }) loggedServices;
+      };
+
+      environment.etc."alloy/config.alloy".text = alloyConfig;
     })
 
     (mkIf metrics.enable {
