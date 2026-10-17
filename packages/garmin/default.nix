@@ -41,8 +41,8 @@ python.buildPythonApplication {
     domain = "git.ishanjain.me";
     owner = "ishan";
     repo = "garmin";
-    rev = "4dee1be71896a6782563f25fdc30964079a8f708";
-    hash = "sha256-0BYqmWMxK6b4b2iI1DWj/NAnpk6XVISCPa7T4xMohsE=";
+    rev = "dfac170bce0936f94ff09cbbe5f14b31c0ebaaf8";
+    hash = "sha256-Y4JecNL0yG0tZK5q7R7km1/U2UtSdJpWe2hJmGAbwYI=";
   };
 
   build-system = [ python.hatchling ];
