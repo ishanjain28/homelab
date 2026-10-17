@@ -1,0 +1,842 @@
+{
+  "title": "Network Logs",
+  "uid": "network-logs",
+  "schemaVersion": 41,
+  "version": 4,
+  "tags": [
+    "homelab",
+    "logs",
+    "loki",
+    "syslog",
+    "network"
+  ],
+  "timezone": "browser",
+  "editable": false,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "graphTooltip": 1,
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "loki",
+        "label": "Loki",
+        "query": "loki",
+        "hide": 2,
+        "refresh": 1,
+        "regex": "",
+        "current": {
+          "text": "homelab-loki",
+          "value": "homelab-loki"
+        },
+        "options": []
+      },
+      {
+        "name": "device",
+        "label": "Device",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "definition": "label_values({source=\"syslog\"}, container)",
+        "query": {
+          "label": "container",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{source=\"syslog\"}",
+          "type": 1
+        },
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".+",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "refresh": 2,
+        "sort": 1
+      },
+      {
+        "name": "priority",
+        "label": "Priority",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki}"
+        },
+        "definition": "label_values({source=\"syslog\"}, priority)",
+        "query": {
+          "label": "priority",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{source=\"syslog\"}",
+          "type": 1
+        },
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".+",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "refresh": 2,
+        "sort": 1
+      },
+      {
+        "name": "search",
+        "label": "Search (regex)",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Log lines",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Errors",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 5,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\", priority=~\"error|critical|alert|emergency\"} |~ \"$search\" [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Firewall drops",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 10,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\" | regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | prefix=~\"(?i).*drop.*\" [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "DHCP leases",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 15,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^dhcp,\" | regexp `^dhcp,[a-z,]+ (?P<server>\\S+) (?P<event>assigned|deassigned) (?P<ip>\\S+) (?:for|to|from) (?P<mac>\\S+)(?: (?P<client>.+))?` | event=\"assigned\" [$__range]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Devices logging",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "count(sum by (container) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" [$__range])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Log lines by topic",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "topk(10, sum by (topic) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" | regexp `^(?P<topic>[a-z0-9-]+)[, ]` [$__auto])))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{topic}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Log lines by severity",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (priority) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{priority}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Firewall",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Firewall events by rule",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (prefix, chain) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\" | regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{prefix}} ({{chain}})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Drops by interface",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "sum by (in, out) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\" | regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | prefix=~\"(?i).*drop.*\" [$__auto]))",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "{{in}} \u2192 {{out}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Firewall log",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\"",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "enableInfiniteScrolling": true
+      }
+    },
+    {
+      "type": "row",
+      "title": "DHCP",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "panels": [
+        {
+          "type": "table",
+          "title": "DHCP leases",
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 42
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki}"
+              },
+              "expr": "sum by (server, ip, mac, client) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^dhcp,\" | regexp `^dhcp,[a-z,]+ (?P<server>\\S+) (?P<event>assigned|deassigned) (?P<ip>\\S+) (?:for|to|from) (?P<mac>\\S+)(?: (?P<client>.+))?` | event=\"assigned\" | server!=\"\" [$__range]))",
+              "refId": "A",
+              "editorMode": "code",
+              "queryType": "instant",
+              "legendFormat": ""
+            }
+          ],
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "mode": "seriesToRows",
+                "reducers": [
+                  "lastNotNull"
+                ],
+                "labelsToFields": true
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Field": true
+                },
+                "indexByName": {
+                  "client": 0,
+                  "ip": 1,
+                  "mac": 2,
+                  "server": 3,
+                  "Count": 4
+                },
+                "renameByName": {
+                  "Last *": "Leases",
+                  "Last": "Leases",
+                  "client": "Client",
+                  "ip": "IP",
+                  "mac": "MAC",
+                  "server": "VLAN"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Leases",
+                    "desc": true
+                  }
+                ]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Logs",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "panels": []
+    },
+    {
+      "type": "logs",
+      "title": "Errors and critical",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\", priority=~\"error|critical|alert|emergency\"} |~ \"$search\"",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "enableInfiniteScrolling": true
+      }
+    },
+    {
+      "type": "logs",
+      "title": "All logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${loki}"
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki}"
+          },
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\"",
+          "refId": "A",
+          "editorMode": "code",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "enableInfiniteScrolling": true
+      }
+    }
+  ]
+}
