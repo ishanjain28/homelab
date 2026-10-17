@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   namespace,
   pkgs,
@@ -53,7 +52,7 @@ in
       };
     };
 
-    containerConfig.environment.etc."grafana/dashboards".source = "${inputs.self}/dashboards";
+    containerConfig.environment.etc."grafana/dashboards".source = ../../../../dashboards;
 
     resources = {
       CPUQuota = "500%";
