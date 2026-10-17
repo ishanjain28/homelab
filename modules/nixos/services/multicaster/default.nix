@@ -37,7 +37,7 @@ in
       TasksMax = 256;
     };
     environment = {
-      RUST_LOG = "info";
+      RUST_LOG = "warn";
       TOKIO_WORKER_THREADS = "2";
     };
     after = [ "network-online.target" ];
