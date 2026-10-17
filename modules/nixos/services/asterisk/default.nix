@@ -121,6 +121,8 @@ in
         useTheseDefaultConfFiles = [ ];
       };
 
+      networking.firewall.rejectPackets = true;
+
       networking.firewall.allowedUDPPortRanges = [
         {
           from = 10000;
