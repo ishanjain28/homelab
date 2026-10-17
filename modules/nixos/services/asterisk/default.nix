@@ -32,11 +32,6 @@ in
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
     secrets = {
-      asteriskConf = {
-        file = "secrets/asterisk/asterisk.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/asterisk.conf";
-      };
       cdrConf = {
         file = "secrets/asterisk/cdr.conf";
         format = "binary";
