@@ -40,7 +40,7 @@ in
     environment = {
       ACTUAL_CONFIG_PATH = confPath;
       ACTUAL_DATA_DIR = "/var/lib/actual-server";
-      ACTUAL_HOSTNAME = "0.0.0.0";
+      ACTUAL_HOSTNAME = "::";
       ACTUAL_PORT = toString cfg.endpoints.web.port;
       LOG_LEVEL = "info";
       NODE_ENV = "production";

@@ -61,7 +61,7 @@ in
     };
     environment = {
       BACKUP_DIR = "/var/lib/tracearr/backup";
-      HOST = "0.0.0.0";
+      HOST = "::";
       PORT = toString cfg.endpoints.web.port;
       NODE_ENV = "production";
       LOG_LEVEL = "warn";

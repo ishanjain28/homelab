@@ -160,6 +160,8 @@ let
       url =
         if protocol == "http" || protocol == "https" then
           "${protocol}://${address}:${toString port}${path}"
+        else if protocol == "icmp" || protocol == "icmpv6" then
+          "${protocol}://${address}"
         else
           "${protocol}://${address}:${toString port}";
     in
@@ -184,7 +186,6 @@ in
       enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
       lokiPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
         "50" = "http://[${mkIpv6Address "loki" 50}]:3100/loki/api/v1/push";
-        "70" = "http://10.0.70.11:3100/loki/api/v1/push";
         "99" = "http://[${mkIpv6Address "loki" 99}]:3100/loki/api/v1/push";
       } "Loki push API URLs keyed by VLAN.";
       hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's Loki push URL.";

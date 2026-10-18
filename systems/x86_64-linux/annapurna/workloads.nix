@@ -13,7 +13,9 @@
     extensions = [ "timescaledb" ];
     authentication = ''
       host all all 10.0.50.0/24 scram-sha-256
+      host all all 2a0a:6040:4004:50::/64 scram-sha-256
       host all ishan 10.0.10.0/24 scram-sha-256
+      host all ishan 2a0a:6040:4004:10::/64 scram-sha-256
     '';
     settings = {
       max_connections = 100;

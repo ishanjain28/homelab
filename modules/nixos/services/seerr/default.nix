@@ -47,7 +47,6 @@ in
     };
     environment = {
       PORT = toString cfg.endpoints.web.port;
-      HOST = "0.0.0.0";
       NODE_ENV = "production";
       LOG_LEVEL = "info";
       CONFIG_DIRECTORY = "/var/lib/seerr";

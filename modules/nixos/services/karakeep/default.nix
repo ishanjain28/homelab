@@ -60,6 +60,7 @@ in
           DATA_DIR = "/var/lib/karakeep";
           PORT = toString cfg.endpoints.web.port;
           DISABLE_NEW_RELEASE_CHECK = "true";
+          HOSTNAME = "::";
         };
       };
 

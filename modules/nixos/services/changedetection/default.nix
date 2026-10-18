@@ -45,7 +45,7 @@ in
         package = changedetectionPackage;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
-        listenAddress = "0.0.0.0";
+        listenAddress = "::";
         port = cfg.endpoints.web.port;
         inherit datastorePath;
         playwrightSupport = false;

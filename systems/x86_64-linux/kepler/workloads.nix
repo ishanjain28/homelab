@@ -41,7 +41,7 @@
   gitea-runner = enabled // {
     vlans = [ 50 ];
     runtimeId = 36928;
-    giteaURI = "http://10.0.50.20:3000";
+    giteaURI = "http://gitea.home.direct.ishanjain.me:3000";
   };
 
   mathesar = enabled // {

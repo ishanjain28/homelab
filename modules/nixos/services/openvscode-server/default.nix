@@ -69,7 +69,7 @@ in
       command = concatStringsSep " " [
         "${pkgs.openvscode-server}/bin/openvscode-server"
         "--accept-server-license-terms"
-        "--host=0.0.0.0"
+        "--host=::"
         "--port=${toString cfg.endpoints.web.port}"
         "--connection-token-file=${connectionTokenPath}"
         "--telemetry-level=off"
