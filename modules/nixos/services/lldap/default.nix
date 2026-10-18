@@ -51,6 +51,8 @@ in
 
     environment = {
       LLDAP_KEY_FILE = containerKeyPath;
+      LLDAP_HTTP_HOST = "::";
+      LLDAP_LDAP_HOST = "::";
     };
 
     serviceProfile = "privileged-ports";

@@ -26,7 +26,7 @@ in
     };
     monitor = enabled // {
       endpoint = "rfc3164";
-      protocol = "tcp";
+      protocol = "icmp";
     };
   };
 

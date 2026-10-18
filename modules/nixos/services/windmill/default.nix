@@ -79,6 +79,7 @@ in
           wants = [ "network-online.target" ];
           environment = commonEnvironment // {
             MODE = "server";
+            SERVER_BIND_ADDR = "::";
             DISABLE_EMBEDDING = "true";
             PORT = toString cfg.endpoints.web.port;
           };

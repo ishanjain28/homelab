@@ -37,7 +37,7 @@ in
       TasksMax = 256;
     };
     environment = {
-      HOST = "0.0.0.0";
+      HOST = "[::]";
       PORT = toString cfg.endpoints.app.port;
       RUST_LOG = "info";
       TOKIO_WORKER_THREADS = "2";
