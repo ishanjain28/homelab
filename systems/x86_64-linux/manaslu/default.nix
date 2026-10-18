@@ -25,7 +25,9 @@ in
     inherit volumes;
     services = workloads;
     logging.enable = mkForce false;
-    metrics = enabled;
+    metrics = enabled // {
+      sensors = disabled;
+    };
 
     shares.dl = {
       hostPath = "/srv/dl";

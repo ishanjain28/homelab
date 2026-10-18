@@ -12,7 +12,7 @@ let
   cfg = srv.gitea-runner;
   runnerEnv = "/run/container-secrets/gitea-runner.env";
   instanceName = config.networking.hostName;
-  labels = [ "ubuntu-latest:docker://gitea/runner-images:ubuntu-latest" ];
+  labels = [ "nixos:host" ];
 in
 {
   options.${namespace}.services.gitea-runner =
@@ -29,6 +29,7 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    serviceProfiles."gitea-runner-${instanceName}" = "jit";
 
     secrets.token = {
       file = "secrets/gitea-runner.env";
@@ -43,18 +44,31 @@ in
     };
 
     containerConfig = {
-      # Docker exists only inside this unprivileged service container.
-      # network=host below therefore means the runner container's VLAN 50
-      # namespace, not Kepler's host network namespace.
-      virtualisation.docker = enabled // {
-        extraPackages = [ pkgs.nftables ];
-      };
-
       services.gitea-actions-runner.instances.${instanceName} = enabled // {
         name = instanceName;
         url = cfg.giteaURI;
         tokenFile = runnerEnv;
         inherit labels;
+
+        hostPackages = with pkgs; [
+          age
+          bash
+          coreutils
+          curl
+          diffutils
+          dnscontrol
+          findutils
+          gawk
+          git
+          gnugrep
+          gnused
+          gnutar
+          gzip
+          jq
+          nodejs
+          wget
+          xz
+        ];
 
         settings = {
           log.level = "info";
@@ -62,7 +76,6 @@ in
           runner = {
             file = ".runner";
             capacity = 1;
-            env_file = ".env";
             timeout = "3h";
             shutdown_timeout = "0s";
             insecure = false;
@@ -71,26 +84,7 @@ in
             inherit labels;
           };
 
-          cache = {
-            enabled = true;
-            dir = "";
-            host = "";
-            port = 0;
-            external_server = "";
-          };
-
-          container = {
-            network = "host";
-            privileged = false;
-            options = null;
-            workdir_parent = null;
-            valid_volumes = [ ];
-            docker_host = "";
-            force_pull = true;
-            force_rebuild = false;
-          };
-
-          host.workdir_parent = null;
+          cache.enabled = false;
         };
       };
 
@@ -103,7 +97,6 @@ in
         StateDirectoryMode = "0700";
         TimeoutStartSec = "infinity";
         TimeoutStopSec = "infinity";
-        UMask = "0077";
       };
     };
   });

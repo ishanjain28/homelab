@@ -197,6 +197,7 @@ in
         mkOpt types.nonEmptyStr "http://[${mkIpv6Address "victoriametrics" 50}]:8428"
           "VictoriaMetrics URL";
       intelGpu.enable = mkBoolOpt false "Whether to collect Intel GPU video engine, frequency and power metrics on this host.";
+      sensors.enable = mkBoolOpt true "Whether to collect lm_sensors hardware sensor readings on this host.";
     };
   };
 
@@ -274,7 +275,6 @@ in
             ];
             diskio = [ { } ];
             net = [ { } ];
-            sensors = [ { } ];
             smart = [
               {
                 path_smartctl = "${pkgs.smartmontools}/bin/smartctl";
@@ -295,6 +295,9 @@ in
                 ];
               }
             ];
+          }
+          // optionalAttrs metrics.sensors.enable {
+            sensors = [ { } ];
           };
 
           processors.enum = [
@@ -334,7 +337,7 @@ in
       };
 
       # The sensors input execs `sensors` from lm_sensors via $PATH.
-      systemd.services.telegraf.path = [ pkgs.lm_sensors ];
+      systemd.services.telegraf.path = optionals metrics.sensors.enable [ pkgs.lm_sensors ];
 
       # smartctl/nvme need raw device access: `disk` group for SATA/SAS SG_IO,
       # CAP_SYS_ADMIN/CAP_SYS_RAWIO for NVMe admin passthrough commands.

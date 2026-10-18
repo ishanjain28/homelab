@@ -20,7 +20,9 @@ in
 
   homelab = {
     profiles.server = enabled;
-    metrics = enabled;
+    metrics = enabled // {
+      sensors = disabled;
+    };
 
     inherit backups;
     inherit volumes;
