@@ -9,6 +9,7 @@ with lib;
 with lib.${namespace};
 let
   hostName = "manaslu";
+  homeVxlan = false;
   backups = import ./backups.nix;
   volumes = import ./volumes.nix;
   workloads = import ./workloads.nix { inherit lib namespace; };
@@ -55,9 +56,52 @@ in
             LinkLocalAddressing = "ipv6";
             IPv6LinkLocalAddressGenerationMode = "eui64";
           };
+          address = optional homeVxlan "2401:c080:3400:2e43:5400:4ff:fe5a:5551/128";
           ipv6AcceptRAConfig = {
             Token = "eui64";
             DHCPv6Client = false;
+          };
+        };
+      }
+      // optionalAttrs homeVxlan {
+        "30-vxlan-home" = {
+          matchConfig.Name = "vxlan-home";
+          address = [ "2a0a:6040:4004:1::1/64" ];
+          networkConfig = {
+            LinkLocalAddressing = "ipv6";
+            IPv6AcceptRA = false;
+          };
+          routingPolicyRules = [
+            {
+              From = "2a0a:6040:4004:1::1/128";
+              Table = 4004;
+              Priority = 100;
+            }
+          ];
+          routes = [
+            {
+              Destination = "2a0a:6040:4004::/48";
+              Gateway = "2a0a:6040:4004:1::2";
+              Table = 4004;
+            }
+          ];
+        };
+      };
+
+      netdevs = optionalAttrs homeVxlan {
+        "30-vxlan-home" = {
+          netdevConfig = {
+            Name = "vxlan-home";
+            Kind = "vxlan";
+            MTUBytes = "1430";
+            MACAddress = mkMacAddress "${hostName}:vxlan-home";
+          };
+          vxlanConfig = {
+            VNI = 4004;
+            Local = "2401:c080:3400:2e43:5400:4ff:fe5a:5551";
+            Remote = "2405:201:6848:2849:4aa9:8aff:fed7:6ee1";
+            DestinationPort = 4789;
+            Independent = true;
           };
         };
       };
@@ -80,12 +124,16 @@ in
       '';
       # Loose validation is needed for the existing routed WireGuard prefixes.
       checkReversePath = "loose";
-      extraInputRules = ''
-        tcp dport 10080 ct status dnat accept
-        meta l4proto { tcp, udp } th dport 10443 ct status dnat accept
-        meta l4proto { tcp, udp } th dport 8853 ct status dnat accept
-        iifname "wg-home-vpn" meta l4proto { tcp, udp } th dport 5353 ct status dnat accept
-      '';
+      extraInputRules =
+        optionalString homeVxlan ''
+          ip6 saddr 2405:201:6848:2849:4aa9:8aff:fed7:6ee1 udp dport 4789 accept
+        ''
+        + ''
+          tcp dport 10080 ct status dnat accept
+          meta l4proto { tcp, udp } th dport 10443 ct status dnat accept
+          meta l4proto { tcp, udp } th dport 8853 ct status dnat accept
+          iifname "wg-home-vpn" meta l4proto { tcp, udp } th dport 5353 ct status dnat accept
+        '';
       interfaces = {
         wg-home-vpn.allowedTCPPorts = [
           2019
