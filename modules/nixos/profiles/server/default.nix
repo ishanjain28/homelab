@@ -60,6 +60,7 @@ in
         homeMode = "700";
         useDefaultShell = true;
         isNormalUser = true;
+        linger = true;
         hashedPassword = "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
       };
     };
