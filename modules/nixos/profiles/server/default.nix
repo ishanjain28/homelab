@@ -44,10 +44,15 @@ in
       "kernel.keys.maxkeys" = 1000000;
       "kernel.keys.maxbytes" = 25000000;
       "net.core.rmem_max" = 134217728;
+      "net.core.default_qdisc" = "fq";
+      "net.ipv4.tcp_congestion_control" = "bbr";
       "vm.overcommit_memory" = 1;
     };
 
-    boot.kernelModules = [ "wireguard" ];
+    boot.kernelModules = [
+      "tcp_bbr"
+      "wireguard"
+    ];
 
     users = {
       mutableUsers = false;

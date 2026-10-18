@@ -296,9 +296,7 @@ in
               }
             ];
           }
-          // optionalAttrs metrics.sensors.enable {
-            sensors = [ { } ];
-          };
+          // optionalAttrs metrics.sensors.enable { sensors = [ { } ]; };
 
           processors.enum = [
             {
