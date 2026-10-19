@@ -226,6 +226,16 @@
     runtimeId = 30351;
   };
 
+  paperless = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "paperless";
+    };
+    vlans = [ 50 ];
+    runtimeId = 30387;
+    shares = [ "paperless" ];
+  };
+
   samba = enabled // {
     monitor.name = "NAS";
     vlans = [ 50 ];
@@ -239,6 +249,7 @@
       "wd-4tb"
       "shared"
       "emeraldbackups"
+      "paperless"
     ];
   };
 

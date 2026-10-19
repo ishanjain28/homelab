@@ -67,6 +67,10 @@ in
         hostPath = "/main/emeraldbackups";
         gid = 30386;
       };
+      paperless = {
+        hostPath = "/main/paperless";
+        gid = 30387;
+      };
     };
 
     hardware.spindown = enabled // {
