@@ -13,9 +13,29 @@ let
   grafanaConfigPath = "/run/container-secrets/grafana.ini";
   ldapConfigPath = "/run/container-secrets/ldap.toml";
   alertingEnvPath = "/run/container-secrets/grafana-alerting.env";
+  datasources = (pkgs.formats.yaml { }).generate "grafana-datasources.yaml" {
+    apiVersion = 1;
+    datasources = [
+      {
+        name = "homelab-victorialogs";
+        uid = "victorialogs";
+        type = "victoriametrics-logs-datasource";
+        access = "proxy";
+        url = "http://[${mkIpv6Address "victorialogs" 50}]:9428";
+      }
+      {
+        name = "homelab-victoriametrics";
+        uid = "efyik59h6cbnkc";
+        type = "victoriametrics-metrics-datasource";
+        access = "proxy";
+        url = "http://[${mkIpv6Address "victoriametrics" 50}]:8428";
+      }
+    ];
+  };
   provisioning = pkgs.linkFarm "grafana-provisioning" {
     "dashboards/homelab.yaml" = ./dashboards.yaml;
     "alerting/homelab.yaml" = ./alerting.yaml;
+    "datasources/homelab.yaml" = datasources;
   };
 in
 {
@@ -64,6 +84,7 @@ in
       GF_PATHS_DATA = "/var/lib/grafana";
       GF_PATHS_PLUGINS = "/var/lib/grafana/plugins";
       GF_PATHS_PROVISIONING = "${provisioning}";
+      GF_PLUGINS_PREINSTALL = "victoriametrics-logs-datasource";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
       GF_SERVER_HTTP_ADDR = "0.0.0.0";
       GF_SERVER_HTTP_PORT = toString cfg.endpoints.web.port;

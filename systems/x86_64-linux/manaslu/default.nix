@@ -25,7 +25,12 @@ in
     inherit backups;
     inherit volumes;
     services = workloads;
-    logging.enable = mkForce false;
+    logging = enabled // {
+      hostVlan = 50;
+      hostJournal = false;
+      services = [ "caddy" ];
+      batchWait = "5m";
+    };
     metrics = enabled // {
       sensors = disabled;
     };

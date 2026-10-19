@@ -6,7 +6,7 @@
   "tags": [
     "homelab",
     "logs",
-    "loki",
+    "victorialogs",
     "syslog",
     "network"
   ],
@@ -24,73 +24,51 @@
   "templating": {
     "list": [
       {
-        "type": "datasource",
-        "name": "loki",
-        "label": "Loki",
-        "query": "loki",
-        "hide": 2,
-        "refresh": 1,
-        "regex": "",
-        "current": {
-          "text": "homelab-loki",
-          "value": "homelab-loki"
-        },
-        "options": []
-      },
-      {
         "name": "device",
         "label": "Device",
         "type": "query",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
         },
-        "definition": "label_values({source=\"syslog\"}, container)",
         "query": {
-          "label": "container",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "{source=\"syslog\"}",
-          "type": 1
+          "type": "fieldValue",
+          "field": "container",
+          "query": "{source=\"syslog\"}",
+          "refId": "device"
         },
+        "definition": "container",
         "includeAll": true,
+        "allValue": ".*",
         "multi": true,
-        "allValue": ".+",
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
         "refresh": 2,
         "sort": 1
       },
       {
         "name": "priority",
-        "label": "Priority",
+        "label": "Severity",
         "type": "query",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
         },
-        "definition": "label_values({source=\"syslog\"}, priority)",
         "query": {
-          "label": "priority",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "{source=\"syslog\"}",
-          "type": 1
+          "type": "fieldValue",
+          "field": "priority",
+          "query": "{source=\"syslog\"}",
+          "refId": "priority"
         },
+        "definition": "priority",
         "includeAll": true,
+        "allValue": ".*",
         "multi": true,
-        "allValue": ".+",
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
         "refresh": 2,
         "sort": 1
@@ -124,8 +102,8 @@
       "type": "stat",
       "title": "Log lines",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -136,14 +114,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" | stats count() as lines",
+          "queryType": "stats"
         }
       ],
       "options": {
@@ -171,8 +147,8 @@
       "type": "stat",
       "title": "Errors",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -183,14 +159,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\", priority=~\"error|critical|alert|emergency\"} |~ \"$search\" [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" priority:~\"^(error|critical|alert|emergency)$\" | stats count() as errors",
+          "queryType": "stats"
         }
       ],
       "options": {
@@ -222,8 +196,8 @@
       "type": "stat",
       "title": "Firewall drops",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -234,14 +208,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\" | regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | prefix=~\"(?i).*drop.*\" [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" ~\"^firewall,\" | extract_regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | filter prefix:~\"(?i)drop\" | stats count() as drops",
+          "queryType": "stats"
         }
       ],
       "options": {
@@ -273,8 +245,8 @@
       "type": "stat",
       "title": "DHCP leases",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -285,14 +257,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^dhcp,\" | regexp `^dhcp,[a-z,]+ (?P<server>\\S+) (?P<event>assigned|deassigned) (?P<ip>\\S+) (?:for|to|from) (?P<mac>\\S+)(?: (?P<client>.+))?` | event=\"assigned\" [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" ~\"^dhcp,\" | extract_regexp `^dhcp,[a-z,]+ (?P<server>\\S+) (?P<event>assigned|deassigned) (?P<ip>\\S+) (?:for|to|from) (?P<mac>\\S+)(?: (?P<client>.+))?` | filter event:=\"assigned\" | stats count() as leases",
+          "queryType": "stats"
         }
       ],
       "options": {
@@ -324,8 +294,8 @@
       "type": "stat",
       "title": "Devices logging",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -336,14 +306,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "count(sum by (container) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" [$__range])))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" | stats count_uniq(container) as devices",
+          "queryType": "stats"
         }
       ],
       "options": {
@@ -371,8 +339,8 @@
       "type": "timeseries",
       "title": "Log lines by topic",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 8,
@@ -383,13 +351,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "topk(10, sum by (topic) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" | regexp `^(?P<topic>[a-z0-9-]+)[, ]` [$__auto])))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" | extract_regexp \"^(?P<topic>[a-z0-9-]+)[, ]\" | stats by (topic) count() as lines",
+          "queryType": "statsRange",
           "legendFormat": "{{topic}}"
         }
       ],
@@ -428,8 +395,8 @@
       "type": "timeseries",
       "title": "Log lines by severity",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 8,
@@ -440,13 +407,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (priority) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" [$__auto]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" | stats by (priority) count() as lines",
+          "queryType": "statsRange",
           "legendFormat": "{{priority}}"
         }
       ],
@@ -497,8 +463,8 @@
       "type": "timeseries",
       "title": "Firewall events by rule",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 8,
@@ -509,14 +475,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (prefix, chain) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\" | regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` [$__auto]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "{{prefix}} ({{chain}})"
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" ~\"^firewall,\" | extract_regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | stats by (prefix, chain) count() as events",
+          "queryType": "statsRange",
+          "legendFormat": "{{prefix}} {{chain}}"
         }
       ],
       "fieldConfig": {
@@ -554,8 +519,8 @@
       "type": "timeseries",
       "title": "Drops by interface",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 8,
@@ -566,14 +531,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (in, out) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\" | regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | prefix=~\"(?i).*drop.*\" [$__auto]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "{{in}} \u2192 {{out}}"
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" ~\"^firewall,\" | extract_regexp `^firewall,[a-z,]+ (?:(?P<prefix>.*) )?(?P<chain>[a-z0-9-]+): in:(?P<in>\\S+) out:(?P<out>[^,]+), (?:connection-state:\\S+ )?(?:src-mac \\S+, )?proto (?P<proto>[A-Za-z0-9-]+)(?: \\([^)]*\\))?, (?P<src>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<sport>\\d+))?->(?P<dst>\\[[0-9a-fA-F:]+\\]|[0-9.]+|[0-9a-fA-F:]+)(?::(?P<dport>\\d+))?, len (?P<len>\\d+)` | filter prefix:~\"(?i)drop\" | stats by (in, out) count() as drops",
+          "queryType": "statsRange",
+          "legendFormat": "{{in}} -> {{out}}"
         }
       ],
       "fieldConfig": {
@@ -611,8 +575,8 @@
       "type": "logs",
       "title": "Firewall log",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 10,
@@ -623,14 +587,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^firewall,\"",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "",
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" ~\"^firewall,\"",
+          "queryType": "instant",
           "maxLines": 1000
         }
       ],
@@ -661,8 +623,8 @@
           "type": "table",
           "title": "DHCP leases",
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
           "gridPos": {
             "h": 10,
@@ -673,59 +635,39 @@
           "targets": [
             {
               "datasource": {
-                "type": "loki",
-                "uid": "${loki}"
+                "type": "victoriametrics-logs-datasource",
+                "uid": "victorialogs"
               },
-              "expr": "sum by (server, ip, mac, client) (count_over_time({source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\" |~ \"^dhcp,\" | regexp `^dhcp,[a-z,]+ (?P<server>\\S+) (?P<event>assigned|deassigned) (?P<ip>\\S+) (?:for|to|from) (?P<mac>\\S+)(?: (?P<client>.+))?` | event=\"assigned\" | server!=\"\" [$__range]))",
               "refId": "A",
-              "editorMode": "code",
-              "queryType": "instant",
-              "legendFormat": ""
+              "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" ~\"^dhcp,\" | extract_regexp `^dhcp,[a-z,]+ (?P<server>\\S+) (?P<event>assigned|deassigned) (?P<ip>\\S+) (?:for|to|from) (?P<mac>\\S+)(?: (?P<client>.+))?` | filter event:=\"assigned\" server:!=\"\" | stats by (server, ip, mac, client) count() as leases",
+              "queryType": "stats"
             }
           ],
           "transformations": [
             {
-              "id": "reduce",
+              "id": "labelsToFields",
               "options": {
-                "mode": "seriesToRows",
-                "reducers": [
-                  "lastNotNull"
-                ],
-                "labelsToFields": true
+                "mode": "columns",
+                "valueLabel": "__name__"
               }
+            },
+            {
+              "id": "merge",
+              "options": {}
             },
             {
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "Field": true
+                  "Time": true
                 },
                 "indexByName": {
-                  "client": 0,
+                  "server": 0,
                   "ip": 1,
                   "mac": 2,
-                  "server": 3,
-                  "Count": 4
-                },
-                "renameByName": {
-                  "Last *": "Leases",
-                  "Last": "Leases",
-                  "client": "Client",
-                  "ip": "IP",
-                  "mac": "MAC",
-                  "server": "VLAN"
+                  "client": 3,
+                  "leases": 4
                 }
-              }
-            },
-            {
-              "id": "sortBy",
-              "options": {
-                "sort": [
-                  {
-                    "field": "Leases",
-                    "desc": true
-                  }
-                ]
               }
             }
           ],
@@ -764,8 +706,8 @@
       "type": "logs",
       "title": "Errors and critical",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 8,
@@ -776,14 +718,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\", priority=~\"error|critical|alert|emergency\"} |~ \"$search\"",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "",
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\" priority:~\"^(error|critical|alert|emergency)$\"",
+          "queryType": "instant",
           "maxLines": 1000
         }
       ],
@@ -803,8 +743,8 @@
       "type": "logs",
       "title": "All logs",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 16,
@@ -815,14 +755,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} |~ \"$search\"",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "",
+          "expr": "{source=\"syslog\", container=~\"$device\", priority=~\"$priority\"} ~\"$search\"",
+          "queryType": "instant",
           "maxLines": 1000
         }
       ],

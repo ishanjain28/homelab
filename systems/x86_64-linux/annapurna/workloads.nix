@@ -195,20 +195,19 @@
     volumes = [ "gitea" ];
   };
 
-  loki = enabled // {
-    vlans = [
-      50
-      70
-      99
-    ];
-    runtimeId = 30343;
-    volumes = [ "loki" ];
-  };
-
   victoriametrics = enabled // {
     vlans = [ 50 ];
     runtimeId = 36929;
     volumes = [ "victoriametrics" ];
+  };
+
+  victorialogs = enabled // {
+    vlans = [
+      50
+      99
+    ];
+    runtimeId = 36935;
+    volumes = [ "victorialogs" ];
   };
 
   grafana = enabled // {
