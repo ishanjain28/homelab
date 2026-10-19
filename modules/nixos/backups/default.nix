@@ -15,6 +15,7 @@ let
   volumes = config.${namespace}.volumes;
   volumeTool = getExe pkgs.${namespace}.volume;
   restic = getExe pkgs.restic;
+  zfs = "${config.boot.zfs.package}/bin/zfs";
 
   backedUpVolumes = filterAttrs (
     _volumeId: volume: volume.backup.groups != [ ] && registry.services.${volume.ownerService}.enable
@@ -24,12 +25,17 @@ let
     mapAttrsToList (volumeId: volume: volume // { id = volumeId; }) (
       filterAttrs (_volumeId: volume: elem groupName volume.backup.groups) backedUpVolumes
     );
-  activeGroups = filterAttrs (groupName: _group: groupVolumes groupName != [ ]) groups;
+  groupDatasets =
+    groupName: attrNames (filterAttrs (_dataset: dataset: elem groupName dataset.groups) cfg.datasets);
+  activeGroups = filterAttrs (
+    groupName: _group: groupVolumes groupName != [ ] || groupDatasets groupName != [ ]
+  ) groups;
   maintainedTargets = filterAttrs (_targetName: target: target.maintenance != null) targets;
 
   missingGroups = unique (
     flatten (
       mapAttrsToList (_volumeId: volume: filter (group: !(hasAttr group groups)) volume.backup.groups) backedUpVolumes
+      ++ mapAttrsToList (_dataset: dataset: filter (group: !(hasAttr group groups)) dataset.groups) cfg.datasets
     )
   );
   missingTargets = unique (
@@ -122,10 +128,29 @@ let
       ++ [ mount ]
     );
 
+  datasetSnapshot = groupName: dataset: "${dataset}@homelab-backup-${groupName}";
+
+  datasetBackup =
+    groupName: dataset:
+    let
+      snapshot = datasetSnapshot groupName dataset;
+    in
+    ''
+      ${zfs} destroy ${snapshot} 2>/dev/null || true
+      if ${zfs} snapshot ${snapshot}; then
+        ${restic} backup --retry-lock=1h --one-file-system --tag=group:${groupName} --tag=dataset:${dataset} \
+          "$(${zfs} get -H -o value mountpoint ${dataset})/.zfs/snapshot/homelab-backup-${groupName}" || failed=1
+        ${zfs} destroy ${snapshot} || failed=1
+      else
+        failed=1
+      fi
+    '';
+
   mkGroupRunner =
     groupName: group:
     let
       volumesByOwner = groupBy (volume: volume.ownerService) (groupVolumes groupName);
+      datasets = groupDatasets groupName;
       runOwner = owner: ownerVolumes: ''
         if ${volumeTool} backup-prepare --group ${groupName} --owner ${owner}; then
           ${concatMapStringsSep "\n" (volume: "${backupCommand groupName volume} || failed=1") ownerVolumes}
@@ -141,12 +166,15 @@ let
       script = ''
         failed=0
         ${concatStringsSep "\n" (mapAttrsToList runOwner volumesByOwner)}
+        ${concatMapStrings (datasetBackup groupName) datasets}
         ${restic} forget --retry-lock=1h --tag=group:${groupName} --group-by=tags,paths ${concatStringsSep " " (keepOptions group.keep)} || failed=1
         exit "$failed"
       '';
-      serviceConfig.ExecStopPost = map (
-        owner: "-${volumeTool} backup-cleanup --wait 60 --group ${groupName} --owner ${owner}"
-      ) (attrNames volumesByOwner);
+      serviceConfig.ExecStopPost =
+        map (owner: "-${volumeTool} backup-cleanup --wait 60 --group ${groupName} --owner ${owner}") (
+          attrNames volumesByOwner
+        )
+        ++ map (dataset: "-${zfs} destroy ${datasetSnapshot groupName dataset}") datasets;
     });
 
   mkMaintenance =
@@ -237,6 +265,16 @@ in
       );
       default = { };
       description = "Backup groups: a schedule and retention policy that volumes opt into.";
+    };
+
+    datasets = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options.groups = mkOpt (types.listOf types.str) [ ] "Backup groups this ZFS dataset belongs to.";
+        }
+      );
+      default = { };
+      description = "ZFS datasets backed up from a temporary snapshot, keyed by dataset name.";
     };
 
     passwordSecret =
