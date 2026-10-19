@@ -120,14 +120,14 @@ groups:
           summary: "{{ $labels.host }} {{ $labels.container }} restarted {{ $values.A.Value }} times in 15 minutes"
         data:
           - refId: A
-            datasourceUid: cfwgsjsykszr4d
+            datasourceUid: victorialogs
             relativeTimeRange:
               from: 900
               to: 0
             model:
               refId: A
-              expr: sum by (host, container) (count_over_time({source="journald"} |= "Scheduled restart job" [15m]))
-              queryType: instant
+              expr: '{source="journald"} "Scheduled restart job" | stats by (host, container) count() as restarts'
+              queryType: stats
           - refId: B
             datasourceUid: __expr__
             model:
@@ -149,14 +149,14 @@ groups:
           summary: "{{ $labels.host }} {{ $labels.container }} logged {{ $values.A.Value }} errors in 10 minutes"
         data:
           - refId: A
-            datasourceUid: cfwgsjsykszr4d
+            datasourceUid: victorialogs
             relativeTimeRange:
               from: 600
               to: 0
             model:
               refId: A
-              expr: sum by (host, container) (count_over_time({source="journald", priority=~"err|crit|alert|emerg"} [10m]))
-              queryType: instant
+              expr: '{source="journald", priority=~"err|crit|alert|emerg"} | stats by (host, container) count() as errors'
+              queryType: stats
           - refId: B
             datasourceUid: __expr__
             model:

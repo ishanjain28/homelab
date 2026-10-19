@@ -448,7 +448,7 @@ let
       )) null "PostgreSQL database this service consumes.";
 
       logging = {
-        enable = mkBoolOpt logging.enable "Whether this service container should push journald logs to Loki.";
+        enable = mkBoolOpt logging.enable "Whether this service container should push journald logs to VictoriaLogs.";
       };
     };
 

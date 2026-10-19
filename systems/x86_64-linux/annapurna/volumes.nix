@@ -109,16 +109,7 @@
 
   grafana = {
     uuid = "ad555d93-40a2-40ae-90eb-e3c6c591ef65";
-    size = "1G";
-    backup.groups = [
-      "daily"
-      "offsite"
-    ];
-  };
-
-  loki = {
-    uuid = "9f67c61c-3d4c-45d2-b4df-6f1775331d9b";
-    size = "20G";
+    size = "2G";
     backup.groups = [
       "daily"
       "offsite"
@@ -127,6 +118,15 @@
 
   victoriametrics = {
     uuid = "9bc789b1-fa53-4d8e-bd32-760af3d0280a";
+    size = "20G";
+    backup.groups = [
+      "daily"
+      "offsite"
+    ];
+  };
+
+  victorialogs = {
+    uuid = "ca2d3414-293a-4705-841f-0247bd7c0d4a";
     size = "20G";
     backup.groups = [
       "daily"

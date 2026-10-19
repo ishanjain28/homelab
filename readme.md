@@ -11,7 +11,7 @@ This is an attempt to fix all of that and get a more uniform flow for applicatio
 
 | System | Location | Hardware | Runs |
 |---|---|---|---|
-| annapurna | Home | Intel i5 12400, 2TB WD SN570 NVMe (OS, service volumes), 3×10TB Seagate Exos in ZFS raidz1 + 1 separate 10TB Seagate Exos, 4TB WD | Media (jellyfin, sonarr, radarr, lidarr, prowlarr, bazarr, unpackerr, qbittorrent, seerr, tracearr), samba, ingress caddy, adguardhome, authelia, lldap, stalwart, gitea, windmill, karakeep, nitter, omada, bentopdf, PostgreSQL primary and Delhi mirror, grafana, loki, victoriametrics, alloy-syslog, telegraf-snmp, VLAN debug containers |
+| annapurna | Home | Intel i5 12400, 2TB WD SN570 NVMe (OS, service volumes), 3×10TB Seagate Exos in ZFS raidz1 + 1 separate 10TB Seagate Exos, 4TB WD | Media (jellyfin, sonarr, radarr, lidarr, prowlarr, bazarr, unpackerr, qbittorrent, seerr, tracearr), samba, ingress caddy, adguardhome, authelia, lldap, stalwart, gitea, windmill, karakeep, nitter, omada, bentopdf, PostgreSQL primary and Delhi mirror, grafana, victorialogs, victoriametrics, alloy-syslog, telegraf-snmp, VLAN debug containers |
 | kepler | Home | Proxmox VM (temporary) | actual, backrest, changedetection, cups, garmin-sync, gitea-runner, huawei-sms, mathesar, multicaster, openvscode-server, pvr-movies-monitor, ripe-atlas probes |
 | kanchenjunga | Home | AMD 5900x, 1TBx2 Samsung 970 EVO Plus NVMe, 2TB WD SN750, VFIO passthrough | VMs: win10, work |
 | manaslu | Delhi | Vultr VPS, 1 core, 2GB memory | BIRD, WireGuard, caddy, adguardhome, gatus, vaultwarden, freshrss, znc, PostgreSQL primary |
@@ -184,7 +184,7 @@ home-manager switch --flake .#<user>@<home> -b backup
 
 **Observability**
 * Telegraf on every host: system, SMART and per-container cgroup metrics (plus monitioring of Intel/NVIDIA/AMD GPUs) into VictoriaMetrics. SNMP polling for network gear.
-* Alloy ships journald and log files from the home hosts and their containers to Loki; a syslog receiver collects logs from devices.
+* Alloy ships journald and log files from the home hosts and their containers to VictoriaLogs; a syslog receiver collects logs from devices.
 * Grafana with dashboards provisioned from the repo.
 * Gatus health checks generated from each service's declared endpoints, alerting over Pushover and Telegram.
 * Pushover alert when any backup fails.

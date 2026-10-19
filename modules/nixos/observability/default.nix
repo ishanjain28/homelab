@@ -13,7 +13,10 @@ let
   allServices = registry.services;
   enabledServices = filterAttrs (_name: service: service.enable) allServices;
   logging = config.${namespace}.logging;
-  loggedServices = filterAttrs (_name: service: service.enable && service.logging.enable) allServices;
+  loggedServices = filterAttrs (
+    name: service:
+    service.enable && service.logging.enable && (logging.services == null || elem name logging.services)
+  ) allServices;
   metrics = config.${namespace}.metrics;
 
   intelGpuSample = pkgs.writeShellScript "intel-gpu-sample" ''
@@ -78,9 +81,9 @@ let
     )
   );
 
-  hostLokiPushUrl =
-    logging.lokiPushUrls.${toString logging.hostVlan}
-    or (throw "No Loki push URL configured for host VLAN ${toString logging.hostVlan}");
+  hostVictoriaLogsPushUrl =
+    logging.victoriaLogsPushUrls.${toString logging.hostVlan}
+    or (throw "No VictoriaLogs push URL configured for host VLAN ${toString logging.hostVlan}");
 
   alloyComponentName = name: replaceStrings [ "-" ] [ "_" ] name;
 
@@ -131,11 +134,12 @@ let
       }
     }
 
-    ${journalSource "systemd" "host" null}
+    ${optionalString logging.hostJournal (journalSource "systemd" "host" null)}
     ${containerJournalSources}
     loki.write "local" {
       endpoint {
-        url = "${hostLokiPushUrl}"
+        url = "${hostVictoriaLogsPushUrl}"
+        ${optionalString (logging.batchWait != null) "batch_wait = \"${logging.batchWait}\""}
       }
     }
   '';
@@ -183,12 +187,15 @@ in
 {
   options.${namespace} = {
     logging = {
-      enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to Loki.";
-      lokiPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
-        "50" = "http://[${mkIpv6Address "loki" 50}]:3100/loki/api/v1/push";
-        "99" = "http://[${mkIpv6Address "loki" 99}]:3100/loki/api/v1/push";
-      } "Loki push API URLs keyed by VLAN.";
-      hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's Loki push URL.";
+      enable = mkBoolOpt false "Whether to collect homelab logs with Alloy and push them to VictoriaLogs.";
+      victoriaLogsPushUrls = mkOpt (types.attrsOf types.nonEmptyStr) {
+        "50" = "http://[${mkIpv6Address "victorialogs" 50}]:9428/insert/loki/api/v1/push?_msg_field=msg,message";
+        "99" = "http://[${mkIpv6Address "victorialogs" 99}]:9428/insert/loki/api/v1/push?_msg_field=msg,message";
+      } "VictoriaLogs push API URLs keyed by VLAN.";
+      hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's VictoriaLogs push URL.";
+      hostJournal = mkBoolOpt true "Whether to ship the host's own journal.";
+      services = mkOpt (types.nullOr (types.listOf types.str)) null "Service containers whose journals are shipped; null ships all logged services.";
+      batchWait = mkOpt (types.nullOr types.str) null "How long Alloy batches log lines before pushing them, such as 5m; null keeps Alloy's default.";
     };
 
     metrics = {

@@ -1,11 +1,11 @@
 {
   "uid": "homelab-logs",
   "title": "Homelab Logs",
-  "description": "Journald logs from hosts and nspawn service containers, collected by Alloy and stored in Loki. Fields that Alloy attaches as structured metadata (Caddy access logs) are always filterable; switch Parser to JSON or logfmt to parse other services' lines at query time.",
+  "description": "Journald logs from hosts and nspawn service containers, collected by Alloy and stored in VictoriaLogs. JSON log lines are split into fields, so any field can be used in Filters.",
   "tags": [
     "homelab",
     "logs",
-    "loki",
+    "victorialogs",
     "journald"
   ],
   "editable": true,
@@ -26,20 +26,6 @@
   "templating": {
     "list": [
       {
-        "type": "datasource",
-        "name": "loki",
-        "label": "Loki",
-        "query": "loki",
-        "hide": 2,
-        "refresh": 1,
-        "regex": "",
-        "current": {
-          "text": "homelab-loki",
-          "value": "homelab-loki"
-        },
-        "options": []
-      },
-      {
         "type": "constant",
         "name": "noise",
         "query": "systemd-.*|alloy[.]service|generate-shutdown-ramfs[.]service|firewall[.]service|dbus[.]service|dbus-broker[.]service|nix-daemon[.]service|logrotate[.]service",
@@ -51,136 +37,104 @@
         "options": []
       },
       {
-        "type": "query",
         "name": "host",
         "label": "Host",
-        "description": "Host the logs come from.",
+        "type": "query",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
         },
         "query": {
-          "label": "host",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "",
-          "type": 1
+          "type": "fieldValue",
+          "field": "host",
+          "query": "{source=\"journald\"}",
+          "refId": "host"
         },
-        "definition": "label_values(host)",
-        "refresh": 2,
-        "regex": "",
-        "sort": 1,
-        "multi": true,
+        "definition": "host",
         "includeAll": true,
-        "allValue": ".+",
-        "allowCustomValue": true,
+        "allValue": ".*",
+        "multi": true,
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
-        "options": []
+        "refresh": 2,
+        "sort": 1
       },
       {
-        "type": "query",
         "name": "container",
         "label": "Container",
-        "description": "Host or service container.",
+        "type": "query",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
         },
         "query": {
-          "label": "container",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "{host=~\"$host\"}",
-          "type": 1
+          "type": "fieldValue",
+          "field": "container",
+          "query": "{source=\"journald\", host=~\"$host\"}",
+          "refId": "container"
         },
-        "definition": "label_values({host=~\"$host\"}, container)",
-        "refresh": 2,
-        "regex": "",
-        "sort": 1,
-        "multi": true,
+        "definition": "container",
         "includeAll": true,
-        "allValue": ".+",
-        "allowCustomValue": true,
+        "allValue": ".*",
+        "multi": true,
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
-        "options": []
+        "refresh": 2,
+        "sort": 1
       },
       {
-        "type": "query",
         "name": "unit",
         "label": "Unit",
-        "description": "Systemd unit inside the selected containers.",
+        "type": "query",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
         },
         "query": {
-          "label": "unit",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "{host=~\"$host\", container=~\"$container\"}",
-          "type": 1
+          "type": "fieldValue",
+          "field": "unit",
+          "query": "{source=\"journald\", host=~\"$host\", container=~\"$container\"}",
+          "refId": "unit"
         },
-        "definition": "label_values({host=~\"$host\", container=~\"$container\"}, unit)",
-        "refresh": 2,
-        "regex": "",
-        "sort": 1,
-        "multi": true,
+        "definition": "unit",
         "includeAll": true,
-        "allValue": ".+",
-        "allowCustomValue": true,
+        "allValue": ".*",
+        "multi": true,
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
-        "options": []
+        "refresh": 2,
+        "sort": 1
       },
       {
-        "type": "query",
         "name": "priority",
         "label": "Priority",
-        "description": "Journald priority.",
+        "type": "query",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
         },
         "query": {
-          "label": "priority",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "",
-          "type": 1
+          "type": "fieldValue",
+          "field": "priority",
+          "query": "{source=\"journald\"}",
+          "refId": "priority"
         },
-        "definition": "label_values(priority)",
-        "refresh": 2,
-        "regex": "",
-        "sort": 1,
-        "multi": true,
+        "definition": "priority",
         "includeAll": true,
-        "allValue": ".+",
-        "allowCustomValue": true,
+        "allValue": ".*",
+        "multi": true,
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
-        "options": []
+        "refresh": 2,
+        "sort": 1
       },
       {
         "type": "textbox",
@@ -195,47 +149,13 @@
         "options": []
       },
       {
-        "type": "custom",
-        "name": "parser",
-        "label": "Parser",
-        "description": "Query-time parser for log lines. None is cheapest and still exposes structured metadata that Alloy attached at ingest (Caddy fields). JSON and logfmt parse every line; lines that do not match are kept unparsed.",
-        "query": "None : __error__=\"\",JSON : json | drop __error__\\, __error_details__,logfmt : logfmt | drop __error__\\, __error_details__",
-        "multi": false,
-        "includeAll": false,
-        "current": {
-          "text": "None",
-          "value": "__error__=\"\""
-        },
-        "options": [
-          {
-            "text": "None",
-            "value": "__error__=\"\"",
-            "selected": true
-          },
-          {
-            "text": "JSON",
-            "value": "json | drop __error__, __error_details__",
-            "selected": false
-          },
-          {
-            "text": "logfmt",
-            "value": "logfmt | drop __error__, __error_details__",
-            "selected": false
-          }
-        ]
-      },
-      {
-        "type": "adhoc",
         "name": "filters",
-        "label": "Field filters",
-        "description": "Filters on stream labels or parsed JSON fields, e.g. status = 502 or request_host = git.ishanjain.me. Applied to every panel.",
+        "label": "Filters",
+        "type": "adhoc",
         "datasource": {
-          "type": "loki",
-          "uid": "${loki}"
-        },
-        "filters": [],
-        "baseFilters": [],
-        "allowCustomValue": true
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
+        }
       }
     ]
   },
@@ -259,8 +179,8 @@
       "title": "Log lines",
       "description": "Application log lines in the selected time range.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -271,14 +191,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats count() as lines",
+          "queryType": "stats"
         }
       ],
       "fieldConfig": {
@@ -319,8 +237,8 @@
       "title": "Warnings",
       "description": "Lines at warning priority in the selected time range.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -331,14 +249,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" priority:=\"warning\" | stats count() as warnings",
+          "queryType": "stats"
         }
       ],
       "fieldConfig": {
@@ -383,8 +299,8 @@
       "title": "Errors",
       "description": "Lines at err, crit, alert or emerg priority in the selected time range.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -395,14 +311,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" priority:~\"^(err|crit|alert|emerg)$\" | stats count() as errors",
+          "queryType": "stats"
         }
       ],
       "fieldConfig": {
@@ -447,8 +361,8 @@
       "title": "Containers logging",
       "description": "Hosts and service containers that produced application logs.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -459,14 +373,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "count(sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats count_uniq(host, container) as containers",
+          "queryType": "stats"
         }
       ],
       "fieldConfig": {
@@ -507,8 +419,8 @@
       "title": "Units logging",
       "description": "Systemd units that produced application logs.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -519,14 +431,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "count(sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range])))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats count_uniq(host, container, unit) as units",
+          "queryType": "stats"
         }
       ],
       "fieldConfig": {
@@ -567,8 +477,8 @@
       "title": "Log volume",
       "description": "Bytes of application log lines in the selected time range.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 4,
@@ -579,14 +489,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum(bytes_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": ""
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats sum_len(_msg) as bytes",
+          "queryType": "stats"
         }
       ],
       "fieldConfig": {
@@ -627,8 +535,8 @@
       "title": "Log lines by priority",
       "description": "Application log lines per interval, stacked by journald priority.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 9,
@@ -639,13 +547,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (priority) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats by (priority) count() as lines",
+          "queryType": "statsRange",
           "legendFormat": "{{priority}}"
         }
       ],
@@ -842,8 +749,8 @@
       "title": "Log lines by container",
       "description": "Application log lines per interval for the busiest containers.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 9,
@@ -854,13 +761,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "topk(15, sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__auto])))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats by (host, container) count() as lines",
+          "queryType": "statsRange",
           "legendFormat": "{{host}}/{{container}}"
         }
       ],
@@ -949,8 +855,8 @@
       "title": "Containers",
       "description": "Per-container log counts for the selected time range. Click a column header to sort.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 10,
@@ -961,83 +867,40 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
-          },
-          "expr": "sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
-          "refId": "B",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
-          },
-          "expr": "sum by (host, container) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
-          "refId": "C",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
-          },
-          "expr": "sum by (host, container) (bytes_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-          "refId": "D",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats by (host, container) count() as Lines, count() if (priority:=\"warning\") as Warnings, count() if (priority:~\"^(err|crit|alert|emerg)$\") as Errors, sum_len(_msg) as Volume",
+          "queryType": "stats"
         }
       ],
       "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "__name__"
+          }
+        },
         {
           "id": "merge",
           "options": {}
         },
         {
-          "id": "filterFieldsByName",
-          "options": {
-            "exclude": {
-              "pattern": "^Time.*"
-            }
-          }
-        },
-        {
           "id": "organize",
           "options": {
-            "renameByName": {
-              "Value #A": "Lines",
-              "Value #B": "Warnings",
-              "Value #C": "Errors",
-              "Value #D": "Volume"
+            "excludeByName": {
+              "Time": true
             },
             "indexByName": {
-              "container": 0,
-              "Lines": 1,
-              "Warnings": 2,
-              "Errors": 3,
-              "Volume": 4
-            },
-            "excludeByName": {}
+              "host": 0,
+              "container": 1,
+              "Lines": 2,
+              "Warnings": 3,
+              "Errors": 4,
+              "Volume": 5
+            }
           }
         }
       ],
@@ -1184,8 +1047,8 @@
       "title": "Units",
       "description": "Per-unit log counts for the selected time range. Click a column header to sort.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 10,
@@ -1196,84 +1059,41 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
-          },
-          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__range]))",
-          "refId": "B",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
-          },
-          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__range]))",
-          "refId": "C",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
-          },
-          "expr": "sum by (host, container, unit) (bytes_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser [$__range]))",
-          "refId": "D",
-          "editorMode": "code",
-          "queryType": "instant",
-          "legendFormat": "",
-          "format": "table"
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" | stats by (host, container, unit) count() as Lines, count() if (priority:=\"warning\") as Warnings, count() if (priority:~\"^(err|crit|alert|emerg)$\") as Errors, sum_len(_msg) as Volume",
+          "queryType": "stats"
         }
       ],
       "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "__name__"
+          }
+        },
         {
           "id": "merge",
           "options": {}
         },
         {
-          "id": "filterFieldsByName",
-          "options": {
-            "exclude": {
-              "pattern": "^Time.*"
-            }
-          }
-        },
-        {
           "id": "organize",
           "options": {
-            "renameByName": {
-              "Value #A": "Lines",
-              "Value #B": "Warnings",
-              "Value #C": "Errors",
-              "Value #D": "Volume"
+            "excludeByName": {
+              "Time": true
             },
             "indexByName": {
-              "container": 0,
-              "unit": 1,
-              "Lines": 2,
-              "Warnings": 3,
-              "Errors": 4,
-              "Volume": 5
-            },
-            "excludeByName": {}
+              "host": 0,
+              "container": 1,
+              "unit": 2,
+              "Lines": 3,
+              "Warnings": 4,
+              "Errors": 5,
+              "Volume": 6
+            }
           }
         }
       ],
@@ -1420,8 +1240,8 @@
       "title": "Warnings by unit",
       "description": "Warning-priority lines per interval, stacked by unit.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 9,
@@ -1432,14 +1252,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=\"warning\"} |~ \"$search\" | $parser [$__auto]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "{{host}}/{{container}} {{unit}}"
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" priority:=\"warning\" | stats by (host, container, unit) count() as warnings",
+          "queryType": "statsRange",
+          "legendFormat": "{{container}} {{unit}}"
         }
       ],
       "fieldConfig": {
@@ -1514,8 +1333,8 @@
       "title": "Errors by unit",
       "description": "Error-and-above lines per interval, stacked by unit.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 9,
@@ -1526,14 +1345,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "sum by (host, container, unit) (count_over_time({source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"err|crit|alert|emerg\"} |~ \"$search\" | $parser [$__auto]))",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "{{host}}/{{container}} {{unit}}"
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" priority:~\"^(err|crit|alert|emerg)$\" | stats by (host, container, unit) count() as errors",
+          "queryType": "statsRange",
+          "legendFormat": "{{container}} {{unit}}"
         }
       ],
       "fieldConfig": {
@@ -1621,8 +1439,8 @@
       "title": "Warnings and errors",
       "description": "Application lines at warning priority or higher. Expand a line and use the filter buttons on a field to add it to the field filters above.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 9,
@@ -1633,15 +1451,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\", priority=~\"warning|err|crit|alert|emerg\"} |~ \"$search\" | $parser",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "",
-          "maxLines": 500
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" priority:~\"^(warning|err|crit|alert|emerg)$\"",
+          "queryType": "instant",
+          "maxLines": 1000
         }
       ],
       "fieldConfig": {
@@ -1673,8 +1489,8 @@
       "title": "Failure signals",
       "description": "Any-priority lines whose message mentions a failure, error, panic or OOM.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 9,
@@ -1685,15 +1501,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\" |~ \"$search\" | $parser",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "",
-          "maxLines": 500
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\" ~\"(?i)(failed|failure|error|exception|panic|fatal|permission denied|start-limit-hit|oom|out of memory|context canceled)\"",
+          "queryType": "instant",
+          "maxLines": 1000
         }
       ],
       "fieldConfig": {
@@ -1725,8 +1539,8 @@
       "title": "Application logs",
       "description": "All application lines matching the filters. JSON lines are parsed: use the field selector on the left to show only the fields you want, and the filter buttons in log details to filter on a field value.",
       "datasource": {
-        "type": "loki",
-        "uid": "${loki}"
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
       },
       "gridPos": {
         "h": 14,
@@ -1737,15 +1551,13 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
-          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", unit=~\".+[.]service\", unit!~\"$noise\", priority=~\"$priority\"} |~ \"$search\" | $parser",
           "refId": "A",
-          "editorMode": "code",
-          "queryType": "range",
-          "legendFormat": "",
-          "maxLines": 500
+          "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\", unit=~\"$unit\", priority=~\"$priority\"} unit:~\"[.]service$\" -unit:~\"^($noise)$\" ~\"$search\"",
+          "queryType": "instant",
+          "maxLines": 1000
         }
       ],
       "fieldConfig": {
@@ -1789,8 +1601,8 @@
           "title": "Boot and system logs",
           "description": "Container and host boot/system plumbing lines, kept out of the application views.",
           "datasource": {
-            "type": "loki",
-            "uid": "${loki}"
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
           },
           "gridPos": {
             "h": 12,
@@ -1801,15 +1613,13 @@
           "targets": [
             {
               "datasource": {
-                "type": "loki",
-                "uid": "${loki}"
+                "type": "victoriametrics-logs-datasource",
+                "uid": "victorialogs"
               },
-              "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\"} |~ \"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" |~ \"$search\"",
               "refId": "A",
-              "editorMode": "code",
-              "queryType": "range",
-              "legendFormat": "",
-              "maxLines": 500
+              "expr": "{source=\"journald\", host=~\"$host\", container=~\"$container\"} ~\"(?i)(^(Starting|Finished|Reached target|Listening on|Mounted|Mounting|Unmounted|Unmounting|Startup finished|Stopping|Stopped|Created slice|Removed slice)|systemd|tmpfiles|journal|utmp|mount|unmount|veth|networkd|nspawn|machine|boot|shutdown|reboot|ConditionNeedsUpdate|unmet condition check|Failed to increase receive buffer size|Setting access ACL|fchownat[(][)]|Failed to reopen|Failed unmounting)\" ~\"$search\"",
+              "queryType": "instant",
+              "maxLines": 1000
             }
           ],
           "fieldConfig": {
