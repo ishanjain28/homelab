@@ -104,7 +104,11 @@ let
           index: vlan:
           nameValuePair "40-${vlanInterface vlan}" {
             matchConfig.Name = vlanInterface vlan;
-            linkConfig.MACAddress = mkMacAddress "${name}:${toString vlan}";
+            linkConfig = {
+              MACAddress = mkMacAddress "${name}:${toString vlan}";
+              RequiredForOnline = "routable";
+              RequiredFamilyForOnline = if hasAttr (toString vlan) ipv6Prefixes then "both" else "ipv4";
+            };
             networkConfig = {
               Description = "${name} service container VLAN ${toString vlan}";
               DHCP = "ipv4";

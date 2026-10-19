@@ -13,6 +13,8 @@
     };
   };
 
+  datasets."main/paperless".groups = [ "offsite-weekly" ];
+
   groups = {
     hourly = {
       target = "local";
@@ -43,6 +45,16 @@
       keep = {
         daily = 7;
         weekly = 4;
+        monthly = 12;
+      };
+    };
+
+    offsite-weekly = {
+      target = "gdrive";
+      onCalendar = "Sun 03:00";
+      randomizedDelaySec = "60m";
+      keep = {
+        weekly = 8;
         monthly = 12;
       };
     };
