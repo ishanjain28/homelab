@@ -179,6 +179,17 @@ in
     };
   };
 
+  systemd.services."container@gitea" = {
+    after = [
+      "container@authelia.service"
+      "container@caddy.service"
+    ];
+    wants = [
+      "container@authelia.service"
+      "container@caddy.service"
+    ];
+  };
+
   sops.secrets.tailscale-auth-key = {
     sopsFile = "${inputs.self}/secrets/tailscale/auth-key";
     format = "binary";
