@@ -20,8 +20,16 @@ in
 
     environment.shellAliases = shellAliases;
     programs.fish = enabled // {
-      interactiveShellInit = fishKeyBindings;
+      interactiveShellInit = fishKeyBindings + ''
+        ${getExe pkgs.atuin} init fish | source
+      '';
     };
+    programs.bash.interactiveShellInit = ''
+      source ${pkgs.bash-preexec}/share/bash/bash-preexec.sh
+      eval "$(${getExe pkgs.atuin} init bash)"
+    '';
+    environment.variables.ATUIN_CONFIG_DIR = "/etc/atuin";
+    environment.etc."atuin/config.toml".text = "update_check = false\n";
     users.defaultUserShell = pkgs.fish;
 
     environment.shells = with pkgs; [
@@ -32,6 +40,7 @@ in
     environment.systemPackages =
       with pkgs;
       [
+        atuin
         gptfdisk
         pv
       ]

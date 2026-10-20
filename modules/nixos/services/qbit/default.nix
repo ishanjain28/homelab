@@ -60,7 +60,7 @@ in
       TimeoutStopSec = "60s";
     };
     secrets.env = {
-      file = "secrets/qbittorrent.env";
+      file = "secrets/qbit.env";
       format = "dotenv";
       mountPath = environmentFile;
     };
