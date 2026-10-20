@@ -103,10 +103,21 @@ in
       };
     };
 
-    programs.fzf = enabled;
+    programs.fzf = enabled // {
+      historyWidget.command = "";
+    };
+
+    programs.atuin = enabled // {
+      settings.update_check = false;
+    };
 
     programs.git = enabled // {
       lfs = enabled;
+      ignores = [
+        ".DS_Store"
+        ".direnv/"
+        ".idea/"
+      ];
     };
   };
 }

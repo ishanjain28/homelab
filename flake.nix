@@ -138,6 +138,7 @@
           packages = [
             (configCommand pkgs)
             pkgs.age
+            pkgs.atuin
             pkgs.deploy-rs
             pkgs.git
             pkgs.home-manager
@@ -149,6 +150,10 @@
           env = editorVariables;
           shellHook = ''
             ${shellAliasHook}
+            if [[ $- == *i* ]] && ! declare -F __atuin_preexec >/dev/null; then
+              source ${pkgs.bash-preexec}/share/bash/bash-preexec.sh
+              eval "$(atuin init bash)"
+            fi
             # Show sops secrets decrypted in git diff/log; falls back to ciphertext without a key.
             git config diff.sops.textconv "sh -c 'sops -d \"\$0\" 2>/dev/null || cat \"\$0\"'"
             git config core.pager "less --tabs=2"
