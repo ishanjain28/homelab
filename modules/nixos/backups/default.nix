@@ -25,11 +25,8 @@ let
     mapAttrsToList (volumeId: volume: volume // { id = volumeId; }) (
       filterAttrs (_volumeId: volume: elem groupName volume.backup.groups) backedUpVolumes
     );
-  groupDatasets =
-    groupName: attrNames (filterAttrs (_dataset: dataset: elem groupName dataset.groups) cfg.datasets);
-  activeGroups = filterAttrs (
-    groupName: _group: groupVolumes groupName != [ ] || groupDatasets groupName != [ ]
-  ) groups;
+  groupDatasets = groupName: attrNames (filterAttrs (_dataset: dataset: elem groupName dataset.groups) cfg.datasets);
+  activeGroups = filterAttrs (groupName: _group: groupVolumes groupName != [ ] || groupDatasets groupName != [ ]) groups;
   maintainedTargets = filterAttrs (_targetName: target: target.maintenance != null) targets;
 
   missingGroups = unique (
@@ -171,9 +168,7 @@ let
         exit "$failed"
       '';
       serviceConfig.ExecStopPost =
-        map (owner: "-${volumeTool} backup-cleanup --wait 60 --group ${groupName} --owner ${owner}") (
-          attrNames volumesByOwner
-        )
+        map (owner: "-${volumeTool} backup-cleanup --wait 60 --group ${groupName} --owner ${owner}") (attrNames volumesByOwner)
         ++ map (dataset: "-${zfs} destroy ${datasetSnapshot groupName dataset}") datasets;
     });
 
@@ -269,9 +264,7 @@ in
 
     datasets = mkOption {
       type = types.attrsOf (
-        types.submodule {
-          options.groups = mkOpt (types.listOf types.str) [ ] "Backup groups this ZFS dataset belongs to.";
-        }
+        types.submodule { options.groups = mkOpt (types.listOf types.str) [ ] "Backup groups this ZFS dataset belongs to."; }
       );
       default = { };
       description = "ZFS datasets backed up from a temporary snapshot, keyed by dataset name.";

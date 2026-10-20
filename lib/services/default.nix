@@ -472,8 +472,7 @@ let
       containerTimeout ? null,
     }:
     let
-      inherit (service) name;
-      inherit (service) runtimeUser;
+      inherit (service) name runtimeUser;
       serviceProfileConfig = getServiceProfile serviceProfile;
       execStart =
         if command != null then

@@ -196,37 +196,16 @@ in
     "net.ipv6.conf.all.forwarding" = 1;
   };
 
-  systemd.services."container@adguardhome" = {
-    after = [
-      "network-online.target"
-      "wg-quick-wg-home-vpn.service"
-    ];
-    wants = [
-      "network-online.target"
-      "wg-quick-wg-home-vpn.service"
-    ];
-  };
-  systemd.services."container@postgresql-del-primary" = {
-    after = [
-      "network-online.target"
-      "wg-quick-wg-home-vpn.service"
-    ];
-    wants = [
-      "network-online.target"
-      "wg-quick-wg-home-vpn.service"
-    ];
-  };
-
-  systemd.services."container@znc" = {
-    after = [
-      "network-online.target"
-      "wg-quick-wg-home-vpn.service"
-    ];
-    wants = [
-      "network-online.target"
-      "wg-quick-wg-home-vpn.service"
-    ];
-  };
+  systemd.services = genAttrs' [ "adguardhome" "postgresql-del-primary" "znc" ] (
+    name:
+    nameValuePair "container@${name}" rec {
+      after = [
+        "network-online.target"
+        "wg-quick-wg-home-vpn.service"
+      ];
+      wants = after;
+    }
+  );
 
   environment.systemPackages = [ pkgs.wireguard-tools ];
 

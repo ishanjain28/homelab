@@ -70,8 +70,7 @@ in
       mountPath = databasePasswordPath;
     };
     containerConfig = {
-      services.freshrss = {
-        enable = true;
+      services.freshrss = enabled // {
         inherit (cfg) baseUrl;
         defaultUser = "ishan";
         inherit extensions;

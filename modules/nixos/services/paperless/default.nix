@@ -68,12 +68,11 @@ in
         };
       };
 
-      systemd.services = genAttrs [
-        "paperless-web"
-        "paperless-task-queue"
-        "paperless-scheduler"
-        "paperless-consumer"
-      ] (_unit: { serviceConfig.ReadWritePaths = [ "${root}/trash" ]; });
+      systemd.services =
+        genAttrs [ "paperless-web" "paperless-task-queue" "paperless-scheduler" "paperless-consumer" ]
+          (_unit: {
+            serviceConfig.ReadWritePaths = [ "${root}/trash" ];
+          });
     };
   });
 }

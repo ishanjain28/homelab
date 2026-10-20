@@ -6,6 +6,7 @@
   namespace,
   ...
 }:
+with lib.${namespace};
 let
   cfg = config.${namespace}.services.bird;
   secret = config.sops.secrets.bird-config;
@@ -28,8 +29,7 @@ in
       mode = "0400";
       restartUnits = [ "bird.service" ];
     };
-    services.bird = {
-      enable = true;
+    services.bird = enabled // {
       inherit (cfg) package;
       config = ''
         include "${secret.path}";

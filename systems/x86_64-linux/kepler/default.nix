@@ -115,8 +115,6 @@ in
           };
         })
       ];
-
-      tcpPorts = [ 22 ];
     };
 
     system.boot = enabled // {
