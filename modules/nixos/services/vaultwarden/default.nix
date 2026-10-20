@@ -43,8 +43,7 @@ in
         mountPath = "${rsaKey}.pub.pem";
       };
     };
-    containerConfig.services.vaultwarden = {
-      enable = true;
+    containerConfig.services.vaultwarden = enabled // {
       dbBackend = "postgresql";
       config = {
         ROCKET_ADDRESS = "0.0.0.0";

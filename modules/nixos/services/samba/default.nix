@@ -85,8 +85,7 @@ in
         '';
       };
 
-      services.samba-wsdd = {
-        enable = true;
+      services.samba-wsdd = enabled // {
         openFirewall = false;
       };
     };

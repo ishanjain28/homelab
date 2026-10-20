@@ -15,7 +15,7 @@ in
     domain = mkOpt str "" "The domain name of the machine";
     hostName = mkOpt str "nixos" "The hostname of the machine";
     hosts = mkOpt attrs { } "An attribute set to merge with `networking.hosts`";
-    tcpPorts = mkOpt (listOf port) [ 80 443 8080 ] "A list of ports to open in the firewall";
+    tcpPorts = mkOpt (listOf port) [ 22 ] "A list of ports to open in the firewall";
     vlans = mkOpt attrs { } "List of VLAN interfaces to configure";
     links = mkOpt attrs { } "List of PHY links to configure";
     interfaces = mkOpt attrs { } "List of interfaces to configure";
@@ -41,16 +41,16 @@ in
 
     systemd.network = enabled // {
       # To have predictable names for network interfaces
-      inherit (cfg) links;
-      inherit (cfg) networks;
-      inherit (cfg) netdevs;
+      inherit (cfg) links networks netdevs;
     };
 
     networking = {
-      inherit (cfg) domain;
-      inherit (cfg) hosts;
-      inherit (cfg) vlans;
-      inherit (cfg) interfaces;
+      inherit (cfg)
+        domain
+        hosts
+        vlans
+        interfaces
+        ;
 
       hostId = mkDefault (builtins.substring 0 8 (builtins.hashString "sha256" config.networking.hostName));
 

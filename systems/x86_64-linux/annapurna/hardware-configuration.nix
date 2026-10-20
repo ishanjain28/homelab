@@ -1,9 +1,11 @@
 {
   config,
   lib,
+  namespace,
   pkgs,
   ...
 }:
+with lib.${namespace};
 {
   boot.initrd.availableKernelModules = [
     "xhci_pci"
@@ -20,8 +22,7 @@
   boot.supportedFilesystems.zfs = true;
   boot.zfs.extraPools = [ "main" ];
   boot.zfs.forceImportRoot = false;
-  services.zfs.autoScrub = {
-    enable = true;
+  services.zfs.autoScrub = enabled // {
     interval = "*-*-01,16 00:00:00";
   };
 

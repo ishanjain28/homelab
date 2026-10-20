@@ -41,8 +41,7 @@ in
         openFirewall = false;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
-        hardwareAcceleration = {
-          enable = true;
+        hardwareAcceleration = enabled // {
           type = "qsv";
           device = renderDevice;
         };

@@ -14,8 +14,7 @@ let
   enabledServices = filterAttrs (_name: service: service.enable) allServices;
   logging = config.${namespace}.logging;
   loggedServices = filterAttrs (
-    name: service:
-    service.enable && service.logging.enable && (logging.services == null || elem name logging.services)
+    name: service: service.enable && service.logging.enable && (logging.services == null || elem name logging.services)
   ) allServices;
   metrics = config.${namespace}.metrics;
 
@@ -192,10 +191,16 @@ in
         "50" = "http://[${mkIpv6Address "victorialogs" 50}]:9428/insert/loki/api/v1/push?_msg_field=msg,message";
         "99" = "http://[${mkIpv6Address "victorialogs" 99}]:9428/insert/loki/api/v1/push?_msg_field=msg,message";
       } "VictoriaLogs push API URLs keyed by VLAN.";
-      hostVlan = mkOpt types.ints.positive 99 "VLAN the host itself is reachable on; selects the host's VictoriaLogs push URL.";
+      hostVlan =
+        mkOpt types.ints.positive 99
+          "VLAN the host itself is reachable on; selects the host's VictoriaLogs push URL.";
       hostJournal = mkBoolOpt true "Whether to ship the host's own journal.";
-      services = mkOpt (types.nullOr (types.listOf types.str)) null "Service containers whose journals are shipped; null ships all logged services.";
-      batchWait = mkOpt (types.nullOr types.str) null "How long Alloy batches log lines before pushing them, such as 5m; null keeps Alloy's default.";
+      services = mkOpt (types.nullOr (
+        types.listOf types.str
+      )) null "Service containers whose journals are shipped; null ships all logged services.";
+      batchWait =
+        mkOpt (types.nullOr types.str) null
+          "How long Alloy batches log lines before pushing them, such as 5m; null keeps Alloy's default.";
     };
 
     metrics = {
