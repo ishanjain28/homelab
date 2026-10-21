@@ -9,6 +9,8 @@ with lib.${namespace};
   ${namespace} = {
     profiles.shell = enabled;
     programs.neovim = enabled;
+    programs.kitty = enabled;
+    theme = enabled;
     services.wallpapers = enabled // {
       directory = "${config.home.homeDirectory}/Downloads/Wallpapers";
     };

@@ -107,6 +107,12 @@ in
       historyWidget.command = "";
     };
 
+    programs.lazygit = enabled;
+    programs.eza = enabled // {
+      git = true;
+    };
+    programs.bat = enabled;
+
     programs.atuin = enabled // {
       settings.update_check = false;
     };

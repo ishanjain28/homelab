@@ -32,6 +32,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -56,6 +61,11 @@
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    stylix = {
+      url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -202,7 +212,10 @@
       };
 
       homes = with inputs; {
-        modules = [ sops-nix.homeManagerModules.sops ];
+        modules = [
+          sops-nix.homeManagerModules.sops
+          stylix.homeModules.stylix
+        ];
       };
 
       outputs-builder = channels: {
