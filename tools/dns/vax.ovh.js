@@ -1,4 +1,7 @@
-D("vax.ovh!public", REG_NONE, DnsProvider(DSP_CLOUDFLARE_REDIRECTS),
+D(
+  "vax.ovh!public",
+  REG_NONE,
+  DnsProvider(DSP_CLOUDFLARE_REDIRECTS),
   NAMESERVER("mario.ns.cloudflare.com."),
   NAMESERVER("tegan.ns.cloudflare.com."),
 
@@ -7,7 +10,7 @@ D("vax.ovh!public", REG_NONE, DnsProvider(DSP_CLOUDFLARE_REDIRECTS),
 
   TXT("@", "v=spf1 -all"),
   TXT("@", "v=DKIM1; p="),
-  TXT("@", "v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;"),
+  TXT("_dmarc", "v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;"),
 
   addressRecords("*", { via: ["caddy-delhi"] }),
 
@@ -15,12 +18,15 @@ D("vax.ovh!public", REG_NONE, DnsProvider(DSP_CLOUDFLARE_REDIRECTS),
 
   CF_TEMP_REDIRECT("vax.ovh/*", "https://ishanjain.me/$1"),
 
-  serviceRecords("public", "vax.ovh")
+  serviceRecords("public", "vax.ovh"),
 );
 
-D("vax.ovh!home", REG_NONE, DnsProvider(DSP_ADGUARDHOME_HOME),
+D(
+  "vax.ovh!home",
+  REG_NONE,
+  DnsProvider(DSP_ADGUARDHOME_HOME),
   ADGUARDHOME_A_PASSTHROUGH("del.dns", ""),
   ADGUARDHOME_AAAA_PASSTHROUGH("del.dns", ""),
 
-  serviceRecords("home", "vax.ovh")
+  serviceRecords("home", "vax.ovh"),
 );

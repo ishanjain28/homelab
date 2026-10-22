@@ -1,4 +1,4 @@
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result, ensure};
 use std::{
     fs,
     os::fd::AsRawFd,
@@ -9,8 +9,8 @@ use std::{
 use crate::{
     lock::VolumeLocks,
     lvm::{create_snapshot, derived_name, ensure_vg, lv_path, remove_snapshot},
-    models::{backup_volumes, load_state, Volume},
-    quiesce::{thaw_if_frozen, QuiesceGuard},
+    models::{Volume, backup_volumes, load_state},
+    quiesce::{QuiesceGuard, thaw_if_frozen},
     util::{is_block_device, is_mountpoint, run_command},
 };
 

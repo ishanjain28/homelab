@@ -1,4 +1,7 @@
-D("ishanjain.in!public", REG_PORKBUN, DnsProvider(DSP_CLOUDFLARE_REDIRECTS),
+D(
+  "ishanjain.in!public",
+  REG_PORKBUN,
+  DnsProvider(DSP_CLOUDFLARE_REDIRECTS),
   NAMESERVER("mario.ns.cloudflare.com."),
   NAMESERVER("tegan.ns.cloudflare.com."),
 

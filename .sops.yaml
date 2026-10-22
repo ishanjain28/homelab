@@ -60,7 +60,7 @@ creation_rules:
     key_groups:
       - age:
           - *turquoise
-  - path_regex: secrets/postgresql\.json$
+  - path_regex: secrets/postgresql/.*\.json$
     encrypted_regex: ^(users)$
     key_groups:
       - age:

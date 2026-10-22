@@ -84,7 +84,7 @@ in
       GF_PATHS_DATA = "/var/lib/grafana";
       GF_PATHS_PLUGINS = "/var/lib/grafana/plugins";
       GF_PATHS_PROVISIONING = "${provisioning}";
-      GF_PLUGINS_PREINSTALL = "victoriametrics-logs-datasource";
+      GF_PLUGINS_PREINSTALL = "victoriametrics-logs-datasource,victoriametrics-metrics-datasource";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
       GF_SERVER_HTTP_ADDR = "0.0.0.0";
       GF_SERVER_HTTP_PORT = toString cfg.endpoints.web.port;

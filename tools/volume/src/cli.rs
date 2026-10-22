@@ -83,9 +83,10 @@ pub fn run() -> Result<()> {
 
     match cli.command {
         VolumeCommand::Apply { yes, volume_ids } => run_apply(&cli.state_file, yes, volume_ids),
-        VolumeCommand::Pull { owner_service, from } => {
-            run_pull(&cli.state_file, &owner_service, &from)
-        }
+        VolumeCommand::Pull {
+            owner_service,
+            from,
+        } => run_pull(&cli.state_file, &owner_service, &from),
         VolumeCommand::Send {
             owner_service,
             volume_ids,

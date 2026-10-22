@@ -1,4 +1,4 @@
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result, ensure};
 use std::process::Command;
 
 use crate::util::{command_stdout, run_command};
