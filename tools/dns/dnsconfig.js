@@ -62,7 +62,9 @@ function directRecords() {
   for (var service in config.services) {
     var direct = config.services[service].direct || {};
     for (var site in direct) {
-      records = records.concat(addressRecords(service + "." + site + ".direct", direct[site]));
+      records = records.concat(
+        addressRecords(service + "." + site + ".direct", direct[site]),
+      );
     }
   }
 

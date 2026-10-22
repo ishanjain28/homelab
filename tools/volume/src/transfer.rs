@@ -1,4 +1,4 @@
-use anyhow::{bail, ensure, Context, Result};
+use anyhow::{Context, Result, bail, ensure};
 use std::{
     fs::{File, OpenOptions},
     io::{self, BufRead, BufReader, ErrorKind, Read, Write},
@@ -11,10 +11,10 @@ use crate::{
     apply::{apply_volume, ensure_filesystem, grow_ext4_to_device, run_e2fsck, validate_volume},
     lock::VolumeLocks,
     lvm::{
-        create_snapshot, derived_name, ensure_vg, has_tag, lv_exists, lv_field, lv_path,
-        remove_snapshot, VG_NAME,
+        VG_NAME, create_snapshot, derived_name, ensure_vg, has_tag, lv_exists, lv_field, lv_path,
+        remove_snapshot,
     },
-    models::{load_state, service_volumes, Volume},
+    models::{Volume, load_state, service_volumes},
     quiesce::QuiesceGuard,
     util::{
         block_device_size, install_interrupt_handler, interrupted, is_block_device, is_mounted,
@@ -233,7 +233,10 @@ fn read_header(stream: &mut impl BufRead, volume_id: &str) -> Result<u64> {
             .parse()
             .with_context(|| format!("invalid size in volume header {line:?}")),
         [] => bail!("sender closed the stream before {volume_id:?}"),
-        _ => bail!("unexpected volume header {:?}, expected {volume_id:?}", line.trim()),
+        _ => bail!(
+            "unexpected volume header {:?}, expected {volume_id:?}",
+            line.trim()
+        ),
     }
 }
 
@@ -250,7 +253,10 @@ fn copy_exact(
     let mut last_report = started;
 
     while copied < bytes {
-        ensure!(!interrupted(), "interrupted after {copied} of {bytes} bytes");
+        ensure!(
+            !interrupted(),
+            "interrupted after {copied} of {bytes} bytes"
+        );
         let wanted = buffer.len().min((bytes - copied) as usize);
         let read = match reader.read(&mut buffer[..wanted]) {
             Ok(0) => bail!("stream ended after {copied} of {bytes} bytes"),

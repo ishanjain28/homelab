@@ -37,8 +37,32 @@ let
 
   mkClusterSql =
     cfg:
+    let
+      memberships = concatLists (
+        mapAttrsToList (user: settings: map (group: "${user}/${group}") settings.memberOf) cfg.users
+      );
+    in
     concatLines (
-      concatLists (
+      [
+        ''
+          DO $$
+          DECLARE membership record;
+          BEGIN
+            FOR membership IN
+              SELECT parent.rolname AS parent, member.rolname AS member
+              FROM pg_auth_members m
+              JOIN pg_roles parent ON parent.oid = m.roleid
+              JOIN pg_roles member ON member.oid = m.member
+              WHERE member.rolname = ANY (${sqlArray (attrNames cfg.users)})
+                AND parent.rolname NOT LIKE 'pg\_%'
+                AND member.rolname || '/' || parent.rolname <> ALL (${sqlArray memberships})
+            LOOP
+              EXECUTE format('REVOKE %I FROM %I', membership.parent, membership.member);
+            END LOOP;
+          END $$;
+        ''
+      ]
+      ++ concatLists (
         mapAttrsToList (
           user: settings: map (group: "GRANT ${quoteIdent group} TO ${quoteIdent user};") settings.memberOf
         ) cfg.users
@@ -56,7 +80,7 @@ let
           BEGIN
             FOR role_name IN
               SELECT rolname FROM pg_roles
-              WHERE NOT rolsuper AND rolname NOT LIKE 'pg\_%' AND rolname <> ALL (${sqlArray access.allowed})
+              WHERE NOT rolsuper AND rolname NOT LIKE 'pg\_%' AND rolname <> '${access.owner}'
             LOOP
               EXECUTE format('REVOKE ALL ON DATABASE %I FROM %I', '${name}', role_name);
             END LOOP;
@@ -136,7 +160,7 @@ let
           END LOOP;
           FOR role_name IN
             SELECT rolname FROM pg_roles
-            WHERE NOT rolsuper AND rolname NOT LIKE 'pg\_%' AND rolname <> ALL (${sqlArray access.allowed})
+            WHERE NOT rolsuper AND rolname NOT LIKE 'pg\_%' AND rolname <> '${access.owner}'
           LOOP
             EXECUTE format('REVOKE ALL ON SCHEMA %I FROM %I', schema_name, role_name);
             EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM %I', schema_name, role_name);
@@ -169,6 +193,19 @@ let
           }}
         END LOOP;
       END $$;
+      DO $$
+      DECLARE acl record;
+      BEGIN
+        FOR acl IN
+          SELECT pg_get_userbyid(d.defaclrole) AS creator, pg_get_userbyid(a.grantee) AS grantee,
+            CASE d.defaclobjtype WHEN 'r' THEN 'TABLES' ELSE 'SEQUENCES' END AS objects
+          FROM pg_default_acl d, aclexplode(d.defaclacl) a
+          WHERE d.defaclnamespace = 0 AND d.defaclobjtype IN ('r', 'S')
+            AND a.grantee <> 0 AND a.grantee <> d.defaclrole
+        LOOP
+          EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL ON %s FROM %I', acl.creator, acl.objects, acl.grantee);
+        END LOOP;
+      END $$;
     ''
     + concatMapStrings defaultPrivileges creators;
 
@@ -188,11 +225,11 @@ let
     writers = [ ];
   };
 
-  # Roles, databases and access come from the shared postgresql.json; deployment settings from the option set.
+  # Roles, databases and access come from the instance secret; deployment settings from the option set.
   mkSpec =
     name: cfg:
     let
-      instance = postgresqlInstances.${name} or (throw "${postgresqlSecretsFile} has no entry for ${name}");
+      instance = postgresqlInstances.${name} or (throw "${postgresqlSecretsFile name} has no entry for ${name}");
       passwordRoles = genAttrs (passwordUsers name) (_user: { });
     in
     cfg
@@ -222,11 +259,11 @@ let
     in
     mkPasswordCommands name
     + ''
-      psql -X -v ON_ERROR_STOP=1 -d postgres -f ${clusterSql}
+      psql -X -1 -v ON_ERROR_STOP=1 -d postgres -f ${clusterSql}
     ''
     + concatStrings (
       mapAttrsToList (database: sql: ''
-        psql -X -v ON_ERROR_STOP=1 -d ${escapeShellArg database} -f ${sql}
+        psql -X -1 -v ON_ERROR_STOP=1 -d ${escapeShellArg database} -f ${sql}
       '') databaseSql
     );
 
@@ -256,14 +293,14 @@ let
           }
           {
             assertion = passwordsWithoutLoginRole == [ ];
-            message = "${name}: ${postgresqlSecretsFile} has passwords for roles that are not declared login users: ${concatStringsSep ", " passwordsWithoutLoginRole}";
+            message = "${name}: ${postgresqlSecretsFile name} has passwords for roles that are not declared login users: ${concatStringsSep ", " passwordsWithoutLoginRole}";
           }
         ];
       }
       (mkServiceContainer {
         service = cfg;
         secrets.passwords = {
-          file = postgresqlSecretsFile;
+          file = postgresqlSecretsFile name;
           format = "json";
           key = "";
           mountPath = secretsPath;

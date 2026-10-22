@@ -1,10 +1,10 @@
-use anyhow::{bail, ensure, Context, Result};
+use anyhow::{Context, Result, bail, ensure};
 use std::{path::Path, process::Command};
 
 use crate::{
     lock::VolumeLocks,
-    lvm::{ensure_vg, lv_name, VG_NAME},
-    models::{load_all_volumes, load_volumes, Volume},
+    lvm::{VG_NAME, ensure_vg, lv_name},
+    models::{Volume, load_all_volumes, load_volumes},
     util::{
         block_device_size, command_output, confirm, is_block_device, is_mounted,
         parse_blkid_output, parse_size, run_command,

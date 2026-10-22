@@ -187,8 +187,15 @@ let
       system.stateVersion = "26.05";
     };
 
-  postgresqlSecretsFile = "secrets/postgresql.json";
-  postgresqlInstances = builtins.fromJSON (builtins.readFile (../.. + "/${postgresqlSecretsFile}"));
+  postgresqlSecretsFile = instance: "secrets/postgresql/${instance}.json";
+  postgresqlInstances = mapAttrs' (
+    file: _:
+    let
+      instance = removeSuffix ".json" file;
+    in
+    nameValuePair instance
+      (builtins.fromJSON (builtins.readFile (../.. + "/${postgresqlSecretsFile instance}"))).${instance}
+  ) (builtins.readDir ../../secrets/postgresql);
   databaseReadyUnit = "database-ready.service";
 
   # Readiness gate and watchdog for a container that consumes a PostgreSQL database.

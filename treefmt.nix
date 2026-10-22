@@ -3,6 +3,16 @@
 
   programs = {
     deadnix.enable = true;
+    rustfmt = {
+      enable = true;
+      edition = "2024";
+    };
+    gofmt.enable = true;
+    prettier = {
+      enable = true;
+      includes = [ "*.js" ];
+      excludes = [ "secrets/**" ];
+    };
     nixfmt = {
       enable = true;
       strict = true;
