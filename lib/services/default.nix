@@ -47,7 +47,7 @@ let
       config,
       containerProfile ? "unprivileged",
       resources ? { },
-      containerTimeout ? null,
+      containerTimeout ? "1min",
     }:
     let
       containerProfileConfig = getContainerProfile containerProfile;
@@ -84,8 +84,8 @@ let
       systemd.network.networks = hostVethNetworks;
 
       systemd.services."container@${name}".serviceConfig = {
-        TimeoutStartSec = mkForce (if containerTimeout == null then "1min" else containerTimeout);
-        TimeoutStopSec = mkForce (if containerTimeout == null then "1min" else containerTimeout);
+        TimeoutStartSec = mkForce containerTimeout;
+        TimeoutStopSec = mkForce containerTimeout;
       }
       // resources;
     };
@@ -125,6 +125,7 @@ let
               VendorClassIdentifier = "homelab-container/${name}";
               RouteMetric = 100 + index;
               UseDNS = index == 0;
+              UseDomains = index == 0;
               UseNTP = index == 0;
             };
             ipv6AcceptRAConfig = {
@@ -154,7 +155,6 @@ let
 
       documentation = disabled;
       environment.defaultPackages = mkForce [ ];
-      environment.shellAliases = shellAliases;
       services.dbus.packages = [ config.systemd.package ];
       nix = disabled;
       programs.command-not-found = disabled;
@@ -255,14 +255,14 @@ let
   ownerWritable = mode: bitAnd (toInt (builtins.substring 1 1 mode)) 2 != 0;
 
   # Default homelab service container: minimal NixOS guest plus arbitrary inner config.
-  genServiceContainer =
+  mkServiceContainer =
     {
       service,
       secrets ? { },
       containerConfig ? { },
       containerProfile ? "unprivileged",
       resources ? { },
-      containerTimeout ? null,
+      containerTimeout ? "1min",
       databaseUnits ? [ service.name ],
       serviceProfiles ? { },
     }:
@@ -373,7 +373,7 @@ let
       })
     ];
 
-  genServiceOptions =
+  mkServiceOptions =
     {
       name,
       description ? name,
@@ -460,7 +460,7 @@ let
     };
 
   # Convenience wrapper for the common one-container/one-systemd-service case.
-  genSingleServiceContainer =
+  mkSingleServiceContainer =
     {
       package ? null,
       command ? null,
@@ -476,7 +476,7 @@ let
       after ? [ ],
       wants ? [ ],
       resources ? { },
-      containerTimeout ? null,
+      containerTimeout ? "1min",
     }:
     let
       inherit (service) name runtimeUser;
@@ -489,7 +489,7 @@ let
         else
           throw "mkSingleServiceContainer '${name}' requires either 'command' or 'package'.";
     in
-    genServiceContainer {
+    mkServiceContainer {
       inherit
         service
         containerProfile
@@ -529,10 +529,10 @@ in
     certificatePath
     containerUidOffset
     mkContainerVethName
+    mkServiceContainer
+    mkServiceOptions
+    mkSingleServiceContainer
     postgresqlInstances
     postgresqlSecretsFile
     ;
-  mkServiceOptions = genServiceOptions;
-  mkServiceContainer = genServiceContainer;
-  mkSingleServiceContainer = genSingleServiceContainer;
 }

@@ -157,6 +157,7 @@ in
               EmitLLDP = "yes";
               LLMNR = "no";
             };
+            dhcpV4Config.UseDomains = true;
             ipv6AcceptRAConfig = {
               DHCPv6Client = false;
               Token = "eui64";
