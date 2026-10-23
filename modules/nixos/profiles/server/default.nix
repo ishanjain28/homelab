@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   pkgs,
   lib,
   namespace,
@@ -53,6 +54,19 @@ in
       "tcp_bbr"
       "wireguard"
     ];
+
+    sops.secrets.atuin-sync-address = {
+      sopsFile = "${inputs.self}/secrets/atuin/sync-address";
+      format = "binary";
+      owner = "ishan";
+    };
+
+    programs.fish.interactiveShellInit = ''
+      test -r ${config.sops.secrets.atuin-sync-address.path}; and set -gx ATUIN_SYNC_ADDRESS (cat ${config.sops.secrets.atuin-sync-address.path})
+    '';
+    programs.bash.interactiveShellInit = ''
+      [ -r ${config.sops.secrets.atuin-sync-address.path} ] && export ATUIN_SYNC_ADDRESS="$(cat ${config.sops.secrets.atuin-sync-address.path})"
+    '';
 
     users = {
       mutableUsers = false;
