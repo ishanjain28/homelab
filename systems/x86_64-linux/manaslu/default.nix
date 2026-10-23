@@ -120,6 +120,7 @@ in
   };
 
   networking = {
+    search = [ "direct.ishanjain.me" ];
     resolvconf.extraConfig = "name_servers='127.0.0.1'";
     firewall = {
       filterForward = true;
