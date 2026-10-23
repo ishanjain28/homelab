@@ -112,4 +112,13 @@
     vlans = [ 50 ];
     runtimeId = 30393;
   };
+
+  atuin = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "atuin";
+    };
+    vlans = [ 50 ];
+    runtimeId = 30394;
+  };
 }
