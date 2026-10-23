@@ -134,4 +134,13 @@
     ];
   };
 
+  paperless = {
+    uuid = "a8e92bdf-df73-47a8-a46a-6d005b1ab801";
+    size = "1G";
+    backup.groups = [
+      "daily"
+      "offsite"
+    ];
+  };
+
 }

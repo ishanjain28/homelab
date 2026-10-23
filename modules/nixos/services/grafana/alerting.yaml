@@ -59,7 +59,7 @@ groups:
         noDataState: OK
         execErrState: Error
         annotations:
-          summary: "{{ $labels.host }} {{ $labels.device }} reports SMART health failing"
+          summary: "{{ $labels.host }} {{ $labels.model }} ({{ $labels.serial_no }}) reports SMART health failing"
         data:
           - refId: A
             datasourceUid: efyik59h6cbnkc
@@ -68,7 +68,7 @@ groups:
               to: 0
             model:
               refId: A
-              expr: min by (host, device) (smart_device_health_ok)
+              expr: min by (host, model, serial_no) (smart_device_health_ok)
               instant: true
           - refId: B
             datasourceUid: __expr__
@@ -88,7 +88,7 @@ groups:
         noDataState: OK
         execErrState: Error
         annotations:
-          summary: "{{ $labels.host }} {{ $labels.device }} ({{ $labels.serial_no }}) has {{ $values.A.Value }} reallocated, pending or uncorrectable sectors"
+          summary: "{{ $labels.host }} {{ $labels.model }} ({{ $labels.serial_no }}) has {{ $values.A.Value }} reallocated, pending or uncorrectable sectors"
         data:
           - refId: A
             datasourceUid: efyik59h6cbnkc
@@ -97,7 +97,7 @@ groups:
               to: 0
             model:
               refId: A
-              expr: max by (host, device, serial_no) ({__name__=~"smart_device_(reallocated_sectors_count|pending_sector_count|uncorrectable_sector_count)"})
+              expr: max by (host, model, serial_no) ({__name__=~"smart_device_(reallocated_sectors_count|pending_sector_count|uncorrectable_sector_count)"})
               instant: true
           - refId: B
             datasourceUid: __expr__
@@ -110,6 +110,99 @@ groups:
                     type: gt
                     params:
                       - 0
+      - uid: host-high-cpu
+        title: High CPU
+        condition: B
+        for: 20m
+        noDataState: OK
+        execErrState: Error
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.host }} CPU has been above 90% for 20 minutes ({{ printf \"%.0f\" $values.A.Value }}%)"
+        data:
+          - refId: A
+            datasourceUid: efyik59h6cbnkc
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: 'max by (host) (100 - cpu_usage_idle)'
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 90
+      - uid: host-high-memory
+        title: High memory
+        condition: B
+        for: 1h
+        noDataState: OK
+        execErrState: Error
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.host }} memory has been above 90% for 1 hour ({{ printf \"%.0f\" $values.A.Value }}%)"
+        data:
+          - refId: A
+            datasourceUid: efyik59h6cbnkc
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: 'max by (host) (mem_used_percent)'
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 90
+      - uid: service-high-memory
+        title: Service near memory limit
+        condition: B
+        for: 1h
+        noDataState: OK
+        execErrState: Error
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.service }} has used over 90% of its memory limit for 1 hour ({{ printf \"%.0f\" $values.A.Value }}%)"
+        data:
+          - refId: A
+            datasourceUid: efyik59h6cbnkc
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: 'max by (host, service) (label_replace(100 * (cgroup_memory_stat_anon + cgroup_memory_stat_shmem) / (cgroup_memory_max < 1e18), "service", "$1", "path", ".*container@(.+)[.]service"))'
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 90
       - uid: unit-restart-loop
         title: Unit restart loop
         condition: B

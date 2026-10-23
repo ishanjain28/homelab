@@ -54,6 +54,7 @@ in
           secrets.manual = true;
           environmentVariables = {
             AUTHELIA_SERVER_ADDRESS = "tcp://0.0.0.0:${toString cfg.endpoints.web.port}";
+            AUTHELIA_SERVER_TIMEOUTS_IDLE = "3m";
           };
         };
 
