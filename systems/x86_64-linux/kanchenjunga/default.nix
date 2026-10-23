@@ -93,7 +93,6 @@ in
               IPv6PrivacyExtensions = "no";
               IPv6AcceptRA = "yes";
               LLDP = "yes";
-              EmitLLDP = "yes";
               LLMNR = "no";
             };
             dhcpV4Config.UseDomains = true;

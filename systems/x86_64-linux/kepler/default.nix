@@ -105,7 +105,6 @@ in
               IPv6PrivacyExtensions = "no";
               IPv6AcceptRA = "yes";
               LLDP = "no";
-              EmitLLDP = "no";
               LLMNR = "no";
             };
             dhcpV4Config.UseDomains = true;

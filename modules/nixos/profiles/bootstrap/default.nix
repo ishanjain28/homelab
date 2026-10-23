@@ -56,8 +56,6 @@ in
       openFirewall = true;
     };
 
-    services.lldpd = enabled;
-
     users.users.root.openssh.authorizedKeys.keys = bootstrapKeys;
     users.users.ishan = {
       group = "users";
