@@ -18,6 +18,8 @@
       wal_level = "replica";
       max_wal_senders = 10;
       max_slot_wal_keep_size = "1GB";
+      wal_compression = "zstd";
+      checkpoint_timeout = "30min";
       timezone = "Asia/Kolkata";
     };
   };
