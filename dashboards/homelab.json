@@ -1732,7 +1732,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "disk_used_percent{host=~\"$host\", fstype!~\"vfat|efivarfs|iso9660\", path!~\"/var/lib/volumes/.*\"}",
+          "expr": "sort_by_label(disk_used_percent{host=~\"$host\", fstype!~\"vfat|efivarfs|iso9660\", path!~\"/var/lib/volumes/.*\"}, \"host\", \"path\")",
           "refId": "A",
           "legendFormat": "{{host}} {{path}}"
         }
@@ -2000,7 +2000,7 @@
           },
           "expr": "smart_device_temp_c{host=~\"$host\"}",
           "refId": "A",
-          "legendFormat": "{{host}} {{device}} ({{model}})"
+          "legendFormat": "{{host}} {{model}} {{serial_no}}"
         },
         {
           "datasource": {

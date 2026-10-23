@@ -283,6 +283,8 @@ in
                   "squashfs"
                   "iso9660"
                 ];
+                tagdrop.path = [ "/run/homelab-backup/*" ];
+                tagexclude = [ "device" ];
               }
             ];
             diskio = [ { } ];
@@ -292,6 +294,10 @@ in
                 path_smartctl = "${pkgs.smartmontools}/bin/smartctl";
                 path_nvme = "${pkgs.nvme-cli}/bin/nvme";
                 interval = "45s";
+                tagexclude = [
+                  "device"
+                  "power"
+                ];
               }
             ];
             cgroup = [

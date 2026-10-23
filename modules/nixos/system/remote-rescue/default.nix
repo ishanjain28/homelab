@@ -33,7 +33,7 @@ in
     systemd = {
       enableEmergencyMode = false;
       settings.Manager = {
-        RuntimeWatchdogSec = "60s";
+        RuntimeWatchdogSec = "5min";
         RebootWatchdogSec = "10min";
       };
 

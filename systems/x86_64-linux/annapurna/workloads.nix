@@ -233,6 +233,7 @@
     vlans = [ 50 ];
     runtimeId = 30387;
     shares = [ "paperless" ];
+    volumes = [ "paperless" ];
   };
 
   samba = enabled // {

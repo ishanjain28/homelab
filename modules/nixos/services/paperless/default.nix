@@ -52,7 +52,7 @@ in
         user = cfg.runtimeUser.name;
         address = "::";
         port = cfg.endpoints.web.port;
-        dataDir = "${root}/data";
+        dataDir = "/var/lib/paperless";
         mediaDir = "${root}/media";
         consumptionDir = "${root}/consume";
         inherit environmentFile;

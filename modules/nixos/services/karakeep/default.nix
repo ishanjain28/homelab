@@ -69,7 +69,7 @@ in
           db_path = "/var/lib/meilisearch/data";
           dump_dir = "/var/lib/meilisearch/dumps";
           snapshot_dir = "/var/lib/meilisearch/snapshots";
-          no_analytics = "true";
+          no_analytics = true;
           env = "production";
         };
 
