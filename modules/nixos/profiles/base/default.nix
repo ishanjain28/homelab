@@ -19,6 +19,7 @@ in
     services.resolved.settings.Resolve.DNSStubListener = false;
 
     environment.shellAliases = shellAliases;
+    services.lldpd = enabled;
     programs.fish = enabled // {
       interactiveShellInit = fishKeyBindings + ''
         ${getExe pkgs.atuin} init fish | source
