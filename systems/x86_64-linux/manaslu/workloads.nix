@@ -59,7 +59,7 @@
       conditions = [
         "[CONNECTED] == true"
         "[CERTIFICATE_EXPIRATION] > 96h"
-        "[IP] == 139.84.164.110"
+        # "[IP] == 139.84.164.110"
       ];
     };
     hostNetwork = true;
