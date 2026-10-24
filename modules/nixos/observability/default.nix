@@ -144,6 +144,14 @@ let
   '';
 
   fleet = inputs.self.lib.homelabRegistry;
+  hostEndpoints = mapAttrsToList (_id: host: {
+    inherit (host) name;
+    group = "Hosts";
+    interval = "30s";
+    url = "icmp://${host.name}${optionalString (host.domain != "") ".${host.domain}"}";
+    conditions = [ "[CONNECTED] == true" ];
+    alerts = [ { type = "pushover"; } ];
+  }) fleet.hosts;
   serviceEndpoints = mapAttrsToList (
     _id: srv:
     let
@@ -181,7 +189,7 @@ let
     ) enabledServices
   );
 
-  gatusSettings.endpoints = serviceEndpoints;
+  gatusSettings.endpoints = hostEndpoints ++ serviceEndpoints;
 in
 {
   options.${namespace} = {

@@ -186,7 +186,7 @@ home-manager switch --flake .#<user>@<home> -b backup
 * Telegraf on every host: system, SMART and per-container cgroup metrics (plus monitioring of Intel/NVIDIA/AMD GPUs) into VictoriaMetrics. SNMP polling for network gear.
 * Alloy ships journald and log files from the home hosts and their containers to VictoriaLogs; a syslog receiver collects logs from devices.
 * Grafana with dashboards provisioned from the repo.
-* Gatus health checks generated from each service's declared endpoints, alerting over Pushover and Telegram.
+* Gatus monitors hosts and services, alerting over Pushover and Telegram.
 * Pushover alert when any backup fails.
 
 **Networking**
