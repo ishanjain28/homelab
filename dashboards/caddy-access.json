@@ -1322,8 +1322,8 @@
       "title": "Top clients",
       "description": "Most active client IPs with their country and network.",
       "datasource": {
-        "type": "victoriametrics-logs-datasource",
-        "uid": "victorialogs"
+        "type": "datasource",
+        "uid": "-- Mixed --"
       },
       "gridPos": {
         "h": 10,
@@ -1340,6 +1340,34 @@
           "refId": "A",
           "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (request.client_ip, country, asn) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "asn-names"
+          },
+          "type": "csv",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "https://raw.githubusercontent.com/ipverse/as-metadata/master/as.csv",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "asn",
+              "text": "asn",
+              "type": "string"
+            },
+            {
+              "selector": "description",
+              "text": "asn_name",
+              "type": "string"
+            }
+          ]
         }
       ],
       "transformations": [
@@ -1348,11 +1376,42 @@
           "options": {
             "mode": "columns",
             "valueLabel": "__name__"
+          },
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
           }
         },
         {
           "id": "merge",
-          "options": {}
+          "options": {},
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "asn",
+            "mode": "outerTabular"
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "requests",
+                "config": {
+                  "id": "isNotNull",
+                  "options": {}
+                }
+              }
+            ]
+          }
         },
         {
           "id": "organize",
@@ -1364,7 +1423,11 @@
               "request.client_ip": 0,
               "country": 1,
               "asn": 2,
-              "requests": 3
+              "requests": 4,
+              "asn_name": 3
+            },
+            "renameByName": {
+              "asn_name": "Network"
             }
           }
         }
@@ -1402,8 +1465,8 @@
       "title": "Networks",
       "description": "Requests per autonomous system.",
       "datasource": {
-        "type": "victoriametrics-logs-datasource",
-        "uid": "victorialogs"
+        "type": "datasource",
+        "uid": "-- Mixed --"
       },
       "gridPos": {
         "h": 10,
@@ -1420,6 +1483,34 @@
           "refId": "A",
           "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (asn) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "asn-names"
+          },
+          "type": "csv",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "https://raw.githubusercontent.com/ipverse/as-metadata/master/as.csv",
+          "url_options": {
+            "method": "GET"
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "asn",
+              "text": "asn",
+              "type": "string"
+            },
+            {
+              "selector": "description",
+              "text": "asn_name",
+              "type": "string"
+            }
+          ]
         }
       ],
       "transformations": [
@@ -1428,11 +1519,42 @@
           "options": {
             "mode": "columns",
             "valueLabel": "__name__"
+          },
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
           }
         },
         {
           "id": "merge",
-          "options": {}
+          "options": {},
+          "filter": {
+            "id": "byRefId",
+            "options": "A"
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "asn",
+            "mode": "outerTabular"
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "include",
+            "match": "all",
+            "filters": [
+              {
+                "fieldName": "requests",
+                "config": {
+                  "id": "isNotNull",
+                  "options": {}
+                }
+              }
+            ]
+          }
         },
         {
           "id": "organize",
@@ -1442,8 +1564,12 @@
             },
             "indexByName": {
               "asn": 0,
-              "requests": 1,
-              "clients": 2
+              "requests": 2,
+              "clients": 3,
+              "asn_name": 1
+            },
+            "renameByName": {
+              "asn_name": "Network"
             }
           }
         }

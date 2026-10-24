@@ -30,6 +30,13 @@ let
         access = "proxy";
         url = "http://[${mkIpv6Address "victoriametrics" 50}]:8428";
       }
+      {
+        name = "ASN names";
+        uid = "asn-names";
+        type = "yesoreyeram-infinity-datasource";
+        access = "proxy";
+        jsonData.allowedHosts = [ "https://raw.githubusercontent.com" ];
+      }
     ];
   };
   provisioning = pkgs.linkFarm "grafana-provisioning" {
@@ -84,7 +91,7 @@ in
       GF_PATHS_DATA = "/var/lib/grafana";
       GF_PATHS_PLUGINS = "/var/lib/grafana/plugins";
       GF_PATHS_PROVISIONING = "${provisioning}";
-      GF_PLUGINS_PREINSTALL = "victoriametrics-logs-datasource,victoriametrics-metrics-datasource";
+      GF_PLUGINS_PREINSTALL_SYNC = "victoriametrics-logs-datasource,victoriametrics-metrics-datasource,yesoreyeram-infinity-datasource";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
       GF_SERVER_HTTP_ADDR = "0.0.0.0";
       GF_SERVER_HTTP_PORT = toString cfg.endpoints.web.port;
