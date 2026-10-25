@@ -56,15 +56,18 @@ in
           matchConfig.Name = "eth0";
           networkConfig = {
             DHCP = "ipv4";
+            DNS = [ "127.0.0.1" ];
             IPv6AcceptRA = true;
             IPv6PrivacyExtensions = false;
             LinkLocalAddressing = "ipv6";
             IPv6LinkLocalAddressGenerationMode = "eui64";
           };
           address = optional homeVxlan "2401:c080:3400:2e43:5400:4ff:fe5a:5551/128";
+          dhcpV4Config.UseDNS = false;
           ipv6AcceptRAConfig = {
             Token = "eui64";
             DHCPv6Client = false;
+            UseDNS = false;
           };
         };
       }
@@ -120,8 +123,6 @@ in
   };
 
   networking = {
-    search = [ "direct.ishanjain.me" ];
-    resolvconf.extraConfig = "name_servers='127.0.0.1'";
     firewall = {
       filterForward = true;
       extraForwardRules = ''
@@ -189,8 +190,6 @@ in
       }
     '';
   };
-
-  services.resolved = disabled;
 
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;

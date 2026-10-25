@@ -55,11 +55,6 @@ in
       "wireguard"
     ];
 
-    networking.search = [
-      "home.direct.ishanjain.me"
-      "del.direct.ishanjain.me"
-    ];
-
     sops.secrets.atuin-sync-address = {
       sopsFile = "${inputs.self}/secrets/atuin/sync-address";
       format = "binary";

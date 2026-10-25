@@ -21,6 +21,10 @@ in
     interfaces = mkOpt attrs { } "List of interfaces to configure";
 
     networks = mkOpt attrs { } "List of networks devices to configure";
+    searchDomains = mkOpt (listOf str) [
+      "home.direct.ishanjain.me"
+      "del.direct.ishanjain.me"
+    ] "DNS search domains for every network.";
     netdevs = mkOpt attrs { } "List of virtual network devices to configure";
   };
 
@@ -41,7 +45,8 @@ in
 
     systemd.network = enabled // {
       # To have predictable names for network interfaces
-      inherit (cfg) links networks netdevs;
+      inherit (cfg) links netdevs;
+      networks = mapAttrs (_: network: recursiveUpdate network { networkConfig.Domains = cfg.searchDomains; }) cfg.networks;
     };
 
     networking = {
