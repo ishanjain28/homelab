@@ -116,7 +116,7 @@ in
         nameValuePair "acme-${id}" {
           wantedBy = [ "timers.target" ];
           timerConfig = {
-            OnActiveSec = 0;
+            OnBootSec = 0;
             OnCalendar = "daily";
             Persistent = true;
           };

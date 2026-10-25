@@ -46,5 +46,14 @@
         monthly = 12;
       };
     };
+    offsite-weekly = {
+      target = "gdrive";
+      onCalendar = "Sun 03:00";
+      randomizedDelaySec = "60m";
+      keep = {
+        weekly = 8;
+        monthly = 12;
+      };
+    };
   };
 }

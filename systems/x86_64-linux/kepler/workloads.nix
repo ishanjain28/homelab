@@ -113,6 +113,12 @@
     runtimeId = 30393;
   };
 
+  kavita = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30395;
+    volumes = [ "kavita" ];
+  };
+
   atuin = enabled // {
     database = {
       instance = "postgresql-home-primary";

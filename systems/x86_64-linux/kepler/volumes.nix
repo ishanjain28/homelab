@@ -57,4 +57,10 @@
       "offsite"
     ];
   };
+
+  kavita = {
+    uuid = "8b4e4265-3fab-44f6-961f-062f8816c487";
+    size = "10G";
+    backup.groups = [ "offsite-weekly" ];
+  };
 }

@@ -67,7 +67,10 @@ in
     };
 
     serviceConfig = {
-      ExecStartPre = "${pkgs.coreutils}/bin/install -m 0600 ${secretConfigPath} ${configPath}";
+      ExecStartPre = [
+        "${pkgs.coreutils}/bin/cp -n --no-preserve=mode ${secretConfigPath} ${configPath}"
+        "${pkgs.yq-go}/bin/yq -i 'load(\"${secretConfigPath}\") * {\"filtering\": {\"rewrites\": .filtering.rewrites}}' ${configPath}"
+      ];
       StateDirectory = "adguardhome";
       StateDirectoryMode = "0700";
     };
