@@ -32,10 +32,7 @@ in
       };
     }
     // {
-      configFile = mkOption {
-        type = types.nonEmptyStr;
-        description = "Repository-relative path to the encrypted Caddy JSON file.";
-      };
+      configFile = mkOption { type = types.nonEmptyStr; };
     };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {

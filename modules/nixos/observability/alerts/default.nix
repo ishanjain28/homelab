@@ -17,7 +17,7 @@ in
     enable = mkEnableOption "Pushover notifications for failed units";
     credentialsSecret =
       mkOpt types.nonEmptyStr "secrets/alerts/pushover.json"
-        "Repository-relative SOPS JSON file with the Pushover `token` and `user` keys.";
+        "Secret file with the Pushover `token` and `user` keys.";
     sound = mkOpt types.nonEmptyStr "falling" "Pushover sound for failure alerts.";
     unit = mkOption {
       type = types.str;

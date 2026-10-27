@@ -144,6 +144,8 @@ let
   '';
 
   fleet = inputs.self.lib.homelabRegistry;
+  site = config.${namespace}.hardware.networking.domain;
+  hostChecks = config.${namespace}.services.gatus.hostChecks;
   hostEndpoints = mapAttrsToList (_id: host: {
     inherit (host) name;
     group = "Hosts";
@@ -151,7 +153,7 @@ let
     url = "icmp://${host.name}${optionalString (host.domain != "") ".${host.domain}"}";
     conditions = [ "[CONNECTED] == true" ];
     alerts = [ { type = "pushover"; } ];
-  }) fleet.hosts;
+  }) (optionalAttrs hostChecks fleet.hosts);
   serviceEndpoints = mapAttrsToList (
     _id: srv:
     let
@@ -181,11 +183,14 @@ let
       inherit (monitor) interval alerts client;
       inherit conditions;
     }
-  ) (filterAttrs (_id: srv: srv.monitor.enable) fleet.services);
+  ) (filterAttrs (_id: srv: srv.monitor.enable && fleet.hosts.${srv.host}.domain == site) fleet.services);
 
   invalidMonitorEndpoints = mapAttrsToList (serviceName: srv: "${serviceName}:${toString srv.monitor.endpoint}") (
     filterAttrs (
-      _name: srv: srv.monitor.enable && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.endpoints))
+      _name: srv:
+      srv.monitor.enable
+      && srv.monitor.protocol != "icmp"
+      && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.endpoints))
     ) enabledServices
   );
 

@@ -108,7 +108,7 @@
             flake="''${HOMELAB_FLAKE:-.}"
 
             usage() {
-              echo "usage: config gatus" >&2
+              echo "usage: config gatus|gatus-home" >&2
               exit 2
             }
 
@@ -119,6 +119,10 @@
               gatus)
                 [[ $# -eq 0 ]] || usage
                 config_attr="configs.gatus"
+                ;;
+              gatus-home)
+                [[ $# -eq 0 ]] || usage
+                config_attr="configs.gatus-home"
                 ;;
               *)
                 usage
@@ -231,6 +235,7 @@
       inherit (inputs) self;
       configs = {
         gatus = self.nixosConfigurations.manaslu.config.services.gatus.configFile;
+        gatus-home = self.nixosConfigurations.annapurna.config.services.gatus.configFile;
       };
       lib = lib // {
         homelabRegistry = fleetRegistry;

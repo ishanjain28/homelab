@@ -89,6 +89,9 @@
       instance = "postgresql-del-primary";
       name = "gatus";
     };
+    envFile = "secrets/gatus/delhi.env";
+    endpointsFile = "secrets/gatus/delhi.yml";
+    hostChecks = true;
   };
   vaultwarden = enabled // {
     monitor.group = "DEL";

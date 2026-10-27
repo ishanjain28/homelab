@@ -18,7 +18,7 @@ in
     interfaces = mkOpt (attrsOf (submodule {
       options = {
         enable = mkBoolOpt true "Whether to enable this tunnel.";
-        configFile = mkOpt str null "Repository-relative SOPS binary file with the complete wg-quick configuration.";
+        configFile = mkOpt str null "Secret file with the complete wg-quick configuration.";
         listenPort = mkOpt (nullOr port) null "UDP port to open; must match ListenPort in the secret.";
       };
     })) { } "WireGuard interfaces by name.";

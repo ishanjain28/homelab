@@ -272,11 +272,11 @@ in
 
     passwordSecret =
       mkOpt types.nonEmptyStr "secrets/backups/restic.password"
-        "Repository-relative SOPS file containing the Restic password shared by all targets.";
+        "Secret file containing the Restic password shared by all targets.";
 
     rcloneConfigSecret =
       mkOpt types.nonEmptyStr "secrets/backups/rclone.conf"
-        "Repository-relative SOPS file containing the rclone config used by rclone: repositories.";
+        "Secret file containing the rclone config used by rclone: repositories.";
 
     onFailure = mkOption {
       type = types.listOf types.str;

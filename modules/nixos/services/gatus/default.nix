@@ -14,18 +14,24 @@ let
   configDir = "/run/gatus";
 in
 {
-  options.${namespace}.services.gatus = mkServiceOptions {
-    name = "gatus";
-    description = "Monitoring service for homelab";
-    endpoints.web.port = 8080;
-  };
+  options.${namespace}.services.gatus =
+    mkServiceOptions {
+      name = "gatus";
+      description = "Monitoring service for homelab";
+      endpoints.web.port = 8080;
+    }
+    // {
+      envFile = mkOption { type = types.nonEmptyStr; };
+      endpointsFile = mkOption { type = types.nonEmptyStr; };
+      hostChecks = mkBoolOpt false "Whether this instance pings every fleet host.";
+    };
 
   config = mkIf cfg.enable (mkMerge [
     {
       services.gatus = {
         settings = {
           web = {
-            address = "127.0.0.1";
+            address = "[::]";
             port = cfg.endpoints.web.port;
           };
 
@@ -41,6 +47,8 @@ in
             type = "postgres";
             caching = true;
             path = "\${POSTGRES_URL}";
+            maximum-number-of-results = 40320;
+            maximum-number-of-events = 2000;
           };
 
           alerting = {
@@ -73,15 +81,14 @@ in
     (mkSingleServiceContainer {
       service = cfg;
       package = pkgs.gatus;
-      serviceProfile = "raw-sockets";
       secrets = {
         env = {
-          file = "secrets/gatus/gatus.env";
+          file = cfg.envFile;
           format = "dotenv";
           mountPath = containerSecretPath;
         };
         endpoints = {
-          file = "secrets/gatus/endpoints.yaml";
+          file = cfg.endpointsFile;
           format = "yaml";
           mountPath = "${configDir}/endpoints.yaml";
         };

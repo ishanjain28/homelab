@@ -19,6 +19,9 @@ in
     mkServiceOptions {
       name = "gitea-runner";
       description = "Gitea Actions runner";
+      monitor = enabled // {
+        protocol = "icmp";
+      };
     }
     // {
       giteaURI = mkOption {

@@ -267,6 +267,13 @@
     monitor = {
       name = "Home DNS";
       group = "Homelab";
+      endpoint = "tls";
+      protocol = "tls";
+      client.insecure = true;
+      conditions = [
+        "[CONNECTED] == true"
+        "[CERTIFICATE_EXPIRATION] > 96h"
+      ];
     };
     vlans = [ 99 ];
     runtimeId = 30373;
@@ -331,6 +338,22 @@
     };
     vlans = [ 50 ];
     runtimeId = 30353;
+  };
+
+  gatus = enabled // {
+    vlans = [
+      50
+      99
+      70
+      140
+    ];
+    runtimeId = 36924;
+    database = {
+      instance = "postgresql-home-primary";
+      name = "gatus";
+    };
+    envFile = "secrets/gatus/home.env";
+    endpointsFile = "secrets/gatus/home.yml";
   };
 
   vlan10-debug = enabled // {
