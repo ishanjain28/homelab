@@ -2,7 +2,6 @@
   config,
   lib,
   namespace,
-  pkgs,
   ...
 }:
 with lib.${namespace};
@@ -18,7 +17,6 @@ with lib.${namespace};
   boot.initrd.kernelModules = [ "dm-snapshot" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
-  boot.kernelPackages = pkgs.linuxPackages;
   boot.supportedFilesystems.zfs = true;
   boot.zfs.extraPools = [ "main" ];
   boot.zfs.forceImportRoot = false;

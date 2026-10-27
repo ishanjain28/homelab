@@ -16,7 +16,10 @@ in
   config = mkIf cfg.enable {
     time.timeZone = timeZone;
 
-    services.resolved.settings.Resolve.DNSStubListener = false;
+    services.resolved.settings.Resolve = {
+      DNSStubListener = false;
+      MulticastDNS = false;
+    };
 
     environment.shellAliases = shellAliases;
     services.lldpd = enabled;

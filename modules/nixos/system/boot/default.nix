@@ -29,9 +29,7 @@ in
   config = mkIf cfg.enable {
     boot = {
       initrd.systemd = enabled;
-
-      # Use latest kernel by default.
-      kernelPackages = mkDefault pkgs.linuxPackages_latest;
+      kernelPackages = mkDefault pkgs.linuxPackages;
 
       # Secure Boot
       lanzaboote = {
