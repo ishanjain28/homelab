@@ -38,6 +38,9 @@ let
       name = hostName;
       system = pkgs.stdenv.hostPlatform.system;
       inherit (config.${namespace}.hardware.networking) domain;
+      vlans = map (netdev: netdev.vlanConfig.Id) (
+        filter (netdev: (netdev.netdevConfig.Kind or "") == "vlan") (attrValues config.systemd.network.netdevs)
+      );
     };
     services = mapAttrs mkService services;
     inherit shares volumes;

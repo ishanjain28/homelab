@@ -138,6 +138,7 @@
           '';
         };
       inherit ((import ./lib/module/default.nix { lib = inputs.nixpkgs.lib; })) shellAliases editorVariables;
+      inherit (import ./lib/networking/default.nix { lib = inputs.nixpkgs.lib; }) ipv6Prefixes mkIpv6Address;
       shellAliasHook = inputs.nixpkgs.lib.concatStringsSep "\n" (
         inputs.nixpkgs.lib.mapAttrsToList (
           name: command: "alias ${name}=${inputs.nixpkgs.lib.escapeShellArg command}"
@@ -240,5 +241,16 @@
       lib = lib // {
         homelabRegistry = fleetRegistry;
       };
+      dnsDirect.services =
+        let
+          v6Vlans = entry: lib.filter (vlan: lib.hasAttr (toString vlan) ipv6Prefixes) entry.vlans;
+          entries = fleetRegistry.services // lib.mapAttrs (name: host: host // { host = name; }) fleetRegistry.hosts;
+        in
+        lib.foldl' lib.recursiveUpdate { } (
+          lib.mapAttrsToList (_key: entry: {
+            ${entry.name}.direct.${lib.head (lib.splitString "." fleetRegistry.hosts.${entry.host}.domain)}.v6 =
+              map (mkIpv6Address entry.name) (v6Vlans entry);
+          }) (lib.filterAttrs (_key: entry: v6Vlans entry != [ ]) entries)
+        );
     };
 }

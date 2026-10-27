@@ -1,4 +1,23 @@
 var config = require(dns);
+var generated = require(direct);
+
+for (var service in generated.services) {
+  var entry = (config.services[service] = config.services[service] || {});
+  entry.direct = entry.direct || {};
+  for (var site in generated.services[service].direct) {
+    var existing = (entry.direct[site] = entry.direct[site] || {});
+    if (existing.v6) {
+      throw (
+        "records.json sets direct." +
+        site +
+        ".v6 for '" +
+        service +
+        "', which is generated from Nix"
+      );
+    }
+    existing.v6 = generated.services[service].direct[site].v6;
+  }
+}
 
 var REG_NONE = NewRegistrar("none");
 var REG_PORKBUN = NewRegistrar("porkbun");

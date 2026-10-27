@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 let
   config = ../../tools/dns;
   secrets = ../../secrets/dns;
+  direct = pkgs.writeText "dns-direct.json" (builtins.toJSON inputs.self.dnsDirect);
 in
 pkgs.writeShellApplication {
   name = "dns";
@@ -19,6 +20,6 @@ pkgs.writeShellApplication {
     fi
 
     sops exec-file --no-fifo --filename records.json ${secrets}/records.json \
-      "dnscontrol $command --config ${config}/dnsconfig.js $creds -v dns={} $*"
+      "dnscontrol $command --config ${config}/dnsconfig.js $creds -v dns={} -v direct=${direct} $*"
   '';
 }
