@@ -1,0 +1,49 @@
+name: update wan1 ipv6 prefix
+on:
+  workflow_dispatch:
+    inputs:
+      prefix:
+        description: New WAN1 /64 prefix as four hextets, e.g. 2405:201:6848:209b
+        required: true
+jobs:
+  update:
+    runs-on: nixos
+    env:
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+      PREFIX: ${{ inputs.prefix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update records.json
+        run: |
+          set -euo pipefail
+          if [[ ! "$PREFIX" =~ ^[0-9a-f]{1,4}(:[0-9a-f]{1,4}){3}$ ]]; then
+            echo "prefix must be four lowercase hextets, e.g. 2405:201:6848:209b" >&2
+            exit 1
+          fi
+          OLD="$(sops decrypt --extract '["addresses"]["caddy-jio"]["v6"][0]' secrets/dns/records.json | cut -d: -f1-4):"
+          NEW="$PREFIX:"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "prefix unchanged"
+            exit 0
+          fi
+          export OLD NEW
+          cat > "$RUNNER_TEMP/sops-editor" <<'SCRIPT'
+          #!/usr/bin/env bash
+          jq --arg old "$OLD" --arg new "$NEW" 'walk(if type == "string" and startswith($old) then $new + .[($old | length):] else . end)' "$1" > "$1.new"
+          mv "$1.new" "$1"
+          SCRIPT
+          chmod +x "$RUNNER_TEMP/sops-editor"
+          EDITOR="$RUNNER_TEMP/sops-editor" sops edit secrets/dns/records.json
+      - name: Commit
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "prefix unchanged"
+            exit 0
+          fi
+          git config user.name gitea-actions
+          git config user.email gitea-actions@localhost
+          git commit -am "update wan1 ipv6 prefix"
+          git push origin "HEAD:${{ gitea.ref_name }}"
+      - name: Push DNS
+        run: nix run .#dns -- push

@@ -13,6 +13,8 @@ let
   runnerEnv = "/run/container-secrets/gitea-runner.env";
   instanceName = config.networking.hostName;
   labels = [ "nixos:host" ];
+  hostNixUser = "gitea-runner-nix";
+  hostNixUid = containerUidOffset + cfg.runtimeId;
 in
 {
   options.${namespace}.services.gitea-runner =
@@ -30,77 +32,102 @@ in
       };
     };
 
-  config = mkIf cfg.enable (mkServiceContainer {
-    service = cfg;
-    serviceProfiles."gitea-runner-${instanceName}" = "jit";
+  config = mkIf cfg.enable (mkMerge [
+    {
+      users.groups.${hostNixUser}.gid = hostNixUid;
+      users.users.${hostNixUser} = {
+        isSystemUser = true;
+        uid = hostNixUid;
+        group = hostNixUser;
+      };
 
-    secrets.token = {
-      file = "secrets/gitea-runner.env";
-      format = "dotenv";
-      mountPath = runnerEnv;
-    };
+      nix.settings.allowed-users = [ hostNixUser ];
+    }
 
-    resources = {
-      CPUQuota = "600%";
-      MemoryMax = "12G";
-      TasksMax = 8192;
-    };
+    (mkServiceContainer {
+      service = cfg;
+      serviceProfiles."gitea-runner-${instanceName}" = "jit";
 
-    containerConfig = {
-      services.gitea-actions-runner.instances.${instanceName} = enabled // {
-        name = instanceName;
-        url = cfg.giteaURI;
-        tokenFile = runnerEnv;
-        inherit labels;
+      secrets.token = {
+        file = "secrets/gitea-runner.env";
+        format = "dotenv";
+        mountPath = runnerEnv;
+      };
 
-        hostPackages = with pkgs; [
-          age
-          bash
-          coreutils
-          curl
-          diffutils
-          dnscontrol
-          findutils
-          gawk
-          git
-          gnugrep
-          gnused
-          gnutar
-          gzip
-          jq
-          nodejs
-          wget
-          xz
-        ];
+      resources = {
+        CPUQuota = "600%";
+        MemoryMax = "12G";
+        TasksMax = 8192;
+      };
 
-        settings = {
-          log.level = "info";
+      containerConfig = {
+        nix = mkForce (
+          enabled
+          // {
+            settings.experimental-features = [
+              "nix-command"
+              "flakes"
+            ];
+          }
+        );
 
-          runner = {
-            file = ".runner";
-            capacity = 1;
-            timeout = "3h";
-            shutdown_timeout = "0s";
-            insecure = false;
-            fetch_timeout = "5s";
-            fetch_interval = "2s";
-            inherit labels;
+        services.gitea-actions-runner.instances.${instanceName} = enabled // {
+          name = instanceName;
+          url = cfg.giteaURI;
+          tokenFile = runnerEnv;
+          inherit labels;
+
+          hostPackages = with pkgs; [
+            age
+            bash
+            coreutils
+            curl
+            diffutils
+            dnscontrol
+            findutils
+            gawk
+            git
+            gnugrep
+            gnused
+            gnutar
+            gzip
+            jq
+            nix
+            nodejs
+            sops
+            wget
+            xz
+          ];
+
+          settings = {
+            log.level = "info";
+
+            runner = {
+              file = ".runner";
+              capacity = 1;
+              timeout = "3h";
+              shutdown_timeout = "0s";
+              insecure = false;
+              fetch_timeout = "5s";
+              fetch_interval = "2s";
+              inherit labels;
+            };
+
+            cache.enabled = false;
           };
+        };
 
-          cache.enabled = false;
+        systemd.services."gitea-runner-${instanceName}".serviceConfig = {
+          DynamicUser = mkForce false;
+          User = cfg.runtimeUser.name;
+          Group = cfg.runtimeUser.group;
+          Restart = mkForce "always";
+          RestartSec = mkForce "10s";
+          StateDirectoryMode = "0700";
+          TimeoutStartSec = "infinity";
+          TimeoutStopSec = "infinity";
         };
       };
-
-      systemd.services."gitea-runner-${instanceName}".serviceConfig = {
-        DynamicUser = mkForce false;
-        User = cfg.runtimeUser.name;
-        Group = cfg.runtimeUser.group;
-        Restart = mkForce "always";
-        RestartSec = mkForce "10s";
-        StateDirectoryMode = "0700";
-        TimeoutStartSec = "infinity";
-        TimeoutStopSec = "infinity";
-      };
-    };
-  });
+    })
+  ]);
 }

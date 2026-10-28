@@ -1,0 +1,13 @@
+name: dns
+on:
+  push:
+    branches:
+      - master
+jobs:
+  push:
+    runs-on: nixos
+    steps:
+      - uses: actions/checkout@v4
+      - run: nix run .#dns -- push
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}

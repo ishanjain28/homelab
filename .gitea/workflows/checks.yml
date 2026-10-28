@@ -1,0 +1,9 @@
+name: checks
+on:
+  push:
+jobs:
+  checks:
+    runs-on: nixos
+    steps:
+      - uses: actions/checkout@v4
+      - run: nix flake check -L

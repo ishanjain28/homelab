@@ -1,1 +1,2 @@
-{ inputs, ... }: builtins.mapAttrs (_: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib
+{ inputs, stdenv, ... }:
+(inputs.deploy-rs.lib.${stdenv.hostPlatform.system}.deployChecks inputs.self.deploy).deploy-schema
