@@ -20,6 +20,10 @@ let
       xff-src: ${mkIpv6Address "caddy" 50}/128
       idp-h-usr: remote-user
       idp-h-grp: remote-groups
+      shr: /shr
+      e2d
+      zs
+      zsl: https://transfer.ishanjain.me/
 
     [/]
       ${dataDir}
@@ -32,7 +36,13 @@ in
   options.${namespace}.services.copyparty = mkServiceOptions {
     name = "copyparty";
     description = "Copyparty file transfer";
-    endpoints.web.port = 3923;
+    endpoints = {
+      web.port = 3923;
+      ssdp = {
+        port = 1900;
+        transport = "udp";
+      };
+    };
     monitor = enabled // {
       endpoint = "web";
       protocol = "tcp";

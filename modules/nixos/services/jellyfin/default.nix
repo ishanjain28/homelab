@@ -18,6 +18,10 @@ in
     description = "Jellyfin media server";
     endpoints = {
       web.port = 8080;
+      ssdp = {
+        port = 1900;
+        transport = "udp";
+      };
     };
     monitor = enabled // {
       endpoint = "web";

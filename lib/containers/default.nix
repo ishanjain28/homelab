@@ -99,6 +99,9 @@ let
     setuid.SystemCallFilter = [ "@setuid" ];
     privileged-ports = grant "CAP_NET_BIND_SERVICE";
     raw-sockets = grant "CAP_NET_RAW";
+    link-layer = grant "CAP_NET_RAW" // {
+      RestrictAddressFamilies = [ "AF_PACKET" ];
+    };
     browser = {
       MemoryDenyWriteExecute = false;
       RestrictNamespaces = false;

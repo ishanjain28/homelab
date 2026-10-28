@@ -82,6 +82,17 @@
     runtimeId = 36925;
   };
 
+  netflector = enabled // {
+    vlans = [
+      50
+      10
+      20
+      30
+      40
+    ];
+    runtimeId = 36997;
+  };
+
   ripe-atlas-primary = enabled // {
     vlans = [ 150 ];
     runtimeId = 36926;
