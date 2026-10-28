@@ -63,4 +63,10 @@
     size = "10G";
     backup.groups = [ "offsite-weekly" ];
   };
+
+  copyparty = {
+    uuid = "8595b15e-58cf-4e7a-919f-509efdf4e927";
+    mountPath = "/srv/copyparty";
+    size = "50G";
+  };
 }

@@ -119,6 +119,12 @@
     volumes = [ "kavita" ];
   };
 
+  copyparty = enabled // {
+    vlans = [ 50 ];
+    runtimeId = 30396;
+    volumes = [ "copyparty" ];
+  };
+
   atuin = enabled // {
     database = {
       instance = "postgresql-home-primary";
