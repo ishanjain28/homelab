@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   namespace,
@@ -22,7 +21,7 @@ in
   };
   config = lib.mkIf cfg.enable {
     sops.secrets.bird-config = {
-      sopsFile = "${inputs.self}/secrets/bird.password";
+      sopsFile = repoFile "secrets/bird.password";
       format = "binary";
       owner = "bird";
       group = "bird";

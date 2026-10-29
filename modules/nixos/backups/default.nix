@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   namespace,
   pkgs,
@@ -303,11 +302,11 @@ in
 
     sops.secrets = {
       homelab-backups-restic-password = {
-        sopsFile = "${inputs.self}/${cfg.passwordSecret}";
+        sopsFile = repoFile cfg.passwordSecret;
         format = "binary";
       };
       homelab-backups-rclone = {
-        sopsFile = "${inputs.self}/${cfg.rcloneConfigSecret}";
+        sopsFile = repoFile cfg.rcloneConfigSecret;
         format = "binary";
       };
     };

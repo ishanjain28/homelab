@@ -1,5 +1,7 @@
 { lib, ... }: with lib;
 rec {
+  repoFile = file: ../.. + "/${file}";
+
   ## Create a NixOS module option.
   ##
   ## ```nix

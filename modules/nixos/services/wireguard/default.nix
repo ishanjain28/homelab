@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   namespace,
   ...
@@ -28,7 +27,7 @@ in
     sops.secrets = mapAttrs' (
       name: interface:
       nameValuePair (secretName name) {
-        sopsFile = "${inputs.self}/${interface.configFile}";
+        sopsFile = repoFile interface.configFile;
         format = "binary";
         restartUnits = [ "wg-quick-${name}.service" ];
       }

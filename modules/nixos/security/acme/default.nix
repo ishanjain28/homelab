@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   namespace,
   pkgs,
@@ -74,7 +73,7 @@ in
 
   config = mkIf (certificateIds != [ ]) {
     sops.secrets.acme = {
-      sopsFile = "${inputs.self}/secrets/acme.json";
+      sopsFile = repoFile "secrets/acme.json";
       format = "json";
       key = "";
       mode = "0400";

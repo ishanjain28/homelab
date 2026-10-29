@@ -193,9 +193,8 @@ let
     let
       instance = removeSuffix ".json" file;
     in
-    nameValuePair instance
-      (builtins.fromJSON (builtins.readFile (../.. + "/${postgresqlSecretsFile instance}"))).${instance}
-  ) (builtins.readDir ../../secrets/postgresql);
+    nameValuePair instance (builtins.fromJSON (builtins.readFile (repoFile (postgresqlSecretsFile instance)))).${instance}
+  ) (builtins.readDir (repoFile "secrets/postgresql"));
   databaseReadyUnit = "database-ready.service";
 
   # Readiness gate and watchdog for a container that consumes a PostgreSQL database.
@@ -267,7 +266,6 @@ let
       serviceProfiles ? { },
     }:
     let
-      repoRoot = ../..;
       inherit (service)
         name
         runtimeId
@@ -319,7 +317,7 @@ let
         sops.secrets = mapAttrs' (
           secretName: secret:
           nameValuePair (mkSecretName secretName) {
-            sopsFile = repoRoot + "/${secret.file}";
+            sopsFile = repoFile secret.file;
             inherit (secret) format;
             key = secret.key or "";
             uid = containerUidOffset + runtimeId;

@@ -79,7 +79,7 @@ in
       };
     };
 
-    containerConfig.environment.etc."grafana/dashboards".source = ../../../../dashboards;
+    containerConfig.environment.etc."grafana/dashboards".source = repoFile "dashboards";
 
     resources = {
       CPUQuota = "500%";

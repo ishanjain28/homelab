@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   namespace,
   pkgs,
@@ -29,7 +28,7 @@ in
 
   config = mkIf cfg.enable {
     sops.secrets.alerts-pushover = {
-      sopsFile = "${inputs.self}/${cfg.credentialsSecret}";
+      sopsFile = repoFile cfg.credentialsSecret;
       format = "json";
       key = "";
     };

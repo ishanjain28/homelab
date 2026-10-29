@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   namespace,
   pkgs,
@@ -10,7 +9,7 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.profiles.bootstrap;
-  bootstrapKeys = filter (key: key != "") (map trim (splitString "\n" (builtins.readFile "${inputs.self}/ssh-keys.txt")));
+  bootstrapKeys = filter (key: key != "") (map trim (splitString "\n" (builtins.readFile (repoFile "ssh-keys.txt"))));
 in
 {
   options.${namespace}.profiles.bootstrap.enable = mkEnableOption "remote installation and rescue environment";

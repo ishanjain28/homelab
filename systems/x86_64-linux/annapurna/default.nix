@@ -1,9 +1,4 @@
-{
-  inputs,
-  lib,
-  namespace,
-  ...
-}:
+{ lib, namespace, ... }:
 with lib;
 with lib.${namespace};
 let
@@ -184,7 +179,7 @@ in
   };
 
   sops.secrets.tailscale-auth-key = {
-    sopsFile = "${inputs.self}/secrets/tailscale/auth-key";
+    sopsFile = repoFile "secrets/tailscale/auth-key";
     format = "binary";
   };
 

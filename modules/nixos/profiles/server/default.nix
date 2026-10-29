@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   pkgs,
   lib,
   namespace,
@@ -56,7 +55,7 @@ in
     ];
 
     sops.secrets.atuin-sync-address = {
-      sopsFile = "${inputs.self}/secrets/atuin/sync-address";
+      sopsFile = repoFile "secrets/atuin/sync-address";
       format = "binary";
       owner = "ishan";
     };
