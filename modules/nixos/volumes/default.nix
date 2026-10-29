@@ -101,7 +101,7 @@ let
       restartTriggers = [ (volumeRestartTrigger [ volumeId ]) ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${volumePackage}/bin/volume apply --yes ${escapeShellArg volumeId}";
+        ExecStart = "/run/current-system/sw/bin/volume apply --yes ${escapeShellArg volumeId}";
         RemainAfterExit = true;
       };
     };

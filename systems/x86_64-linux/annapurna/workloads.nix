@@ -31,7 +31,7 @@
       wal_buffers = "16MB";
       wal_level = "replica";
       max_wal_senders = 10;
-      wal_keep_size = "512MB";
+      wal_keep_size = "128MB";
       checkpoint_completion_target = 0.9;
       max_wal_size = "1GB";
       min_wal_size = "512MB";

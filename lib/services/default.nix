@@ -176,7 +176,7 @@ let
         Storage = "persistent";
         SplitMode = "none";
         MaxRetentionSec = "1week";
-        SystemMaxUse = "256M";
+        SystemMaxUse = "64M";
         RuntimeMaxUse = "64M";
       };
 
