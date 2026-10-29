@@ -48,9 +48,10 @@ in
     environment = {
       PORT = toString cfg.endpoints.web.port;
       NODE_ENV = "production";
-      LOG_LEVEL = "info";
+      LOG_LEVEL = "warn";
       CONFIG_DIRECTORY = "/var/lib/seerr";
     };
+    containerConfig.systemd.services.seerr.preStart = "install -m600 ${settingsPath} /var/lib/seerr/settings.json";
     serviceConfig = {
       EnvironmentFile = confPath;
       StateDirectory = "seerr";
