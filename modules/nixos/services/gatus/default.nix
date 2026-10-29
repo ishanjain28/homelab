@@ -95,6 +95,7 @@ in
       };
       environment = {
         GATUS_CONFIG_PATH = configDir;
+        GATUS_LOG_LEVEL = "WARN";
       };
       serviceConfig = {
         StateDirectory = "gatus";

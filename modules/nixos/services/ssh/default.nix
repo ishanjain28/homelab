@@ -31,6 +31,7 @@ in
         X11Forwarding = mkDefault false;
         PermitRootLogin = mkForce (bool-to-yes-no cfg.permitRootLogin);
         PasswordAuthentication = mkDefault cfg.passwordAuth;
+        KbdInteractiveAuthentication = mkDefault cfg.passwordAuth;
       };
       openFirewall = true;
     };

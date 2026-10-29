@@ -335,6 +335,7 @@ let
               log_autovacuum_min_duration = -1;
               log_connections = false;
               log_disconnections = false;
+              log_line_prefix = "[%p] %h %u@%d ";
             }
             // optionalAttrs (cfg.replicaOf != null) {
               primary_conninfo = "host=${cfg.replicaOf} port=5432 user=replica passfile=/run/postgresql/pgpass";

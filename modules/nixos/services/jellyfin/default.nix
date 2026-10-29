@@ -41,6 +41,8 @@ in
     containerConfig = {
       environment.etc.jellyfin.source = "/var/lib/jellyfin/config";
 
+      systemd.services.jellyfin.path = [ pkgs.jellyfin-ffmpeg ];
+
       services.jellyfin = enabled // {
         openFirewall = false;
         user = cfg.runtimeUser.name;

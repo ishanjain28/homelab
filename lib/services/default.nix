@@ -165,7 +165,7 @@ let
       services.timesyncd = disabled;
       system.nssModules = mkForce [ ];
       services.resolved.settings.Resolve.DNSStubListener = false;
-      systemd.oomd = enabled;
+      systemd.oomd = disabled;
       systemd.settings.Manager.ShowStatus = false;
       systemd.services."console-getty" = disabled;
       systemd.services.systemd-networkd-persistent-storage = disabled;
