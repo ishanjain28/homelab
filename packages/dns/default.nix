@@ -14,12 +14,17 @@ pkgs.writeShellApplication {
     command="''${1:-preview}"
     shift || true
 
-    creds=""
+    creds=()
     if [ "$command" = preview ] || [ "$command" = push ]; then
-      creds="--creds '!sops decrypt ${secrets}/creds.json --output-type json'"
+      creds=(--creds "!sops decrypt ${secrets}/creds.json --output-type json")
     fi
 
-    sops exec-file --no-fifo --filename records.json ${secrets}/records.json \
-      "dnscontrol $command --config ${config}/dnsconfig.js $creds -v dns={} -v direct=${direct} $*"
+    cd "$(mktemp -d)"
+    trap 'rm -rf "$PWD"' EXIT
+    sops decrypt ${secrets}/records.json > records.json
+    cp ${direct} direct.json
+
+    dnscontrol "$command" --config ${config}/dnsconfig.js "''${creds[@]}" \
+      -v dns="$PWD/records.json" -v direct="$PWD/direct.json" "$@"
   '';
 }
