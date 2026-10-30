@@ -3,6 +3,15 @@ on:
   push:
     branches:
       - master
+    paths:
+      - .gitea/workflows/dns.yml
+      - flake.nix
+      - flake.lock
+      - lib/**
+      - packages/dns/**
+      - secrets/dns/**
+      - systems/**
+      - tools/dns/**
 jobs:
   push:
     runs-on: nixos

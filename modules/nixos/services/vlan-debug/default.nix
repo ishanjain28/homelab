@@ -31,6 +31,12 @@ let
     mkIf cfg.enable (mkServiceContainer {
       service = cfg;
 
+      secrets.ishan-password = {
+        file = "secrets/users/ishan-password";
+        format = "binary";
+        mountPath = "/run/container-secrets/ishan-password";
+      };
+
       resources = {
         CPUQuota = "100%";
         MemoryMax = "1G";
@@ -126,7 +132,7 @@ let
             home = "/home/ishan";
             homeMode = "700";
             useDefaultShell = true;
-            hashedPassword = config.users.users.ishan.hashedPassword;
+            hashedPasswordFile = "/run/container-secrets/ishan-password";
             openssh.authorizedKeys.keys = ssh.keys;
           };
         };

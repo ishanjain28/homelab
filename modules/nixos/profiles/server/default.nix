@@ -58,6 +58,12 @@ in
       "wireguard"
     ];
 
+    sops.secrets.ishan-password = {
+      sopsFile = repoFile "secrets/users/ishan-password";
+      format = "binary";
+      neededForUsers = true;
+    };
+
     sops.secrets.atuin-sync-address = {
       sopsFile = repoFile "secrets/atuin/sync-address";
       format = "binary";
@@ -83,7 +89,7 @@ in
         useDefaultShell = true;
         isNormalUser = true;
         linger = true;
-        hashedPassword = "$6$/4l0PEwOs7lcQlOU$rn9VlGaNJQcd.ndc.vmkIo4ZbL6uG9G3sd/mP7/AFf9ucakIfnGT4NtWllnEPnoLg5FsoHzJgpfHuDoAzNLXC/";
+        hashedPasswordFile = config.sops.secrets.ishan-password.path;
       };
     };
 

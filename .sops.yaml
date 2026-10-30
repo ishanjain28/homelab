@@ -45,6 +45,14 @@ creation_rules:
           - *annapurna
           - *kanchenjunga
           - *manaslu
+  - path_regex: secrets/users/ishan-password$
+    key_groups:
+      - age:
+          - *turquoise
+          - *kepler
+          - *annapurna
+          - *kanchenjunga
+          - *manaslu
   - path_regex: secrets/atuin/sync-address$
     key_groups:
       - age:
