@@ -31,83 +31,31 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
-    secrets = {
-      cdrConf = {
-        file = "secrets/asterisk/cdr.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/cdr.conf";
-      };
-      cdrCustomConf = {
-        file = "secrets/asterisk/cdr_custom.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/cdr_custom.conf";
-      };
-      confbridgeConf = {
-        file = "secrets/asterisk/confbridge.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/confbridge.conf";
-      };
-      dnsmgrConf = {
-        file = "secrets/asterisk/dnsmgr.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/dnsmgr.conf";
-      };
-      extensionsConf = {
-        file = "secrets/asterisk/extensions.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/extensions.conf";
-      };
-      indicationsConf = {
-        file = "secrets/asterisk/indications.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/indications.conf";
-      };
-      loggerConf = {
-        file = "secrets/asterisk/logger.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/logger.conf";
-      };
-      modulesConf = {
-        file = "secrets/asterisk/modules.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/modules.conf";
-      };
-      musiconholdConf = {
-        file = "secrets/asterisk/musiconhold.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/musiconhold.conf";
-      };
-      pjsipConf = {
-        file = "secrets/asterisk/pjsip.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/pjsip.conf";
-      };
-      pjsipNotifyConf = {
-        file = "secrets/asterisk/pjsip_notify.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/pjsip_notify.conf";
-      };
-      queuesConf = {
-        file = "secrets/asterisk/queues.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/queues.conf";
-      };
-      resolverUnboundConf = {
-        file = "secrets/asterisk/resolver_unbound.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/resolver_unbound.conf";
-      };
-      rtpConf = {
-        file = "secrets/asterisk/rtp.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/rtp.conf";
-      };
-      voicemailConf = {
-        file = "secrets/asterisk/voicemail.conf";
-        format = "binary";
-        mountPath = "/etc/asterisk/voicemail.conf";
-      };
-    };
+    secrets =
+      genAttrs
+        [
+          "cdr"
+          "cdr_custom"
+          "confbridge"
+          "dnsmgr"
+          "extensions"
+          "indications"
+          "logger"
+          "modules"
+          "musiconhold"
+          "pjsip"
+          "pjsip_jio"
+          "pjsip_notify"
+          "queues"
+          "resolver_unbound"
+          "rtp"
+          "voicemail"
+        ]
+        (name: {
+          file = "secrets/asterisk/${name}.conf";
+          format = "binary";
+          mountPath = "/etc/asterisk/${name}.conf";
+        });
 
     resources = {
       CPUQuota = "200%";
@@ -117,8 +65,9 @@ in
 
     containerConfig = {
       services.asterisk = enabled // {
-        package = pkgs.asterisk;
+        package = pkgs.${namespace}.asterisk-jio;
         useTheseDefaultConfFiles = [ ];
+        extraConfig = "astdatadir => ${pkgs.asterisk}/var/lib/asterisk";
       };
 
       networking.firewall.rejectPackets = true;

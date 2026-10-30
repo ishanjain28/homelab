@@ -343,6 +343,7 @@
   gatus = enabled // {
     vlans = [
       50
+      10
       99
       70
       140

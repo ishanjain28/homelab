@@ -1,11 +1,8 @@
 { pkgs, ... }:
 let
-  src = pkgs.fetchFromGitea {
-    domain = "git.ishanjain.me";
-    owner = "ishan";
-    repo = "multicaster";
+  src = builtins.fetchGit {
+    url = "ssh://git@ssh.git.ishanjain.me:2222/ishan/multicaster.git";
     rev = "0acc1fa43acf4f8ee6d4d032035940ca5a0add63";
-    hash = "sha256-V4n7q3n2Z65D2l4KWyA8nMwJBRAH4JtZWk+98W8tGAY=";
   };
 in
 pkgs.rustPlatform.buildRustPackage {

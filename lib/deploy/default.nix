@@ -10,7 +10,7 @@ in
       nodes = builtins.deepSeq fleetRegistry.volumes (
         builtins.mapAttrs (_: machine: {
           hostname = machine.config.networking.hostName;
-          fastConnection = true;
+          fastConnection = false;
           remoteBuild = false;
           autoRollback = true;
           magicRollback = true;

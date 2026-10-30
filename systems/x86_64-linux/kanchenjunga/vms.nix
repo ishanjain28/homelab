@@ -16,7 +16,7 @@
   };
 
   win10 = enabled // {
-    autoStart = false;
+    autoStart = true;
     runtimeId = 31003;
     os = "windows";
     cpus = 12;

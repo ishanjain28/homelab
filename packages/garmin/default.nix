@@ -37,12 +37,9 @@ python.buildPythonApplication {
   version = "0.1.0";
   pyproject = true;
 
-  src = pkgs.fetchFromGitea {
-    domain = "git.ishanjain.me";
-    owner = "ishan";
-    repo = "garmin";
+  src = builtins.fetchGit {
+    url = "ssh://git@ssh.git.ishanjain.me:2222/ishan/garmin.git";
     rev = "dfac170bce0936f94ff09cbbe5f14b31c0ebaaf8";
-    hash = "sha256-Y4JecNL0yG0tZK5q7R7km1/U2UtSdJpWe2hJmGAbwYI=";
   };
 
   build-system = [ python.hatchling ];
