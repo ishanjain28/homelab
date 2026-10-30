@@ -4,14 +4,14 @@ let
   version = "2.8.3";
   nodejs = pkgs.nodejs-slim_24;
   pnpm = pkgs.pnpm_12.override { nodejs-slim = nodejs; };
-  basemapBuild = "20261019";
+  basemapBuild = "20261028";
   basemap = pkgs.stdenvNoCC.mkDerivation {
     name = "tracearr-basemap-${basemapBuild}.pmtiles";
     nativeBuildInputs = [ pkgs.pmtiles ];
     SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     outputHashMode = "flat";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-YIr0zZydXlSwU2BJ8gl9USPSm4BFRy56Fa5HwUqSUhw=";
+    outputHash = "sha256-vZkbe7OwCseaRYeqXs5JS1/YjKI+0uVcVZsuK4tFdiQ=";
     buildCommand = "pmtiles extract https://build.protomaps.com/${basemapBuild}.pmtiles $out --maxzoom=8";
   };
 
@@ -80,7 +80,7 @@ pkgs.stdenv.mkDerivation {
       data/GeoLite2-ASN.mmdb \
       data/BASEMAP_NOTICE.txt \
       "$runtimeRoot/data/"
-    cp ${basemap} "$runtimeRoot/data/basemap.pmtiles"
+    ln -s ${basemap} "$runtimeRoot/data/basemap.pmtiles"
     ln -s /var/lib/tracearr/image-cache "$runtimeRoot/data/image-cache"
 
     printf '{"version":"%s","tag":"v%s"}\n' '${version}' '${version}' \
