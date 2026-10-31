@@ -1,5 +1,5 @@
-{ lib, namespace }:
-with lib.${namespace}; {
+{ lib, namespace }: with lib.${namespace};
+{
   postgresql-home-primary = enabled // {
     monitor.name = "PostgreSQL Primary";
     vlans = [ 50 ];
@@ -84,7 +84,10 @@ with lib.${namespace}; {
   karakeep = enabled // {
     vlans = [ 50 ];
     runtimeId = 30348;
-    volumes = [ "karakeep" "karakeep-meilisearch" ];
+    volumes = [
+      "karakeep"
+      "karakeep-meilisearch"
+    ];
   };
 
   bentopdf = enabled // {
@@ -175,7 +178,10 @@ with lib.${namespace}; {
     vlans = [ 50 ];
     runtimeId = 30360;
     volumes = [ "jellyfin" ];
-    shares = [ "wd-4tb" "music" ];
+    shares = [
+      "wd-4tb"
+      "music"
+    ];
     devices = [ "render" ];
   };
 
@@ -196,7 +202,10 @@ with lib.${namespace}; {
   };
 
   victorialogs = enabled // {
-    vlans = [ 50 99 ];
+    vlans = [
+      50
+      99
+    ];
     runtimeId = 36935;
     volumes = [ "victorialogs" ];
   };
@@ -241,7 +250,10 @@ with lib.${namespace}; {
 
   caddy = enabled // {
     monitor.name = "Ingress Proxy IPv4";
-    vlans = [ 50 140 ];
+    vlans = [
+      50
+      140
+    ];
     runtimeId = 30352;
     configFile = "secrets/caddy/home.json";
   };
@@ -253,7 +265,10 @@ with lib.${namespace}; {
       endpoint = "tls";
       protocol = "tls";
       client.insecure = true;
-      conditions = [ "[CONNECTED] == true" "[CERTIFICATE_EXPIRATION] > 96h" ];
+      conditions = [
+        "[CONNECTED] == true"
+        "[CERTIFICATE_EXPIRATION] > 96h"
+      ];
     };
     vlans = [ 99 ];
     runtimeId = 30373;
@@ -321,7 +336,13 @@ with lib.${namespace}; {
   };
 
   gatus = enabled // {
-    vlans = [ 50 10 99 70 140 ];
+    vlans = [
+      50
+      10
+      99
+      70
+      140
+    ];
     runtimeId = 36924;
     database = {
       instance = "postgresql-home-primary";
@@ -388,12 +409,18 @@ with lib.${namespace}; {
 
   alloy-syslog = enabled // {
     monitor.name = "Syslog";
-    vlans = [ 50 99 ];
+    vlans = [
+      50
+      99
+    ];
     runtimeId = 30346;
   };
 
   telegraf-snmp = enabled // {
-    vlans = [ 50 99 ];
+    vlans = [
+      50
+      99
+    ];
     runtimeId = 36931;
   };
 

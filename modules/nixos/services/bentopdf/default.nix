@@ -10,6 +10,19 @@ with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.bentopdf;
+  caddyfile = pkgs.writeText "Caddyfile" ''
+    {
+    	admin off
+    }
+
+    :${toString cfg.endpoints.web.port} {
+    	root * ${pkgs.bentopdf}
+    	try_files {path} {path}.html {path}/index.html
+    	file_server {
+    		precompressed br
+    	}
+    }
+  '';
 in
 {
   options.${namespace}.services.bentopdf = mkServiceOptions {
@@ -31,6 +44,6 @@ in
       TasksMax = 256;
     };
 
-    command = "${pkgs.caddy}/bin/caddy file-server --listen :${toString cfg.endpoints.web.port} --root ${pkgs.bentopdf}";
+    command = "${pkgs.caddy}/bin/caddy run --config ${caddyfile} --adapter caddyfile";
   });
 }
