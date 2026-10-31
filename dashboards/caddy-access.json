@@ -95,6 +95,31 @@
         "sort": 1
       },
       {
+        "name": "status",
+        "label": "Status code",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "status",
+          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\"",
+          "refId": "status"
+        },
+        "definition": "status",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "refresh": 2,
+        "sort": 3
+      },
+      {
         "name": "asn",
         "label": "ASN",
         "type": "textbox",
@@ -146,7 +171,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count() as requests",
           "queryType": "stats"
         }
       ],
@@ -205,7 +230,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count_uniq(request.client_ip) as clients",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count_uniq(request.client_ip) as clients",
           "queryType": "stats"
         }
       ],
@@ -264,7 +289,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count() if (status:>=500) as errors, count() as total | math errors / total * 100 as server_errors | fields server_errors",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count() if (status:>=500) as errors, count() as total | math errors / total * 100 as server_errors | fields server_errors",
           "queryType": "stats"
         }
       ],
@@ -331,7 +356,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.5, duration) as p50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.5, duration) as p50",
           "queryType": "stats"
         }
       ],
@@ -390,7 +415,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.95, duration) as p95",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.95, duration) as p95",
           "queryType": "stats"
         }
       ],
@@ -457,7 +482,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats sum(size) as bytes",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats sum(size) as bytes",
           "queryType": "stats"
         }
       ],
@@ -529,7 +554,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (status) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (status) count() as requests",
           "queryType": "statsRange",
           "legendFormat": "{{status}}"
         }
@@ -586,7 +611,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.5, duration) as p50, quantile(0.95, duration) as p95, quantile(0.99, duration) as p99",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.5, duration) as p50, quantile(0.95, duration) as p95, quantile(0.99, duration) as p99",
           "queryType": "statsRange",
           "legendFormat": "{{__name__}}"
         }
@@ -644,7 +669,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.host) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.host) count() as requests",
           "queryType": "statsRange",
           "legendFormat": "{{request.host}}"
         }
@@ -701,7 +726,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.method) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.method) count() as requests",
           "queryType": "stats",
           "legendFormat": "{{request.method}}"
         }
@@ -756,7 +781,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.proto) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.proto) count() as requests",
           "queryType": "stats",
           "legendFormat": "{{request.proto}}"
         }
@@ -824,7 +849,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, sum(size) as bytes | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, sum(size) as bytes | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -962,7 +987,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, max(duration) as max | filter requests:>=5 | sort by (p95 desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, max(duration) as max | filter requests:>=5 | sort by (p95 desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1100,7 +1125,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | status:>=400 | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path, status) count() as requests | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | status:>=400 | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path, status) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1226,7 +1251,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<user_agent>\\\"]\" from \"request.headers.User-Agent\" | stats by (user_agent) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<user_agent>\\\"]\" from \"request.headers.User-Agent\" | stats by (user_agent) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1338,7 +1363,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (request.client_ip, country, asn) count() as requests | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (request.client_ip, country, asn) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
         },
         {
@@ -1481,7 +1506,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (asn) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (asn) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
         },
         {
@@ -1636,7 +1661,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | filter country:!=\"\" | stats by (country) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | filter country:!=\"\" | stats by (country) count() as requests",
           "queryType": "stats"
         }
       ],
@@ -1685,7 +1710,8 @@
           "lat": 20,
           "lon": 0,
           "zoom": 1.6,
-          "allLayers": true
+          "allLayers": true,
+          "noRepeat": true
         },
         "controls": {
           "showZoom": true,
@@ -1755,7 +1781,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | stats by (country) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | stats by (country) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1834,7 +1860,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<state>\\\"]\" from \"resp_headers.X-State\" | extract \"[\\\"<city>\\\"]\" from \"resp_headers.X-City\" | stats by (country, state, city) count() as requests | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<state>\\\"]\" from \"resp_headers.X-State\" | extract \"[\\\"<city>\\\"]\" from \"resp_headers.X-City\" | stats by (country, state, city) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1927,7 +1953,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | status:>=500",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | status:>=500",
           "queryType": "instant",
           "maxLines": 500
         }

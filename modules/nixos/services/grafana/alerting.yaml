@@ -261,3 +261,65 @@ groups:
                     type: gt
                     params:
                       - 50
+      - uid: http-404-flood
+        title: Many 404 responses
+        condition: B
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.site }} returned {{ $values.A.Value }} 404s in 10 minutes"
+        data:
+          - refId: A
+            datasourceUid: victorialogs
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: '{container="caddy"} status:404 | stats by ("request.host", caddy_instance) count() n | stats by ("request.host") max(n) notfound | rename "request.host" as site'
+              queryType: stats
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 300
+      - uid: http-404-surge
+        title: Sudden surge of 404 responses
+        condition: D
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.site }} returned {{ $values.A.Value }} 404s in 10 minutes, over 10x its 24h average"
+        data:
+          - refId: A
+            datasourceUid: victorialogs
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: '{container="caddy"} status:404 | stats by ("request.host", caddy_instance) count() n | stats by ("request.host") max(n) notfound | rename "request.host" as site'
+              queryType: stats
+          - refId: C
+            datasourceUid: victorialogs
+            relativeTimeRange:
+              from: 86400
+              to: 0
+            model:
+              refId: C
+              expr: '{container="caddy"} status:404 | stats by ("request.host", caddy_instance) count() n | stats by ("request.host") max(n) notfound | rename "request.host" as site'
+              queryType: stats
+          - refId: D
+            datasourceUid: __expr__
+            model:
+              refId: D
+              type: math
+              expression: $A > 100 && $A > 10 * $C / 144

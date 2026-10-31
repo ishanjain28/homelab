@@ -12,8 +12,6 @@ D(
   TXT("@", "v=DKIM1; p="),
   TXT("_dmarc", "v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;"),
 
-  addressRecords("*", { via: ["caddy-delhi"] }),
-
   A("@", "192.0.2.1", CF_PROXY_ON),
 
   CF_TEMP_REDIRECT("vax.ovh/*", "https://ishanjain.me/$1"),

@@ -502,7 +502,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "snmp_cpu_temperature{agent_host=\"$router\"}",
+          "expr": "max without (model, version, serial, mode) (snmp_cpu_temperature{agent_host=\"$router\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -1590,7 +1590,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "snmp_cpu_temperature{agent_host=\"$router\"}",
+          "expr": "max without (model, version, serial, mode) (snmp_cpu_temperature{agent_host=\"$router\"})",
           "refId": "A",
           "legendFormat": "CPU"
         }
@@ -4165,7 +4165,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_snr{agent_host=\"$ptp_local\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_snr{agent_host=\"$ptp_local\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -4231,7 +4231,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_transmit_ccq{agent_host=\"$ptp_local\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_transmit_ccq{agent_host=\"$ptp_local\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -4297,7 +4297,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_snr{agent_host=\"$ptp_remote\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_snr{agent_host=\"$ptp_remote\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -4363,7 +4363,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_transmit_ccq{agent_host=\"$ptp_remote\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_transmit_ccq{agent_host=\"$ptp_remote\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -4491,7 +4491,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_memory_usage{agent_host=\"$ptp_local\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_memory_usage{agent_host=\"$ptp_local\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -4557,7 +4557,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_cpu_usage{agent_host=\"$ptp_local\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_cpu_usage{agent_host=\"$ptp_local\"})",
           "refId": "A",
           "legendFormat": ""
         }
@@ -4623,7 +4623,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_snr{agent_host=\"$ptp_local\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_snr{agent_host=\"$ptp_local\"})",
           "refId": "A",
           "legendFormat": "Local SNR"
         },
@@ -4632,7 +4632,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_transmit_ccq{agent_host=\"$ptp_local\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_transmit_ccq{agent_host=\"$ptp_local\"})",
           "refId": "B",
           "legendFormat": "Local Tx CCQ"
         },
@@ -4641,7 +4641,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_snr{agent_host=\"$ptp_remote\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_snr{agent_host=\"$ptp_remote\"})",
           "refId": "C",
           "legendFormat": "Remote SNR"
         },
@@ -4650,7 +4650,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "ptp_transmit_ccq{agent_host=\"$ptp_remote\"}",
+          "expr": "max without (model, version, serial, mode) (ptp_transmit_ccq{agent_host=\"$ptp_remote\"})",
           "refId": "D",
           "legendFormat": "Remote Tx CCQ"
         }
