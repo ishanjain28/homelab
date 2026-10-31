@@ -1,13 +1,12 @@
 { lib, pkgs, ... }:
 pkgs.rustPlatform.buildRustPackage {
   pname = "netflector";
-  version = "0.17.1";
+  version = "0.17.1-ssdp";
 
-  src = pkgs.fetchFromGitHub {
-    owner = "netflector";
-    repo = "netflector";
-    tag = "v0.17.1";
-    hash = "sha256-mL8q3nMUmLZa2dBWmR/n4JsAACwMYiM/kaEFhkQR6vA=";
+  src = pkgs.fetchgit {
+    url = "https://git.ishanjain.me/ishan/netflector.git";
+    rev = "f06bdf3b6c77230922d2c15198bb09b5729d1585";
+    hash = "sha256-Z8scLWiP/Mk/LOMyXNC8keWBZ2hEgMt/2FQBoQc/FtY=";
   };
   cargoLock.lockFile = ./Cargo.lock;
 
@@ -19,7 +18,7 @@ pkgs.rustPlatform.buildRustPackage {
 
   meta = {
     description = "Directional SSDP, WS-Discovery and mDNS reflector";
-    homepage = "https://github.com/netflector/netflector";
+    homepage = "https://git.ishanjain.me/ishan/netflector";
     license = lib.licenses.bsd2;
     mainProgram = "netflector";
     platforms = lib.platforms.linux;

@@ -44,5 +44,15 @@ in
       MemoryMax = "128M";
       TasksMax = 128;
     };
+    containerConfig.networking.firewall.interfaces =
+      genAttrs (map (vlan: "eth${toString vlan}") (remove 50 cfg.vlans))
+        (_: {
+          allowedTCPPortRanges = [
+            {
+              from = 32768;
+              to = 60999;
+            }
+          ];
+        });
   });
 }
