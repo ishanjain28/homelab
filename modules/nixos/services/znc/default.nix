@@ -26,6 +26,11 @@ in
   };
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
+    resources = {
+      CPUQuota = "100%";
+      MemoryMax = "256M";
+      TasksMax = 256;
+    };
     command = "${pkgs.znc}/bin/znc --foreground --datadir=/var/lib/znc";
     secrets = {
       config = {

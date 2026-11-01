@@ -51,7 +51,7 @@ in
     service = cfg;
     resources = {
       CPUQuota = "400%";
-      MemoryMax = "2G";
+      MemoryMax = "256M";
       TasksMax = 1024;
     };
 

@@ -35,7 +35,7 @@ in
     };
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "512M";
       TasksMax = 256;
     };
     environment = {

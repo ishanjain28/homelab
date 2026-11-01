@@ -315,7 +315,10 @@ in
             ];
             cgroup = [
               {
-                paths = [ "/sys/fs/cgroup/machine.slice/container@*.service" ];
+                paths = [
+                  "/sys/fs/cgroup/machine.slice/container@*.service"
+                  "/sys/fs/cgroup/system.slice/vm-*.service"
+                ];
                 files = [
                   "cpu.stat"
                   "memory.current"
@@ -327,7 +330,15 @@ in
               }
             ];
           }
-          // optionalAttrs metrics.sensors.enable { sensors = [ { } ]; };
+          // optionalAttrs metrics.sensors.enable { sensors = [ { } ]; }
+          // optionalAttrs config.boot.zfs.enabled {
+            zfs = [
+              {
+                kstatMetrics = [ "arcstats" ];
+                poolMetrics = false;
+              }
+            ];
+          };
 
           processors.enum = [
             {
@@ -346,7 +357,7 @@ in
               tags = [
                 {
                   key = "path";
-                  pattern = ".*container@(.+)\\.service$";
+                  pattern = ".*/(?:container@)?([^/@]+)\\.service$";
                   replacement = "$\{1}";
                   result_key = "service";
                 }

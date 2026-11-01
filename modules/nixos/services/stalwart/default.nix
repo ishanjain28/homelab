@@ -39,7 +39,7 @@ in
     containerConfig.environment.systemPackages = [ pkgs.stalwart-cli ];
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "512M";
       TasksMax = 512;
     };
     serviceConfig = {

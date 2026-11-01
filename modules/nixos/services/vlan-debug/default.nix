@@ -39,7 +39,7 @@ let
 
       resources = {
         CPUQuota = "100%";
-        MemoryMax = "1G";
+        MemoryMax = "256M";
         TasksMax = 512;
       };
 

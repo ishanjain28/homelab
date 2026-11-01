@@ -33,7 +33,7 @@ in
     };
     resources = {
       CPUQuota = "30%";
-      MemoryMax = "128M";
+      MemoryMax = "256M";
       TasksMax = 256;
     };
     environment = {

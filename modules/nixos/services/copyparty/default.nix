@@ -57,7 +57,7 @@ in
     serviceConfig.StateDirectory = "copyparty";
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "512M";
       TasksMax = 512;
     };
   });

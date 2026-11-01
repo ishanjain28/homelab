@@ -36,7 +36,7 @@ in
     exec = "/bin/alloy run /etc/alloy-syslog --disable-reporting --server.http.listen-addr=127.0.0.1:23456 --server.http.enable-pprof=false";
     resources = {
       CPUQuota = "100%";
-      MemoryMax = "256M";
+      MemoryMax = "512M";
       TasksMax = 256;
     };
 

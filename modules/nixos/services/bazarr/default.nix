@@ -9,7 +9,7 @@ with lib.${namespace};
 let
   srv = config.${namespace}.services;
   cfg = srv.bazarr;
-  configPath = "/var/lib/bazarr/config/config.yaml";
+  settingsPath = "/run/container-secrets/bazarr.yml";
 in
 {
   options.${namespace}.services.bazarr = mkServiceOptions {
@@ -29,11 +29,11 @@ in
     secrets.config = {
       file = "secrets/bazarr.yml";
       format = "yaml";
-      mountPath = configPath;
+      mountPath = settingsPath;
     };
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "2G";
       TasksMax = 512;
     };
 
@@ -46,6 +46,7 @@ in
       };
 
       systemd.services.bazarr = {
+        preStart = "install -Dm600 ${settingsPath} /var/lib/bazarr/config/config.yaml";
         serviceConfig.UMask = "0007";
       };
     };

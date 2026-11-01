@@ -29,7 +29,7 @@ in
     };
     resources = {
       CPUQuota = "800%";
-      MemoryMax = "4G";
+      MemoryMax = "512M";
       TasksMax = 512;
     };
 

@@ -80,6 +80,11 @@ in
 
     (mkSingleServiceContainer {
       service = cfg;
+      resources = {
+        CPUQuota = "100%";
+        MemoryMax = "256M";
+        TasksMax = 256;
+      };
       package = pkgs.gatus;
       secrets = {
         env = {

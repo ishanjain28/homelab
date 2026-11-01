@@ -30,7 +30,7 @@ in
     };
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "2G";
       TasksMax = 512;
     };
     containerConfig = {

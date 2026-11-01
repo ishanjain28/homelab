@@ -33,7 +33,7 @@ in
     };
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "768M";
       TasksMax = 512;
     };
 
@@ -52,6 +52,7 @@ in
         Group = cfg.runtimeUser.group;
         StateDirectoryMode = "0700";
         UMask = "0077";
+        Restart = mkForce "always";
       };
     };
   });

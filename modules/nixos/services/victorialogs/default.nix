@@ -27,7 +27,7 @@ in
     serviceProfiles.victorialogs = "default";
     resources = {
       CPUQuota = "400%";
-      MemoryMax = "2G";
+      MemoryMax = "3G";
       TasksMax = 512;
     };
     containerConfig = {

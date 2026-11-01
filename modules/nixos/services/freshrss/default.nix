@@ -58,6 +58,11 @@ in
     };
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    resources = {
+      CPUQuota = "100%";
+      MemoryMax = "512M";
+      TasksMax = 256;
+    };
     serviceProfiles.caddy = "privileged-ports";
     secrets.password = {
       file = "secrets/freshrss/password";

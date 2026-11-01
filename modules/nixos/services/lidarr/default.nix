@@ -25,7 +25,10 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
-    serviceProfiles.lidarr = "jit";
+    serviceProfiles.lidarr = [
+      "jit"
+      "procfs"
+    ];
     secrets.env = {
       file = "secrets/lidarr.env";
       format = "dotenv";
@@ -33,7 +36,7 @@ in
     };
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "512M";
       TasksMax = 512;
     };
 
@@ -49,7 +52,10 @@ in
         };
       };
 
-      systemd.services.lidarr.serviceConfig.UMask = mkForce "0007";
+      systemd.services.lidarr.serviceConfig = {
+        UMask = mkForce "0007";
+        Restart = mkForce "always";
+      };
     };
   });
 }

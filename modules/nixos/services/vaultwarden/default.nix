@@ -24,6 +24,11 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    resources = {
+      CPUQuota = "100%";
+      MemoryMax = "256M";
+      TasksMax = 256;
+    };
     secrets = {
       config = {
         file = "secrets/vaultwarden/config.json";

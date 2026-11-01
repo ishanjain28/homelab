@@ -25,7 +25,10 @@ in
 
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
-    serviceProfiles.sonarr = "jit";
+    serviceProfiles.sonarr = [
+      "jit"
+      "procfs"
+    ];
     secrets.env = {
       file = "secrets/sonarr.env";
       format = "dotenv";
@@ -33,7 +36,7 @@ in
     };
     resources = {
       CPUQuota = "200%";
-      MemoryMax = "1G";
+      MemoryMax = "768M";
       TasksMax = 512;
     };
 
@@ -51,6 +54,7 @@ in
 
       systemd.services.sonarr.serviceConfig = {
         PrivateUsers = mkForce false;
+        Restart = mkForce "always";
         UMask = mkForce "0007";
       };
     };
