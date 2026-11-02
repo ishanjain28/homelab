@@ -10,6 +10,8 @@ with lib.${namespace};
 let
   cfg = config.${namespace}.services.copyparty;
   dataDir = "/srv/copyparty";
+  package = pkgs.copyparty.override { withFastThumbnails = true; };
+  accountsPath = "/run/container-secrets/copyparty-accounts.conf";
   configFile = pkgs.writeText "copyparty.conf" ''
     [global]
       i: ::
@@ -22,8 +24,13 @@ let
       idp-h-grp: remote-groups
       shr: /shr
       e2d
+      e2ts
+      dedup
       zs
-      zsl: https://transfer.ishanjain.me/
+      zsl: https://share.ishanjain.me/
+      og
+      og-site: Ishan's Share
+      og-ua: (?i)(discordbot|twitterbot|slackbot|telegrambot|whatsapp|redditbot|mastodon|synapse|googlebot)
 
     [/]
       ${dataDir}
@@ -51,8 +58,13 @@ in
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
-    package = pkgs.copyparty;
-    command = "${pkgs.copyparty}/bin/copyparty -c ${configFile}";
+    inherit package;
+    command = "${package}/bin/copyparty -c ${accountsPath} -c ${configFile}";
+    secrets.accounts = {
+      file = "secrets/copyparty-accounts.conf";
+      format = "binary";
+      mountPath = accountsPath;
+    };
     environment.XDG_CONFIG_HOME = "/var/lib/copyparty";
     serviceConfig.StateDirectory = "copyparty";
     resources = {

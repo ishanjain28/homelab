@@ -6,5 +6,7 @@
     };
   };
 
+  systemd.services.nh-clean.serviceConfig.LogLevelMax = "warning";
+
   nix = mkNixConfig { inherit lib; };
 }

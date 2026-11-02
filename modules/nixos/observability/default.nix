@@ -128,6 +128,11 @@ let
       }
 
       rule {
+        source_labels = ["__journal__transport"]
+        target_label  = "transport"
+      }
+
+      rule {
         action = "labeldrop"
         regex  = "syslog_identifier|job|service_name"
       }

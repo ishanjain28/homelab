@@ -31,7 +31,6 @@ in
       "iommu=pt"
     ]
     ++ optional (cfg.iommu == "intel") "intel_iommu=on"
-    ++ optional (cfg.iommu == "amd") "amd_iommu=on"
     ++ optional (cfg.pciIds != [ ]) "vfio-pci.ids=${concatStringsSep "," cfg.pciIds}";
 
     boot.kernelModules = vfioModules;

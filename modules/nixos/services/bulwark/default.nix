@@ -42,6 +42,10 @@ in
       HOSTNAME = "::";
       PORT = toString cfg.endpoints.web.port;
       NEXT_TELEMETRY_DISABLED = "1";
+      ADMIN_DATA_DIR = "${stateDir}/admin";
+      SETTINGS_DATA_DIR = "${stateDir}/settings";
+      TELEMETRY_DATA_DIR = "${stateDir}/telemetry";
+      VERSION_CHECK_DATA_DIR = "${stateDir}/version-check";
     };
     serviceConfig = {
       EnvironmentFile = envPath;

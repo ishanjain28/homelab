@@ -1584,6 +1584,117 @@
       }
     },
     {
+      "id": 21,
+      "type": "row",
+      "title": "Kernel (dmesg)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      },
+      "panels": []
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Kernel warnings and errors by host",
+      "description": "Kernel ring buffer messages at warning priority or higher.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 68
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "queryType": "statsRange",
+          "expr": "{source=\"journald\", host=~\"$host\", transport=\"kernel\"} priority:~\"^(warning|error|crit|alert|emerg)$\" ~\"$search\" | stats by (host, priority) count() as lines"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 23,
+      "type": "logs",
+      "title": "Kernel messages",
+      "description": "Kernel ring buffer (dmesg) from every host that ships its journal.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 75
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{source=\"journald\", host=~\"$host\", transport=\"kernel\"} ~\"$search\"",
+          "queryType": "instant",
+          "maxLines": 1000
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showFieldSelector": false,
+        "displayedFields": [],
+        "showLabels": false,
+        "showLevel": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "timestampResolution": "ms",
+        "unwrappedColumns": false,
+        "wrapLogMessage": false,
+        "syntaxHighlighting": true
+      }
+    },
+    {
       "id": 20,
       "type": "row",
       "title": "System",
@@ -1592,7 +1703,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 87
       },
       "panels": [
         {
@@ -1608,7 +1719,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 68
+            "y": 88
           },
           "targets": [
             {

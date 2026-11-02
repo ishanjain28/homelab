@@ -163,7 +163,7 @@ let
         failed=0
         ${concatStringsSep "\n" (mapAttrsToList runOwner volumesByOwner)}
         ${concatMapStrings (datasetBackup groupName) datasets}
-        ${restic} forget --retry-lock=1h --tag=group:${groupName} --group-by=tags,paths ${concatStringsSep " " (keepOptions group.keep)} || failed=1
+        ${restic} forget --quiet --retry-lock=1h --tag=group:${groupName} --group-by=tags,paths ${concatStringsSep " " (keepOptions group.keep)} || failed=1
         exit "$failed"
       '';
       serviceConfig.ExecStopPost =
