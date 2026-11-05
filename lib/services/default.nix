@@ -165,6 +165,7 @@ let
       services.timesyncd = disabled;
       system.nssModules = mkForce [ ];
       services.resolved.settings.Resolve.DNSStubListener = false;
+      boot.kernel.sysctl."net.mptcp.enabled" = 0;
       systemd.oomd = disabled;
       systemd.settings.Manager.ShowStatus = false;
       systemd.services."console-getty" = disabled;

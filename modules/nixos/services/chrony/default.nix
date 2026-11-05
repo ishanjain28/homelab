@@ -21,6 +21,7 @@ in
       enableNTS = true;
       extraConfig = ''
         makestep 1.0 3
+        rtcsync
         driftfile /var/lib/chrony/drift
       '';
       servers = [

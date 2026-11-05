@@ -46,6 +46,7 @@ in
       "net.core.rmem_max" = 134217728;
       "net.core.default_qdisc" = "fq";
       "net.ipv4.tcp_congestion_control" = "bbr";
+      "net.mptcp.enabled" = 0;
       "vm.overcommit_memory" = mkIf (any (name: config.${namespace}.services.${name}.enable) [
         "authelia"
         "redis"
