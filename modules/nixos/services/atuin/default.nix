@@ -39,7 +39,10 @@ in
         host = "::";
         port = cfg.endpoints.web.port;
         openRegistration = false;
-        database.uri = null;
+        database = {
+          createLocally = false;
+          uri = null;
+        };
         environmentFile = envPath;
       };
     };

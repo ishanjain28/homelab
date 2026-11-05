@@ -8,8 +8,8 @@ let
   src = pkgs.fetchFromGitHub {
     owner = "ishanjain28";
     repo = "jellyseerr";
-    rev = "da433c808d59c453fa4e377ae0303b181fc5948c";
-    hash = "sha256-CWNpjGvMqPkEFybEt/Piaz714QztIFSDf5ZhDyQDrmo=";
+    rev = "762b2dd83d2ba644287e72f2dcea9fbba8d2fc07";
+    hash = "sha256-KKR5+z34M5rrybNvWqBBsg+iEx+6EdQeQ1PMa+cIk88=";
   };
 in
 pkgs.stdenv.mkDerivation {
@@ -19,7 +19,7 @@ pkgs.stdenv.mkDerivation {
     inherit pname version src;
     inherit pnpm;
     fetcherVersion = 3;
-    hash = "sha256-WFbTBk2U0KS65LauKcqtD+y6RlcIMnN4tUWYM2WOUnQ=";
+    hash = "sha256-NiptqZ+r8JsH47sapaKPo3D3DojCn6j0g/OXkhmjNuU=";
   };
 
   nativeBuildInputs = [

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   pname = "tracearr";
-  version = "2.8.3";
+  version = "3.1.3";
   nodejs = pkgs.nodejs-slim_24;
   pnpm = pkgs.pnpm_12.override { nodejs-slim = nodejs; };
   basemapBuild = "20261028";
@@ -19,7 +19,7 @@ let
     owner = "connorgallopo";
     repo = "Tracearr";
     rev = "v${version}";
-    hash = "sha256-DS5I9BFgpp7y9l3egALuZaTW0d+IK9gsKybiF0R3tNk=";
+    hash = "sha256-EvnD2wqrI/32GRVQQsWAfaL6ptn/tVezafMxNWKpcUA=";
   };
 in
 pkgs.stdenv.mkDerivation {
@@ -33,7 +33,7 @@ pkgs.stdenv.mkDerivation {
     inherit pname version src;
     inherit pnpm;
     fetcherVersion = 4;
-    hash = "sha256-M1CiL0JvN7EXMdi0hX0068HnrNgDP5x6Qi/91p+y63o=";
+    hash = "sha256-wxtx5Jdx2eSSo+OR6284/4cWbqrlO1kXXknhK06FVaw=";
   };
 
   nativeBuildInputs = [
