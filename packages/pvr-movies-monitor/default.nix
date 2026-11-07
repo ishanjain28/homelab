@@ -1,8 +1,11 @@
 { pkgs, ... }:
 let
-  src = builtins.fetchGit {
-    url = "ssh://git@ssh.git.ishanjain.me:2222/ishan/pvr-movies-monitor.git";
+  src = pkgs.fetchFromGitea {
+    domain = "git.ishanjain.me";
+    owner = "ishan";
+    repo = "pvr-movies-monitor";
     rev = "c053464614c1ad0ce8e6b80c95e0cc7aa02cbe77";
+    hash = "sha256-jUWqLNxr/SQdZ7T+m7YbCW8XmuEp1OOlNWSCbqxU/3k=";
   };
 in
 pkgs.rustPlatform.buildRustPackage {

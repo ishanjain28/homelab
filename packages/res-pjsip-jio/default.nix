@@ -1,8 +1,11 @@
 { pkgs, ... }:
 let
-  src = builtins.fetchGit {
-    url = "ssh://git@ssh.git.ishanjain.me:2222/ishan/pjsip-jio-plugin.git";
+  src = pkgs.fetchFromGitea {
+    domain = "git.ishanjain.me";
+    owner = "ishan";
+    repo = "pjsip-jio-plugin";
     rev = "3b0a5872416a156decad29eb18b03b58b4708cd9";
+    hash = "sha256-H3jA2HGw5eW3wDX2z02+0+0IH6Jik2U3tlaNj6AgojI=";
   };
 in
 pkgs.asterisk.overrideAttrs (old: {

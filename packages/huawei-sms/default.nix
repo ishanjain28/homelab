@@ -1,8 +1,11 @@
 { pkgs, ... }:
 let
-  src = builtins.fetchGit {
-    url = "ssh://git@ssh.git.ishanjain.me:2222/ishan/huawei-sms.git";
+  src = pkgs.fetchFromGitea {
+    domain = "git.ishanjain.me";
+    owner = "ishan";
+    repo = "huawei-sms";
     rev = "8ebd57a1a9cb8fce6a7cc05517f18d58dffdc82e";
+    hash = "sha256-yp0lDIuaF3Gze/JrR1TE+Y3PtnC7ZYBZm6QZAMTSma4=";
   };
 in
 pkgs.rustPlatform.buildRustPackage {
