@@ -38,7 +38,17 @@ in
       configFile = config.sops.secrets.${secretName name}.path;
     }) interfaces;
 
-    systemd.services = mapAttrs' (name: _: nameValuePair "wg-quick-${name}" { restartIfChanged = false; }) interfaces;
+    systemd.services = mapAttrs' (
+      name: _:
+      nameValuePair "wg-quick-${name}" {
+        restartIfChanged = false;
+        unitConfig.StartLimitIntervalSec = 0;
+        serviceConfig = {
+          Restart = "on-failure";
+          RestartSec = "5s";
+        };
+      }
+    ) interfaces;
 
     networking.firewall.allowedUDPPorts = filter (port: port != null) (
       mapAttrsToList (_: interface: interface.listenPort) interfaces

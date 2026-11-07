@@ -23,6 +23,10 @@ in
         transport = "tcp-and-udp";
       };
       rfc5424.port = 601;
+      omada = {
+        port = 5140;
+        transport = "udp";
+      };
     };
     monitor = enabled // {
       endpoint = "rfc3164";
@@ -33,7 +37,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.grafana-alloy;
-    exec = "/bin/alloy run /etc/alloy-syslog --disable-reporting --server.http.listen-addr=127.0.0.1:23456 --server.http.enable-pprof=false";
+    exec = "/bin/alloy run /etc/alloy-syslog --stability.level=experimental --disable-reporting --server.http.listen-addr=127.0.0.1:23456 --server.http.enable-pprof=false";
     resources = {
       CPUQuota = "100%";
       MemoryMax = "512M";
@@ -105,6 +109,16 @@ in
           }
           forward_to    = [loki.write.syslog.receiver]
           relabel_rules = loki.relabel.syslog.rules
+        }
+
+        loki.source.syslog "omada" {
+          listener {
+            address             = "0.0.0.0:5140"
+            protocol            = "udp"
+            syslog_format       = "raw"
+            labels              = { source = "syslog", container = "omada" }
+          }
+          forward_to    = [loki.write.syslog.receiver]
         }
 
         loki.write "syslog" {

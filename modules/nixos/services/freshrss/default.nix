@@ -58,6 +58,10 @@ in
     };
   config = mkIf cfg.enable (mkServiceContainer {
     service = cfg;
+    databaseUnits = [
+      "freshrss-config"
+      "phpfpm-freshrss"
+    ];
     resources = {
       CPUQuota = "100%";
       MemoryMax = "512M";
