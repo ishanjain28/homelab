@@ -12,7 +12,9 @@ jobs:
         run: |
           set -euo pipefail
           nix flake update 2>&1 | tee "$RUNNER_TEMP/flake-update.log"
-      - run: nix flake check -L
+      - run: |
+          ulimit -v $((10 * 1024 * 1024))
+          nix flake check -L
       - name: Commit
         run: |
           set -euo pipefail

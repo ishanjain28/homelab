@@ -56,7 +56,7 @@ in
 
       resources = {
         CPUQuota = "600%";
-        MemoryMax = "6G";
+        MemoryMax = "12G";
         TasksMax = 8192;
       };
 

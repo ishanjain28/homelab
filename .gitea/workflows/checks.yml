@@ -6,4 +6,6 @@ jobs:
     runs-on: nixos
     steps:
       - uses: actions/checkout@v4
-      - run: nix flake check -L
+      - run: |
+          ulimit -v $((10 * 1024 * 1024))
+          nix flake check -L
