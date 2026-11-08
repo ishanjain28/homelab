@@ -40,6 +40,7 @@
     hugepages = true;
     vlans = [ 10 ];
     disks = [ "/dev/pool/gaming-1" ];
+    diskBus = "virtio-scsi";
     pciDevices = [
       "0000:0c:00.0" # RTX 3080
       "0000:0c:00.1" # RTX 3080 audio

@@ -60,7 +60,12 @@ let
         };
         disks = mkOpt (types.listOf (
           types.strMatching "/dev/.*"
-        )) [ ] "Host block devices attached to the guest as SATA disks, in boot order.";
+        )) [ ] "Host block devices attached to the guest on diskBus, in boot order.";
+        diskBus = mkOpt (types.enum [
+          "sata"
+          "virtio-scsi"
+        ]) "sata" "Bus the disks are attached to; virtio-scsi needs the guest's virtio SCSI driver.";
+        virtioScsiController = mkBoolOpt false "Add an empty virtio-scsi controller so the guest can load its driver before diskBus is switched.";
         pciDevices = mkOpt (types.listOf pciAddressType) [ ] "Host PCI functions passed through with vfio-pci.";
         usbDevices =
           mkOpt (types.listOf usbDeviceType) [ ]
@@ -126,10 +131,31 @@ let
         [
           "-drive"
           "file=${disk},if=none,id=${id},format=raw,cache=none,aio=io_uring,discard=unmap,detect-zeroes=unmap"
+        ]
+        ++ optionals (vm.diskBus == "sata") [
           "-device"
           "ide-hd,drive=${id},bus=ahci.${toString index},rotation_rate=1,bootindex=${toString index}"
         ]
       ) vm.disks
+    );
+
+  mkScsiArgs =
+    vm:
+    optionals (vm.virtioScsiController || vm.diskBus == "virtio-scsi") (
+      [
+        "-object"
+        "iothread,id=iothread0"
+        "-device"
+        "virtio-scsi-pci,id=scsi0,iothread=iothread0"
+      ]
+      ++ optionals (vm.diskBus == "virtio-scsi") (
+        concatLists (
+          imap0 (index: _disk: [
+            "-device"
+            "scsi-hd,drive=disk${toString index},bus=scsi0.0,rotation_rate=1,bootindex=${toString index}"
+          ]) vm.disks
+        )
+      )
     );
 
   mkNetArgs =
@@ -242,6 +268,7 @@ let
     ++ mkPciArgs vm
     ++ mkUsbArgs vm
     ++ mkNetArgs name vm
+    ++ mkScsiArgs vm
     ++ vm.extraArgs;
 
   mkPrepareScript =

@@ -112,7 +112,11 @@ in
     "default_hugepagesz=1G"
     "hugepagesz=1G"
     "hugepages=32"
+    "irqaffinity=0-5,12-17"
+    "isolcpus=managed_irq,6-11,18-23"
   ];
+
+  systemd.settings.Manager.CPUAffinity = "0-5 12-17";
 
   sops.secrets.tailscale-auth-key = {
     sopsFile = repoFile "secrets/tailscale/auth-key";
