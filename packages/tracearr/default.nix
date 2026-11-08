@@ -4,14 +4,14 @@ let
   version = "3.1.3";
   nodejs = pkgs.nodejs-slim_24;
   pnpm = pkgs.pnpm_12.override { nodejs-slim = nodejs; };
-  basemapBuild = "20261028";
+  basemapBuild = "20260811";
   basemap = pkgs.stdenvNoCC.mkDerivation {
     name = "tracearr-basemap-${basemapBuild}.pmtiles";
     nativeBuildInputs = [ pkgs.pmtiles ];
     SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     outputHashMode = "flat";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-vZkbe7OwCseaRYeqXs5JS1/YjKI+0uVcVZsuK4tFdiQ=";
+    outputHash = "sha256-6pHtC6B/wnsHLgEtIzoi6ZR2Exe8ck1mdGXAFx601Vw=";
     buildCommand = "pmtiles extract https://build.protomaps.com/${basemapBuild}.pmtiles $out --maxzoom=8";
   };
 
