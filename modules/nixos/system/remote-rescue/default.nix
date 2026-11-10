@@ -19,7 +19,6 @@ in
     homelab.services.ssh = {
       enable = mkDefault true;
       addRootKeys = mkDefault true;
-      passwordAuth = mkDefault false;
       permitRootLogin = mkDefault false;
     };
 

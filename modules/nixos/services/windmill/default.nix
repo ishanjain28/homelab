@@ -11,6 +11,7 @@ let
   cfg = config.${namespace}.services.windmill;
   environmentFile = "/run/container-secrets/windmill.env";
   commonEnvironment = {
+    DATABASE_CONNECTIONS = "4";
     JSON_FMT = "true";
     RUST_LOG = "warn";
   };

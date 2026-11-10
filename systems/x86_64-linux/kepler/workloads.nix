@@ -2,7 +2,6 @@
 {
   ssh = enabled // {
     addRootKeys = true;
-    passwordAuth = false;
     permitRootLogin = false;
   };
 

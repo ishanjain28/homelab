@@ -25,7 +25,7 @@
       maintenance_work_mem = "512MB";
       dynamic_shared_memory_type = "posix";
       effective_io_concurrency = 256;
-      max_worker_processes = 16;
+      max_worker_processes = 24;
       max_parallel_workers_per_gather = 2;
       max_parallel_workers = 4;
       wal_buffers = "16MB";
@@ -37,7 +37,7 @@
       min_wal_size = "512MB";
       random_page_cost = 1.1;
       default_statistics_target = 100;
-      max_locks_per_transaction = 512;
+      max_locks_per_transaction = 2048;
       autovacuum_worker_slots = 8;
       autovacuum_max_workers = 4;
       autovacuum_naptime = 10;
@@ -47,7 +47,7 @@
       log_timezone = "Asia/Kolkata";
       default_text_search_config = "pg_catalog.english";
       shared_preload_libraries = "timescaledb";
-      "timescaledb.max_background_workers" = 8;
+      "timescaledb.max_background_workers" = 12;
     };
   };
 

@@ -19,7 +19,7 @@ in
       map trim (splitString "\n" (builtins.readFile (repoFile "ssh-keys.txt")))
     )) "List of SSH keys to add";
     package = mkPackageOption pkgs "openssh" { };
-    passwordAuth = mkBoolOpt true "Allow password authentication";
+    passwordAuth = mkBoolOpt false "Allow password authentication";
     permitRootLogin = mkBoolOpt false "Allow root login";
   };
 
