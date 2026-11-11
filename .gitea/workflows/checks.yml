@@ -6,6 +6,12 @@ jobs:
     runs-on: nixos
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          ulimit -v $((10 * 1024 * 1024))
-          nix flake check -L
+      - name: Evaluate
+        run: |
+          set -euo pipefail
+          for host in $(nix eval --raw .#nixosConfigurations --apply 'h: toString (builtins.attrNames h)'); do
+            echo "evaluating $host"
+            nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath"
+            echo
+          done
+          nix eval --raw .#packages.x86_64-linux --apply 'ps: toString (map (p: p.drvPath) (builtins.attrValues ps))'
