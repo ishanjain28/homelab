@@ -40,9 +40,6 @@ in
       unmanaged = [ "type:wifi" ];
     };
 
-    # Enable debug logs
-    # systemd.services."systemd-networkd".environment.SYSTEMD_LOG_LEVEL = "debug";
-
     systemd.network = enabled // {
       # To have predictable names for network interfaces
       inherit (cfg) links netdevs;
