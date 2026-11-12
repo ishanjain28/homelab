@@ -35,7 +35,7 @@
         },
         "definition": "caddy_instance",
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": "*",
         "multi": true,
         "current": {
           "text": "All",
@@ -55,12 +55,12 @@
         "query": {
           "type": "fieldValue",
           "field": "request.host",
-          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\"",
+          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance",
           "refId": "vhost"
         },
         "definition": "request.host",
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": "*",
         "multi": true,
         "current": {
           "text": "All",
@@ -80,12 +80,12 @@
         "query": {
           "type": "fieldValue",
           "field": "request.proto",
-          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\"",
+          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost",
           "refId": "proto"
         },
         "definition": "request.proto",
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": "*",
         "multi": true,
         "current": {
           "text": "All",
@@ -105,12 +105,12 @@
         "query": {
           "type": "fieldValue",
           "field": "status",
-          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\"",
+          "query": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto",
           "refId": "status"
         },
         "definition": "status",
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": "*",
         "multi": true,
         "current": {
           "text": "All",
@@ -123,12 +123,104 @@
         "name": "asn",
         "label": "ASN",
         "type": "textbox",
-        "query": ".*",
+        "query": "",
         "current": {
-          "text": ".*",
-          "value": ".*"
+          "text": "",
+          "value": ""
         },
-        "description": "AS number, such as 13335. Use 13335|15169 for several; .* matches all."
+        "description": "AS number regex, such as 13335 or 13335|15169. Empty matches all."
+      },
+      {
+        "name": "step",
+        "label": "Resolution",
+        "type": "interval",
+        "description": "Bucket size for time series. auto picks about 60 buckets for the selected range.",
+        "query": "1m,5m,15m,30m,1h,3h,6h,12h,1d",
+        "auto": true,
+        "auto_count": 60,
+        "auto_min": "1m",
+        "current": {
+          "text": "auto",
+          "value": "$__auto_interval_step"
+        },
+        "options": [
+          {
+            "text": "auto",
+            "value": "$__auto_interval_step",
+            "selected": true
+          },
+          {
+            "text": "1m",
+            "value": "1m",
+            "selected": false
+          },
+          {
+            "text": "5m",
+            "value": "5m",
+            "selected": false
+          },
+          {
+            "text": "15m",
+            "value": "15m",
+            "selected": false
+          },
+          {
+            "text": "30m",
+            "value": "30m",
+            "selected": false
+          },
+          {
+            "text": "1h",
+            "value": "1h",
+            "selected": false
+          },
+          {
+            "text": "3h",
+            "value": "3h",
+            "selected": false
+          },
+          {
+            "text": "6h",
+            "value": "6h",
+            "selected": false
+          },
+          {
+            "text": "12h",
+            "value": "12h",
+            "selected": false
+          },
+          {
+            "text": "1d",
+            "value": "1d",
+            "selected": false
+          }
+        ],
+        "refresh": 2
+      },
+      {
+        "name": "sample",
+        "label": "Latency sampling",
+        "type": "custom",
+        "description": "Requests used for latency percentiles. 1/10 keeps requests whose client port ends in 0: p50 and p95 stay within about 1%, p99 is rougher, and queries run several times faster.",
+        "query": "exact : .*, 1/10 : 0$",
+        "current": {
+          "text": "1/10",
+          "value": "0$"
+        },
+        "options": [
+          {
+            "text": "exact",
+            "value": ".*",
+            "selected": false
+          },
+          {
+            "text": "1/10",
+            "value": "0$",
+            "selected": true
+          }
+        ],
+        "includeAll": false,
+        "multi": false
       }
     ]
   },
@@ -171,7 +263,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats count() as requests",
           "queryType": "stats"
         }
       ],
@@ -230,7 +322,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count_uniq(request.client_ip) as clients",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats count_uniq(request.client_ip) as clients",
           "queryType": "stats"
         }
       ],
@@ -289,7 +381,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats count() if (status:>=500) as errors, count() as total | math errors / total * 100 as server_errors | fields server_errors",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats count() if (status:>=500) as errors, count() as total | math errors / total * 100 as server_errors | fields server_errors",
           "queryType": "stats"
         }
       ],
@@ -356,7 +448,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.5, duration) as p50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" request.remote_port:~\"${sample}\" | stats quantile(0.5, duration) as p50",
           "queryType": "stats"
         }
       ],
@@ -415,7 +507,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.95, duration) as p95",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" request.remote_port:~\"${sample}\" | stats quantile(0.95, duration) as p95",
           "queryType": "stats"
         }
       ],
@@ -482,7 +574,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats sum(size) as bytes",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats sum(size) as bytes",
           "queryType": "stats"
         }
       ],
@@ -554,9 +646,10 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (status) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats by (status) count() as requests",
           "queryType": "statsRange",
-          "legendFormat": "{{status}}"
+          "legendFormat": "{{status}}",
+          "step": "$step"
         }
       ],
       "fieldConfig": {
@@ -611,9 +704,10 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats quantile(0.5, duration) as p50, quantile(0.95, duration) as p95, quantile(0.99, duration) as p99",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" request.remote_port:~\"${sample}\" | stats quantile(0.5, duration) as p50, quantile(0.95, duration) as p95, quantile(0.99, duration) as p99",
           "queryType": "statsRange",
-          "legendFormat": "{{__name__}}"
+          "legendFormat": "{{__name__}}",
+          "step": "$step"
         }
       ],
       "fieldConfig": {
@@ -669,9 +763,10 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.host) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | format if (request.host:\"\") \"(none)\" as request.host | stats by (request.host) count() as requests",
           "queryType": "statsRange",
-          "legendFormat": "{{request.host}}"
+          "legendFormat": "{{request.host}}",
+          "step": "$step"
         }
       ],
       "fieldConfig": {
@@ -726,7 +821,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.method) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats by (request.method) count() as requests",
           "queryType": "stats",
           "legendFormat": "{{request.method}}"
         }
@@ -781,7 +876,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | stats by (request.proto) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | stats by (request.proto) count() as requests",
           "queryType": "stats",
           "legendFormat": "{{request.proto}}"
         }
@@ -815,6 +910,118 @@
       }
     },
     {
+      "id": 29,
+      "type": "timeseries",
+      "title": "Requests by upstream",
+      "description": "Proxied requests per home upstream over time, from the X-Upstream response header.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 18,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" \"resp_headers.X-Upstream\":* | extract \"[\\\"<upstream>\\\"]\" from \"resp_headers.X-Upstream\" | stats by (upstream) count() as requests",
+          "queryType": "statsRange",
+          "legendFormat": "{{upstream}}",
+          "step": "$step"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": "piechart",
+      "title": "Upstream share",
+      "description": "Share of proxied requests per home upstream in the selected range.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 22
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" \"resp_headers.X-Upstream\":* | extract \"[\\\"<upstream>\\\"]\" from \"resp_headers.X-Upstream\" | stats by (upstream) count() as requests",
+          "queryType": "stats",
+          "legendFormat": "{{upstream}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "options": {
+        "pieType": "donut",
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
       "id": 15,
       "type": "row",
       "title": "Paths",
@@ -823,7 +1030,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "panels": []
     },
@@ -840,7 +1047,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 31
       },
       "targets": [
         {
@@ -849,7 +1056,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, sum(size) as bytes | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | format if (request.host:\"\") \"(none)\" as request.host | extract \"<path>?\" from request.uri | format if (path:\"\") \"<request.uri>\" as path | stats by (request.host, path) count() as requests, sum(size) as bytes | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -875,7 +1082,6 @@
               "request.host": 0,
               "path": 1,
               "requests": 2,
-              "p95": 3,
               "bytes": 4
             }
           }
@@ -906,26 +1112,6 @@
               {
                 "id": "custom.wrapText",
                 "value": false
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "p95"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
-                "id": "custom.wrapText",
-                "value": false
-              },
-              {
-                "id": "unit",
-                "value": "s"
               }
             ]
           },
@@ -978,7 +1164,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 43
       },
       "targets": [
         {
@@ -987,7 +1173,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, max(duration) as max | filter requests:>=5 | sort by (p95 desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | format if (request.host:\"\") \"(none)\" as request.host | extract \"<path>?\" from request.uri | format if (path:\"\") \"<request.uri>\" as path | stats by (request.host, path) count() as requests, quantile(0.95, duration) as p95, max(duration) as max | filter requests:>=5 | sort by (p95 desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1116,7 +1302,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 53
       },
       "targets": [
         {
@@ -1125,7 +1311,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | status:>=400 | extract_regexp \"^(?P<path>[^?]*)\" from request.uri | stats by (request.host, path, status) count() as requests | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | format if (request.host:\"\") \"(none)\" as request.host | status:>=400 | extract \"<path>?\" from request.uri | format if (path:\"\") \"<request.uri>\" as path | stats by (request.host, path, status) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1225,7 +1411,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 63
       },
       "panels": []
     },
@@ -1242,7 +1428,7 @@
         "h": 14,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 64
       },
       "targets": [
         {
@@ -1251,7 +1437,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<user_agent>\\\"]\" from \"request.headers.User-Agent\" | stats by (user_agent) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | extract \"[\\\"<user_agent>\\\"]\" from \"request.headers.User-Agent\" | format if (user_agent:\"\") \"(none)\" as user_agent | stats by (user_agent) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1354,7 +1540,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 70
+        "y": 78
       },
       "targets": [
         {
@@ -1363,7 +1549,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (request.client_ip, country, asn) count() as requests | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | format if (country:\"\") \"(none)\" as country | format if (asn:\"\") \"(none)\" as asn | stats by (request.client_ip, country, asn) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
         },
         {
@@ -1497,7 +1683,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 70
+        "y": 78
       },
       "targets": [
         {
@@ -1506,7 +1692,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (asn) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | extract \"[\\\"<asn>\\\"]\" from \"resp_headers.X-Asn\" | stats by (asn) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
         },
         {
@@ -1635,7 +1821,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 80
+        "y": 88
       },
       "panels": []
     },
@@ -1652,7 +1838,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 81
+        "y": 89
       },
       "targets": [
         {
@@ -1661,7 +1847,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | filter country:!=\"\" | stats by (country) count() as requests",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | filter country:!=\"\" | stats by (country) count() as requests",
           "queryType": "stats"
         }
       ],
@@ -1772,7 +1958,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 97
+        "y": 105
       },
       "targets": [
         {
@@ -1781,7 +1967,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | stats by (country) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | stats by (country) count() as requests, count_uniq(request.client_ip) as clients | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1851,7 +2037,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 97
+        "y": 105
       },
       "targets": [
         {
@@ -1860,7 +2046,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<state>\\\"]\" from \"resp_headers.X-State\" | extract \"[\\\"<city>\\\"]\" from \"resp_headers.X-City\" | stats by (country, state, city) count() as requests | sort by (requests desc) | limit 50",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | extract \"[\\\"<country>\\\"]\" from \"resp_headers.X-Country\" | extract \"[\\\"<state>\\\"]\" from \"resp_headers.X-State\" | extract \"[\\\"<city>\\\"]\" from \"resp_headers.X-City\" | stats by (country, state, city) count() as requests | sort by (requests desc) | limit 50",
           "queryType": "stats"
         }
       ],
@@ -1927,7 +2113,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 107
+        "y": 115
       },
       "panels": []
     },
@@ -1944,7 +2130,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 108
+        "y": 116
       },
       "targets": [
         {
@@ -1953,7 +2139,7 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:~\"^(${instance})$\" request.host:~\"^(${vhost})$\" request.proto:~\"^(${proto})$\" status:~\"^(${status})$\" \"resp_headers.X-Asn\":~\"\\\"(${asn})\\\"\" | status:>=500",
+          "expr": "{container=\"caddy\"} \"handled request\" caddy_instance:$instance request.host:$vhost request.proto:$proto status:$status \"resp_headers.X-Asn\":~\"${asn}\" | status:>=500",
           "queryType": "instant",
           "maxLines": 500
         }

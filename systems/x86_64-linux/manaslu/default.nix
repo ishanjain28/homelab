@@ -142,7 +142,6 @@ in
         '';
       interfaces = {
         wg-home-vpn.allowedTCPPorts = [
-          2019
           5432
           25000
         ];

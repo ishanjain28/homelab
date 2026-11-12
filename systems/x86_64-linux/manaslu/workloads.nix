@@ -34,10 +34,6 @@
         port = 10443;
         transport = "tcp-and-udp";
       };
-      admin = {
-        port = 2019;
-        expose = false;
-      };
     };
     monitor = {
       endpoint = "http";

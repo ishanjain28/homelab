@@ -1,4 +1,11 @@
 apiVersion: 1
+templates:
+  - orgId: 1
+    name: pushover
+    template: |
+      {{ define "pushover.title" }}{{ if eq .Status "firing" }}{{ .CommonLabels.alertname }}{{ if gt (len .Alerts.Firing) 1 }} ({{ len .Alerts.Firing }}){{ end }}{{ else }}Resolved: {{ .CommonLabels.alertname }}{{ end }}{{ end }}
+      {{ define "pushover.message" }}{{ range .Alerts }}{{ if eq .Status "resolved" }}Resolved: {{ end }}{{ or .Annotations.summary .Labels.alertname }} <a href="{{ .GeneratorURL }}">Open rule</a>
+      {{ end }}{{ end }}
 contactPoints:
   - orgId: 1
     name: pushover
@@ -8,6 +15,8 @@ contactPoints:
         settings:
           apiToken: $PUSHOVER_TOKEN
           userKey: $PUSHOVER_USER
+          title: '{{ template "pushover.title" . }}'
+          message: '{{ template "pushover.message" . }}'
 policies:
   - orgId: 1
     receiver: pushover

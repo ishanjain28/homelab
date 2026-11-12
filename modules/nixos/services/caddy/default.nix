@@ -19,10 +19,9 @@ in
       description = "Caddy ingress proxy";
       endpoints = {
         http.port = 80;
-        https.port = 443;
-        admin = {
-          port = 2019;
-          expose = false;
+        https = {
+          port = 443;
+          transport = "tcp-and-udp";
         };
         healthcheck.port = 9001;
       };
