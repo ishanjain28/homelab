@@ -33,6 +33,7 @@ with lib.${namespace};
     NIX_SSL_CERT_FILE = "/etc/nix/ca-bundle.pem";
     SSL_CERT_FILE = "/etc/nix/ca-bundle.pem";
     SOPS_AGE_KEY_FILE = config.sops.age.keyFile;
+    SOPS_AGE_KEY_CMD = "age-plugin-yubikey --identity";
     SSH_AUTH_SOCK = "${config.home.homeDirectory}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
   };
 

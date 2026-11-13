@@ -160,9 +160,12 @@
             pkgs.sops
             pkgs.ssh-to-age
             pkgs.neovim
+            pkgs.age-plugin-yubikey
             (treefmtModule pkgs ./treefmt.nix).config.build.wrapper
           ];
-          env = editorVariables;
+          env = editorVariables // {
+            SOPS_AGE_KEY_CMD = "age-plugin-yubikey --identity";
+          };
           shellHook = ''
             ${shellAliasHook}
             if [[ $- == *i* ]] && ! declare -F __atuin_preexec >/dev/null; then

@@ -332,3 +332,32 @@ groups:
               refId: D
               type: math
               expression: $A > 100 && $A > 10 * $C / 144
+      - uid: non-jio-upstream
+        title: Traffic off Jio upstream
+        condition: B
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $values.A.Value }} requests went over the {{ $labels.upstream }} upstream in 10 minutes"
+        data:
+          - refId: A
+            datasourceUid: victorialogs
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              refId: A
+              expr: '{container="caddy"} "handled request" "resp_headers.X-Upstream":* | extract "[\"<upstream>\"]" from "resp_headers.X-Upstream" | filter -upstream:jio | stats by (upstream) count() as requests'
+              queryType: stats
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 20
