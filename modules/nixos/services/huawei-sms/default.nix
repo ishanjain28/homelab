@@ -16,6 +16,12 @@ in
   options.${namespace}.services.huawei-sms = mkServiceOptions {
     name = "huawei-sms";
     description = "Huawei 5G Modem messages to Pushover";
+    endpoints.api.port = 8080;
+    monitor = enabled // {
+      name = "Huawei SMS";
+      endpoint = "api";
+      protocol = "tcp";
+    };
   };
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
@@ -34,11 +40,9 @@ in
     environment = {
       RUST_LOG = "warn";
       TOKIO_WORKER_THREADS = "2";
-      STATE_FILE = "/var/lib/huawei-sms/state.json";
     };
     serviceConfig = {
       EnvironmentFile = containerSecretPath;
-      StateDirectory = "huawei-sms";
     };
   });
 }

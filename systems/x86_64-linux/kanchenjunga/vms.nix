@@ -65,6 +65,10 @@
         vendorId = "1d6b";
         productId = "0104";
       }
+      {
+        vendorId = "2ccf";
+        productId = "080a";
+      }
     ];
     extraArgs = [
       "-smbios"

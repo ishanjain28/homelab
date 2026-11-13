@@ -33,6 +33,10 @@
   };
 
   huawei-sms = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "huawei_sms";
+    };
     vlans = [ 50 ];
     runtimeId = 27777;
   };
