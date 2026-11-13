@@ -20,14 +20,13 @@ let
     inherit (service)
       description
       devices
-      endpoints
       enable
       logging
       monitor
       name
+      networking
       runtimeId
       shares
-      vlans
       volumes
       ;
     inherit (service) runtimeUser;

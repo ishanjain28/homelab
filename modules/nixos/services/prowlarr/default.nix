@@ -42,7 +42,7 @@ in
         openFirewall = false;
         settings.server = {
           bindaddress = "*";
-          port = cfg.endpoints.web.port;
+          port = cfg.networking.endpoints.web.port;
         };
       };
 

@@ -44,8 +44,8 @@ in
 
           server = {
             http_listen_address = "0.0.0.0";
-            http_listen_port = cfg.endpoints.web.port;
-            grpc_listen_port = cfg.endpoints.grpc.port;
+            http_listen_port = cfg.networking.endpoints.web.port;
+            grpc_listen_port = cfg.networking.endpoints.grpc.port;
             log_level = "warn";
           };
 

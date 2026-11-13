@@ -2,7 +2,7 @@
 {
   postgresql-home-primary = enabled // {
     monitor.name = "PostgreSQL Primary";
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 36932;
     volumes = [ "postgresql-home-primary" ];
     resources = {
@@ -53,7 +53,7 @@
 
   postgresql-del-mirror = enabled // {
     monitor.name = "PostgreSQL Secondary";
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 36933;
     volumes = [ "postgresql-del-mirror" ];
     resources = {
@@ -82,7 +82,7 @@
   };
 
   karakeep = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30348;
     volumes = [
       "karakeep"
@@ -91,7 +91,7 @@
   };
 
   bentopdf = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 50715;
   };
 
@@ -100,13 +100,13 @@
       instance = "postgresql-home-primary";
       name = "tracearr";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30342;
   };
 
   omada = enabled // {
     monitor.name = "Omada Controller";
-    vlans = [ 99 ];
+    networking.vlans = [ 99 ];
     runtimeId = 30349;
     volumes = [ "omada" ];
   };
@@ -116,7 +116,7 @@
       instance = "postgresql-home-primary";
       name = "prowlarr-main";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30350;
   };
 
@@ -125,7 +125,7 @@
       instance = "postgresql-home-primary";
       name = "radarrmain";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30354;
     shares = [ "wd-4tb" ];
   };
@@ -135,7 +135,7 @@
       instance = "postgresql-home-primary";
       name = "sonarrmain";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30355;
     shares = [ "wd-4tb" ];
   };
@@ -145,7 +145,7 @@
       instance = "postgresql-home-primary";
       name = "bazarr";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30356;
     volumes = [ "bazarr" ];
     shares = [ "wd-4tb" ];
@@ -156,26 +156,26 @@
       instance = "postgresql-home-primary";
       name = "lidarrmain";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30358;
     shares = [ "music" ];
   };
 
   unpackerr = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30359;
     shares = [ "wd-4tb" ];
   };
 
   qbittorrent = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30361;
     volumes = [ "qbittorrent" ];
     shares = [ "wd-4tb" ];
   };
 
   jellyfin = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30360;
     volumes = [ "jellyfin" ];
     shares = [
@@ -190,19 +190,19 @@
       instance = "postgresql-home-primary";
       name = "gitea";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 36930;
     volumes = [ "gitea" ];
   };
 
   victoriametrics = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 36929;
     volumes = [ "victoriametrics" ];
   };
 
   victorialogs = enabled // {
-    vlans = [
+    networking.vlans = [
       50
       99
     ];
@@ -215,7 +215,7 @@
       instance = "postgresql-home-primary";
       name = "grafana";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 31918;
     volumes = [ "grafana" ];
   };
@@ -225,7 +225,7 @@
       instance = "postgresql-home-primary";
       name = "paperless";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30387;
     shares = [ "paperless" ];
     volumes = [ "paperless" ];
@@ -233,7 +233,7 @@
 
   samba = enabled // {
     monitor.name = "NAS";
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30363;
     shares = [
       "ishan"
@@ -250,7 +250,7 @@
 
   caddy = enabled // {
     monitor.name = "Ingress Proxy IPv4";
-    vlans = [
+    networking.vlans = [
       50
       140
     ];
@@ -270,29 +270,31 @@
         "[CERTIFICATE_EXPIRATION] > 96h"
       ];
     };
-    vlans = [ 99 ];
+    networking = {
+      vlans = [ 99 ];
+      endpoints = {
+        dns = {
+          port = 53;
+          transport = "tcp-and-udp";
+        };
+        tls = {
+          port = 853;
+          transport = "tcp-and-udp";
+        };
+        https.port = 443;
+        web = {
+          port = 80;
+          expose = true;
+        };
+      };
+    };
     runtimeId = 30373;
     configFile = "secrets/adguardhome/home.yaml";
     certificates = [ "adguard-home" ];
-    endpoints = {
-      dns = {
-        port = 53;
-        transport = "tcp-and-udp";
-      };
-      tls = {
-        port = 853;
-        transport = "tcp-and-udp";
-      };
-      https.port = 443;
-      web = {
-        port = 80;
-        expose = true;
-      };
-    };
   };
 
   asterisk = enabled // {
-    vlans = [ 140 ];
+    networking.vlans = [ 140 ];
     runtimeId = 30362;
     logging = disabled;
   };
@@ -302,7 +304,7 @@
       instance = "postgresql-home-primary";
       name = "ldap";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 25457;
   };
 
@@ -311,7 +313,7 @@
       instance = "postgresql-home-primary";
       name = "authelia";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 20001;
   };
 
@@ -320,7 +322,7 @@
       instance = "postgresql-home-primary";
       name = "stalwart";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30364;
     volumes = [ "stalwart" ];
     certificates = [ "mail-home" ];
@@ -331,12 +333,12 @@
       instance = "postgresql-home-primary";
       name = "windmill";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30353;
   };
 
   gatus = enabled // {
-    vlans = [
+    networking.vlans = [
       50
       10
       99
@@ -353,47 +355,47 @@
   };
 
   vlan10-debug = enabled // {
-    vlans = [ 10 ];
+    networking.vlans = [ 10 ];
     runtimeId = 31010;
   };
 
   vlan20-debug = enabled // {
-    vlans = [ 20 ];
+    networking.vlans = [ 20 ];
     runtimeId = 31020;
   };
 
   vlan30-debug = enabled // {
-    vlans = [ 30 ];
+    networking.vlans = [ 30 ];
     runtimeId = 31030;
   };
 
   vlan40-debug = enabled // {
-    vlans = [ 40 ];
+    networking.vlans = [ 40 ];
     runtimeId = 31040;
   };
 
   vlan50-debug = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 31050;
   };
 
   vlan99-debug = enabled // {
-    vlans = [ 99 ];
+    networking.vlans = [ 99 ];
     runtimeId = 31099;
   };
 
   vlan140-debug = enabled // {
-    vlans = [ 140 ];
+    networking.vlans = [ 140 ];
     runtimeId = 31140;
   };
 
   vlan150-debug = enabled // {
-    vlans = [ 150 ];
+    networking.vlans = [ 150 ];
     runtimeId = 31150;
   };
 
   vlan160-debug = enabled // {
-    vlans = [ 160 ];
+    networking.vlans = [ 160 ];
     runtimeId = 31160;
   };
 
@@ -403,13 +405,13 @@
       instance = "postgresql-home-primary";
       name = "jellyseerr";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30340;
   };
 
   alloy-syslog = enabled // {
     monitor.name = "Syslog";
-    vlans = [
+    networking.vlans = [
       50
       99
     ];
@@ -417,7 +419,7 @@
   };
 
   telegraf-snmp = enabled // {
-    vlans = [
+    networking.vlans = [
       50
       99
     ];

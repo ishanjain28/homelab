@@ -46,7 +46,7 @@ in
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
         listenAddress = "::";
-        port = cfg.endpoints.web.port;
+        port = cfg.networking.endpoints.web.port;
         inherit datastorePath;
         playwrightSupport = false;
         webDriverSupport = false;

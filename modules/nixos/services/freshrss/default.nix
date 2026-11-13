@@ -11,7 +11,7 @@ let
   cfg = config.${namespace}.services.freshrss;
   passwordPath = "/run/container-secrets/freshrss-password";
   databasePasswordPath = "/run/container-secrets/freshrss-database-password";
-  virtualHost = "http://:${toString cfg.endpoints.web.port}";
+  virtualHost = "http://:${toString cfg.networking.endpoints.web.port}";
 
   inherit (pkgs.freshrss-extensions) buildFreshRssExtension;
   officialExtensions = pkgs.fetchFromGitHub {

@@ -123,7 +123,7 @@ in
 
         loki.write "syslog" {
           endpoint {
-            url = "${logging.victoriaLogsPushUrls.${toString (head cfg.vlans)}}"
+            url = "${logging.victoriaLogsPushUrls.${toString (head cfg.networking.vlans)}}"
           }
         }
       '';

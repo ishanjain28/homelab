@@ -45,7 +45,7 @@ in
     containerConfig = {
       services.redis.servers."" = enabled // {
         inherit (cfg) bind;
-        port = cfg.endpoints.redis.port;
+        port = cfg.networking.endpoints.redis.port;
         openFirewall = true;
         requirePassFile = containerPasswordPath;
 

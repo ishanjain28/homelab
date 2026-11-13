@@ -46,7 +46,7 @@ in
       TasksMax = 512;
     };
     environment = {
-      PORT = toString cfg.endpoints.web.port;
+      PORT = toString cfg.networking.endpoints.web.port;
       NODE_ENV = "production";
       LOG_LEVEL = "warn";
       CONFIG_DIRECTORY = "/var/lib/seerr";

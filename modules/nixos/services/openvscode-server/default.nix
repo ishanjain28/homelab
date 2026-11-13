@@ -70,7 +70,7 @@ in
         "${pkgs.openvscode-server}/bin/openvscode-server"
         "--accept-server-license-terms"
         "--host=::"
-        "--port=${toString cfg.endpoints.web.port}"
+        "--port=${toString cfg.networking.endpoints.web.port}"
         "--connection-token-file=${connectionTokenPath}"
         "--telemetry-level=off"
         "--user-data-dir=${stateDir}/user-data"

@@ -40,7 +40,7 @@ in
     };
     environment = {
       HOSTNAME = "::";
-      PORT = toString cfg.endpoints.web.port;
+      PORT = toString cfg.networking.endpoints.web.port;
       NEXT_TELEMETRY_DISABLED = "1";
       ADMIN_DATA_DIR = "${stateDir}/admin";
       SETTINGS_DATA_DIR = "${stateDir}/settings";

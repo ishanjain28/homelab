@@ -47,7 +47,7 @@ let
       config,
       containerProfile ? "unprivileged",
       resources ? { },
-      containerTimeout ? "1min",
+      containerTimeout ? "3min",
     }:
     let
       containerProfileConfig = getContainerProfile containerProfile;
@@ -96,6 +96,7 @@ let
       endpoints,
       vlans,
       hostNetwork ? false,
+      mode ? "both",
     }:
     let
       vlanInterface = vlan: "eth${toString vlan}";
@@ -107,20 +108,20 @@ let
             linkConfig = {
               MACAddress = mkMacAddress "${name}:${toString vlan}";
               RequiredForOnline = "routable";
-              RequiredFamilyForOnline = if hasAttr (toString vlan) ipv6Prefixes then "both" else "ipv4";
+              RequiredFamilyForOnline = if mode == "both" then "any" else mode;
             };
             networkConfig = {
               Description = "${name} service container VLAN ${toString vlan}";
-              DHCP = "ipv4";
-              LinkLocalAddressing = "ipv6";
+              DHCP = if mode == "ipv6" then "no" else "ipv4";
+              LinkLocalAddressing = if mode == "ipv4" then "no" else "ipv6";
               IPv6LinkLocalAddressGenerationMode = "eui64";
               IPv6PrivacyExtensions = "no";
-              IPv6AcceptRA = "yes";
+              IPv6AcceptRA = if mode == "ipv4" then "no" else "yes";
               LLDP = "no";
               EmitLLDP = "no";
               LLMNR = "no";
             };
-            dhcpV4Config = {
+            dhcpV4Config = mkIf (mode != "ipv6") {
               ClientIdentifier = "mac";
               VendorClassIdentifier = "homelab-container/${name}";
               RouteMetric = 100 + index;
@@ -128,7 +129,7 @@ let
               UseDomains = index == 0;
               UseNTP = index == 0;
             };
-            ipv6AcceptRAConfig = {
+            ipv6AcceptRAConfig = mkIf (mode != "ipv4") {
               DHCPv6Client = false;
               RouteMetric = 100 + index;
               Token = "eui64";
@@ -167,7 +168,10 @@ let
       services.resolved.settings.Resolve.DNSStubListener = false;
       boot.kernel.sysctl."net.mptcp.enabled" = 0;
       systemd.oomd = disabled;
-      systemd.settings.Manager.ShowStatus = false;
+      systemd.settings.Manager = {
+        ShowStatus = false;
+        DefaultTimeoutStopSec = "1min";
+      };
       systemd.services."console-getty" = disabled;
       systemd.services.systemd-networkd-persistent-storage = disabled;
       systemd.services.systemd-update-utmp = disabled;
@@ -262,17 +266,13 @@ let
       containerConfig ? { },
       containerProfile ? "unprivileged",
       resources ? { },
-      containerTimeout ? "1min",
+      containerTimeout ? "3min",
       databaseUnits ? [ service.name ],
       serviceProfiles ? { },
     }:
     let
-      inherit (service)
-        name
-        runtimeId
-        runtimeUser
-        vlans
-        ;
+      inherit (service) name runtimeId runtimeUser;
+      inherit (service.networking) vlans hostNetwork mode;
       mkSecretName = secretName: "${name}-${secretName}";
       databaseEnabled = service.database != null;
       databaseUnitConfig =
@@ -290,8 +290,12 @@ let
       {
         assertions = [
           {
-            assertion = (service.vlans != [ ]) != service.hostNetwork;
-            message = "${name}: configure either VLAN attachments or hostNetwork.";
+            assertion = (vlans != [ ]) != hostNetwork;
+            message = "${name}: configure either networking.vlans or networking.hostNetwork.";
+          }
+          {
+            assertion = mode == "both" || !hostNetwork;
+            message = "${name}: networking.mode must be \"both\" with networking.hostNetwork.";
           }
         ];
       }
@@ -343,12 +347,17 @@ let
           containerProfile
           resources
           containerTimeout
+          hostNetwork
           ;
-        inherit (service) hostNetwork;
         config = mkMerge [
           (genContainerDefaults {
-            inherit name vlans;
-            inherit (service) endpoints hostNetwork;
+            inherit
+              name
+              vlans
+              hostNetwork
+              mode
+              ;
+            inherit (service.networking) endpoints;
           })
           {
             users.groups.${runtimeUser.group}.gid = mkForce runtimeId;
@@ -390,15 +399,23 @@ let
 
       description = mkOpt types.str description "Human-readable service description.";
 
-      endpoints = mkOpt (types.attrsOf endpointType) endpoints "Named listener endpoints for this service.";
+      networking = {
+        vlans = mkOption {
+          type = types.addCheck (types.listOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
+          default = [ ];
+          description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
+        };
 
-      vlans = mkOption {
-        type = types.addCheck (types.listOf (types.ints.between 1 4094)) (vlans: length vlans == length (unique vlans));
-        default = [ ];
-        description = "VLANs attached to this service container; the first is preferred for default routes and DNS.";
+        hostNetwork = mkOpt types.bool false "Share the host's network namespace instead of a private network.";
+
+        mode = mkOpt (types.enum [
+          "both"
+          "ipv4"
+          "ipv6"
+        ]) "both" "IP families configured on the service container's VLAN interfaces.";
+
+        endpoints = mkOpt (types.attrsOf endpointType) endpoints "Named listener endpoints for this service.";
       };
-
-      hostNetwork = mkOpt types.bool false "Share the host's network namespace instead of a private network.";
 
       volumes = mkOpt (types.listOf types.nonEmptyStr) [ ] "Volume IDs to attach to this service container.";
 
@@ -475,7 +492,7 @@ let
       after ? [ ],
       wants ? [ ],
       resources ? { },
-      containerTimeout ? "1min",
+      containerTimeout ? "3min",
     }:
     let
       inherit (service) name runtimeUser;

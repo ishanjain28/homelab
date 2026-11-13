@@ -125,7 +125,6 @@ in
           RestartSec = mkForce "10s";
           StateDirectoryMode = "0700";
           TimeoutStartSec = "infinity";
-          TimeoutStopSec = "infinity";
         };
       };
     })

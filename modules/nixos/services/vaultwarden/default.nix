@@ -52,7 +52,7 @@ in
       dbBackend = "postgresql";
       config = {
         ROCKET_ADDRESS = "0.0.0.0";
-        ROCKET_PORT = cfg.endpoints.web.port;
+        ROCKET_PORT = cfg.networking.endpoints.web.port;
         CONFIG_FILE = configFile;
         RSA_KEY_FILENAME = rsaKey;
         TZ = "Asia/Kolkata";

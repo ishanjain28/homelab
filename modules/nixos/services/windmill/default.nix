@@ -82,7 +82,7 @@ in
             MODE = "server";
             SERVER_BIND_ADDR = "::";
             DISABLE_EMBEDDING = "true";
-            PORT = toString cfg.endpoints.web.port;
+            PORT = toString cfg.networking.endpoints.web.port;
           };
           serviceConfig = commonServiceConfig // {
             User = cfg.runtimeUser.name;

@@ -51,7 +51,6 @@ in
     serviceProfile = "jit";
     inherit package;
     exec = "/bin/omada-controller";
-    containerTimeout = "3min";
     resources = {
       CPUQuota = "500%";
       MemoryMax = "5G";

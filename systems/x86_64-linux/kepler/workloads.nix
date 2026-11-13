@@ -22,13 +22,13 @@
   };
 
   actual-server = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30341;
     volumes = [ "actual-server" ];
   };
 
   pvr-movies-monitor = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 20691;
   };
 
@@ -37,12 +37,12 @@
       instance = "postgresql-home-primary";
       name = "huawei_sms";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 27777;
   };
 
   gitea-runner = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 36928;
     giteaURI = "https://git.ishanjain.me";
   };
@@ -52,30 +52,30 @@
       instance = "postgresql-home-primary";
       name = "mathesar_django";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30339;
   };
 
   changedetection = enabled // {
     monitor.name = "Change Detection";
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30344;
     volumes = [ "changedetection" ];
   };
 
   openvscode-server = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30345;
     volumes = [ "openvscode-server" ];
   };
   cups = enabled // {
-    vlans = [ 70 ];
+    networking.vlans = [ 70 ];
     runtimeId = 30347;
     volumes = [ "cups" ];
   };
 
   multicaster = enabled // {
-    vlans = [
+    networking.vlans = [
       10
       20
       30
@@ -86,7 +86,7 @@
   };
 
   netflector = enabled // {
-    vlans = [
+    networking.vlans = [
       50
       10
       20
@@ -97,13 +97,13 @@
   };
 
   ripe-atlas-primary = enabled // {
-    vlans = [ 150 ];
+    networking.vlans = [ 150 ];
     runtimeId = 36926;
     volumes = [ "ripe-atlas-primary" ];
   };
 
   ripe-atlas-lte = enabled // {
-    vlans = [ 160 ];
+    networking.vlans = [ 160 ];
     runtimeId = 36927;
     volumes = [ "ripe-atlas-lte" ];
   };
@@ -113,28 +113,28 @@
       instance = "postgresql-home-primary";
       name = "garmin_data";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30365;
   };
 
   backrest = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30366;
   };
 
   bulwark = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30393;
   };
 
   kavita = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30395;
     volumes = [ "kavita" ];
   };
 
   copyparty = enabled // {
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30396;
     volumes = [ "copyparty" ];
   };
@@ -144,7 +144,7 @@
       instance = "postgresql-home-primary";
       name = "atuin";
     };
-    vlans = [ 50 ];
+    networking.vlans = [ 50 ];
     runtimeId = 30394;
   };
 }

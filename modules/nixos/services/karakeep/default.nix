@@ -58,7 +58,7 @@ in
         extraEnvironment = {
           NODE_ENV = "production";
           DATA_DIR = "/var/lib/karakeep";
-          PORT = toString cfg.endpoints.web.port;
+          PORT = toString cfg.networking.endpoints.web.port;
           DISABLE_NEW_RELEASE_CHECK = "true";
           HOSTNAME = "::";
         };

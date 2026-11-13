@@ -51,7 +51,7 @@ in
         package = pkgs.paperless-ngx;
         user = cfg.runtimeUser.name;
         address = "::";
-        port = cfg.endpoints.web.port;
+        port = cfg.networking.endpoints.web.port;
         dataDir = "/var/lib/paperless";
         mediaDir = "${root}/media";
         consumptionDir = "${root}/consume";

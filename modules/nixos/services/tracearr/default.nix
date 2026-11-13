@@ -62,7 +62,7 @@ in
     environment = {
       BACKUP_DIR = "/var/lib/tracearr/backup";
       HOST = "::";
-      PORT = toString cfg.endpoints.web.port;
+      PORT = toString cfg.networking.endpoints.web.port;
       NODE_ENV = "production";
       LOG_LEVEL = "warn";
       REDIS_URL = "redis://127.0.0.1:6379";

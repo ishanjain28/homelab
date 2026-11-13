@@ -52,12 +52,11 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.qbittorrent-nox;
-    exec = "/bin/qbittorrent-nox --confirm-legal-notice --profile=${profileDir} --webui-port=${toString cfg.endpoints.web.port} --torrenting-port=\${PIA_PORT}";
+    exec = "/bin/qbittorrent-nox --confirm-legal-notice --profile=${profileDir} --webui-port=${toString cfg.networking.endpoints.web.port} --torrenting-port=\${PIA_PORT}";
     serviceProfile = "default";
     serviceConfig = {
       EnvironmentFile = portEnvFile;
       StateDirectory = "qbittorrent";
-      TimeoutStopSec = "60s";
     };
     secrets.env = {
       file = "secrets/qbit.env";

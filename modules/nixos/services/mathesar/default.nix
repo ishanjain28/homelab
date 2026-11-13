@@ -26,7 +26,7 @@ in
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
     package = pkgs.${namespace}.mathesar;
-    exec = "/bin/mathesar run --no-venv --addr [::] --port ${toString cfg.endpoints.web.port}";
+    exec = "/bin/mathesar run --no-venv --addr [::] --port ${toString cfg.networking.endpoints.web.port}";
 
     secrets.env = {
       file = "secrets/mathesar.env";
@@ -44,7 +44,7 @@ in
       HOME = "/var/lib/mathesar";
       MEDIA_ROOT = "/var/lib/mathesar/media";
       SKIP_STATIC_COLLECTION = "true";
-      PORT = toString cfg.endpoints.web.port;
+      PORT = toString cfg.networking.endpoints.web.port;
     };
 
     serviceConfig = {

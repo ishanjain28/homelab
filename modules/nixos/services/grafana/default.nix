@@ -94,7 +94,7 @@ in
       GF_PLUGINS_PREINSTALL_SYNC = "victoriametrics-logs-datasource,victoriametrics-metrics-datasource,yesoreyeram-infinity-datasource";
       GF_AUTH_LDAP_CONFIG_FILE = ldapConfigPath;
       GF_SERVER_HTTP_ADDR = "0.0.0.0";
-      GF_SERVER_HTTP_PORT = toString cfg.endpoints.web.port;
+      GF_SERVER_HTTP_PORT = toString cfg.networking.endpoints.web.port;
     };
 
     serviceConfig = {

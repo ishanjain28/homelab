@@ -6,7 +6,7 @@
       name = "PostgreSQL Primary";
     };
     volumes = [ "postgresql-del-primary" ];
-    hostNetwork = true;
+    networking.hostNetwork = true;
     runtimeId = 36934;
     authentication = ''
       host all all 127.0.0.1/32 scram-sha-256
@@ -24,17 +24,19 @@
     };
   };
   caddy = enabled // {
-    hostNetwork = true;
+    networking = {
+      hostNetwork = true;
+      endpoints = {
+        http.port = 10080;
+        https = {
+          port = 10443;
+          transport = "tcp-and-udp";
+        };
+      };
+    };
     runtimeId = 30352;
     configFile = "secrets/caddy/delhi.json";
     shares = [ "dl" ];
-    endpoints = {
-      http.port = 10080;
-      https = {
-        port = 10443;
-        transport = "tcp-and-udp";
-      };
-    };
     monitor = {
       endpoint = "http";
       group = "DEL";
@@ -58,28 +60,30 @@
         # "[IP] == 139.84.164.110"
       ];
     };
-    hostNetwork = true;
+    networking = {
+      hostNetwork = true;
+      endpoints = {
+        dns = {
+          port = 5353;
+          transport = "tcp-and-udp";
+        };
+        tls = {
+          port = 8853;
+          transport = "tcp-and-udp";
+        };
+        https.port = 8443;
+        web = {
+          port = 1030;
+          expose = false;
+        };
+      };
+    };
     runtimeId = 30373;
     configFile = "secrets/adguardhome/delhi.yml";
     certificates = [ "adguard-home" ];
-    endpoints = {
-      dns = {
-        port = 5353;
-        transport = "tcp-and-udp";
-      };
-      tls = {
-        port = 8853;
-        transport = "tcp-and-udp";
-      };
-      https.port = 8443;
-      web = {
-        port = 1030;
-        expose = false;
-      };
-    };
   };
   gatus = enabled // {
-    hostNetwork = true;
+    networking.hostNetwork = true;
     runtimeId = 36924;
     database = {
       instance = "postgresql-del-primary";
@@ -92,7 +96,7 @@
   vaultwarden = enabled // {
     monitor.group = "DEL";
     volumes = [ "vaultwarden" ];
-    hostNetwork = true;
+    networking.hostNetwork = true;
     runtimeId = 30390;
     database = {
       instance = "postgresql-del-primary";
@@ -102,7 +106,7 @@
   freshrss = enabled // {
     monitor.group = "DEL";
     volumes = [ "freshrss" ];
-    hostNetwork = true;
+    networking.hostNetwork = true;
     runtimeId = 30391;
     database = {
       instance = "postgresql-del-primary";
@@ -117,7 +121,7 @@
     monitor.group = "DEL";
     volumes = [ "znc" ];
     runtimeId = 30392;
-    hostNetwork = true;
+    networking.hostNetwork = true;
   };
   wireguard = enabled // {
     interfaces = {

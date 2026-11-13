@@ -15,7 +15,7 @@ let
   configFile = pkgs.writeText "copyparty.conf" ''
     [global]
       i: ::
-      p: ${toString cfg.endpoints.web.port}
+      p: ${toString cfg.networking.endpoints.web.port}
       http-only
       rproxy: 1
       xff-hdr: x-forwarded-for

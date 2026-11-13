@@ -45,7 +45,7 @@ in
       TasksMax = 128;
     };
     containerConfig.networking.firewall.interfaces =
-      genAttrs (map (vlan: "eth${toString vlan}") (remove 50 cfg.vlans))
+      genAttrs (map (vlan: "eth${toString vlan}") (remove 50 cfg.networking.vlans))
         (_: {
           allowedTCPPortRanges = [
             {

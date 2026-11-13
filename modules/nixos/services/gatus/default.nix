@@ -32,7 +32,7 @@ in
         settings = {
           web = {
             address = "[::]";
-            port = cfg.endpoints.web.port;
+            port = cfg.networking.endpoints.web.port;
           };
 
           ui = {

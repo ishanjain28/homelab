@@ -15,7 +15,7 @@ let
     	admin off
     }
 
-    :${toString cfg.endpoints.web.port} {
+    :${toString cfg.networking.endpoints.web.port} {
     	root * ${pkgs.bentopdf}
     	try_files {path} {path}.html {path}/index.html
     	file_server {

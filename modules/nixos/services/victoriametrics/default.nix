@@ -32,7 +32,7 @@ in
     };
     containerConfig = {
       services.victoriametrics = enabled // {
-        listenAddress = ":${toString cfg.endpoints.web.port}";
+        listenAddress = ":${toString cfg.networking.endpoints.web.port}";
         retentionPeriod = "1y";
         extraOptions = [
           "-enableTCP6"

@@ -38,7 +38,7 @@ in
     };
     environment = {
       HOST = "[::]";
-      PORT = toString cfg.endpoints.app.port;
+      PORT = toString cfg.networking.endpoints.app.port;
       RUST_LOG = "info";
       TOKIO_WORKER_THREADS = "2";
     };

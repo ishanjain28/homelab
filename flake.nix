@@ -247,7 +247,12 @@
       dnsDirect.services =
         let
           v6Vlans = entry: lib.filter (vlan: lib.hasAttr (toString vlan) ipv6Prefixes) entry.vlans;
-          entries = fleetRegistry.services // lib.mapAttrs (name: host: host // { host = name; }) fleetRegistry.hosts;
+          entries =
+            lib.mapAttrs (_key: service: {
+              inherit (service) name host;
+              inherit (service.networking) vlans;
+            }) fleetRegistry.services
+            // lib.mapAttrs (name: host: host // { host = name; }) fleetRegistry.hosts;
         in
         lib.foldl' lib.recursiveUpdate { } (
           lib.mapAttrsToList (_key: entry: {

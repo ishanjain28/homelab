@@ -48,7 +48,7 @@ in
         environmentFiles = [ environmentFile ];
         settings.server = {
           bindaddress = "*";
-          port = cfg.endpoints.web.port;
+          port = cfg.networking.endpoints.web.port;
         };
       };
 

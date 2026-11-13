@@ -49,7 +49,7 @@ in
     environment = {
       BACKREST_CONFIG = configPath;
       BACKREST_DATA = stateDir;
-      BACKREST_PORT = ":${toString cfg.endpoints.web.port}";
+      BACKREST_PORT = ":${toString cfg.networking.endpoints.web.port}";
       BACKREST_RESTIC_COMMAND = "${pkgs.restic}/bin/restic";
       RCLONE_CONFIG = "${stateDir}/rclone.conf";
       XDG_CACHE_HOME = "${stateDir}/cache";

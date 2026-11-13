@@ -75,7 +75,7 @@ let
   vethServiceMap = listToAttrs (
     concatLists (
       mapAttrsToList (
-        name: service: map (vlan: nameValuePair (mkContainerVethName name vlan) name) service.vlans
+        name: service: map (vlan: nameValuePair (mkContainerVethName name vlan) name) service.networking.vlans
       ) enabledServices
     )
   );
@@ -174,7 +174,7 @@ let
       inherit (fleet.hosts.${srv.host}) domain;
       defaultAddress = if domain != "" then "${srv.name}.${domain}" else srv.name;
       address = if monitor.address != "" then monitor.address else defaultAddress;
-      port = srv.endpoints.${endpoint}.port;
+      port = srv.networking.endpoints.${endpoint}.port;
       url =
         if protocol == "http" || protocol == "https" then
           "${protocol}://${address}:${toString port}${path}"
@@ -195,7 +195,7 @@ let
       _name: srv:
       srv.monitor.enable
       && srv.monitor.protocol != "icmp"
-      && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.endpoints))
+      && (srv.monitor.endpoint == null || !(hasAttr srv.monitor.endpoint srv.networking.endpoints))
     ) enabledServices
   );
 

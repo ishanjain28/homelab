@@ -35,7 +35,6 @@ in
     (mkServiceContainer {
       service = cfg;
       serviceProfiles.telegraf = "raw-sockets";
-      containerTimeout = "2min";
 
       resources = {
         CPUQuota = "50%";

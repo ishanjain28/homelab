@@ -328,7 +328,7 @@ let
             }) cfg.users;
             inherit (cfg) authentication;
             settings = {
-              port = cfg.endpoints.postgres.port;
+              port = cfg.networking.endpoints.postgres.port;
               log_min_messages = "warning";
               log_min_error_statement = "error";
               log_checkpoints = false;

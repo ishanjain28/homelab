@@ -37,7 +37,7 @@ in
     containerConfig = {
       services.atuin = enabled // {
         host = "::";
-        port = cfg.endpoints.web.port;
+        port = cfg.networking.endpoints.web.port;
         openRegistration = false;
         database = {
           createLocally = false;
