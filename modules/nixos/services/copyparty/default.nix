@@ -26,8 +26,6 @@ let
       e2d
       e2ts
       dedup
-      zs
-      zsl: https://share.ishanjain.me/
       og
       og-site: Ishan's Share
       og-ua: (?i)(discordbot|twitterbot|slackbot|telegrambot|whatsapp|redditbot|mastodon|synapse|googlebot)
@@ -43,13 +41,7 @@ in
   options.${namespace}.services.copyparty = mkServiceOptions {
     name = "copyparty";
     description = "Copyparty file transfer";
-    endpoints = {
-      web.port = 3923;
-      ssdp = {
-        port = 1900;
-        transport = "udp";
-      };
-    };
+    endpoints.web.port = 3923;
     monitor = enabled // {
       endpoint = "web";
       protocol = "tcp";

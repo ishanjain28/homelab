@@ -2,6 +2,7 @@
   config,
   lib,
   namespace,
+  pkgs,
   ...
 }:
 with lib;
@@ -42,6 +43,7 @@ in
 
     containerConfig = {
       services.radarr = enabled // {
+        package = pkgs.radarr;
         openFirewall = false;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
