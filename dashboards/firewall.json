@@ -1,0 +1,796 @@
+{
+  "title": "Firewall",
+  "uid": "firewall",
+  "schemaVersion": 41,
+  "version": 1,
+  "tags": [
+    "homelab",
+    "firewall"
+  ],
+  "timezone": "browser",
+  "editable": false,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "1m",
+  "graphTooltip": 1,
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "victorialogs"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "host",
+          "query": "{container=\"host\", transport=\"kernel\"} ~\"^firewall [a-z0-9-]+/\"",
+          "refId": "host"
+        },
+        "definition": "host",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Traffic the container firewall does not allow. In **log** mode it is only logged and still gets through; in **drop** mode it is blocked.\n\n**Inbound:** a connection to a service endpoint from a caller not in its `from` list. **Internet:** a new connection to the internet from a service with `networking.internet = false`."
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Inbound attempts",
+      "description": "Connections to endpoints from callers not in their from list.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 3
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:!=internet | stats count() as attempts",
+          "queryType": "stats"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          }
+        },
+        "overrides": []
+      },
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Internet attempts",
+      "description": "New internet connections from services with networking.internet = false.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 3
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:=internet | stats count() as attempts",
+          "queryType": "stats"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          }
+        },
+        "overrides": []
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "Services affected",
+      "description": "Services with at least one inbound or internet event.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 3
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | stats count_uniq(service) as services",
+          "queryType": "stats"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "Distinct sources",
+      "description": "Distinct source addresses across all events.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 3
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | stats count_uniq(src) as sources",
+          "queryType": "stats"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        },
+        "overrides": []
+      },
+      "id": 5
+    },
+    {
+      "type": "row",
+      "title": "Inbound: callers not in from",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "panels": [],
+      "id": 6
+    },
+    {
+      "type": "timeseries",
+      "title": "Inbound attempts by target",
+      "description": "Grouped by target service/endpoint.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:!=internet | stats by (service, rule) count() as attempts",
+          "queryType": "statsRange",
+          "legendFormat": "{{service}}/{{rule}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 7
+    },
+    {
+      "type": "timeseries",
+      "title": "Inbound attempts by source",
+      "description": "Grouped by source address.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:!=internet | stats by (src) count() as attempts",
+          "queryType": "statsRange",
+          "legendFormat": "{{src}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 8
+    },
+    {
+      "type": "table",
+      "title": "Inbound connections",
+      "description": "Each row is one source address reaching one target endpoint.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:!=internet | stats by (host, src, service, rule, dst, proto, dport) count() as attempts, max(_time) as seen | math round(seen / 1e6) as last_seen | delete seen | sort by (attempts desc) | limit 500",
+          "queryType": "stats"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "__name__"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "host": 0,
+              "src": 1,
+              "service": 2,
+              "rule": 3,
+              "dst": 4,
+              "proto": 5,
+              "dport": 6,
+              "attempts": 7,
+              "last_seen": 8
+            },
+            "renameByName": {
+              "host": "Host",
+              "src": "Source address",
+              "service": "Target service",
+              "rule": "Endpoint",
+              "dst": "Destination address",
+              "proto": "Protocol",
+              "dport": "Port",
+              "attempts": "Attempts",
+              "last_seen": "Last seen"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "wrapText": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last seen"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeFromNow"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Attempts",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "id": 9
+    },
+    {
+      "type": "row",
+      "title": "Internet: services with internet = false",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "panels": [],
+      "id": 10
+    },
+    {
+      "type": "timeseries",
+      "title": "Internet attempts by service",
+      "description": "Grouped by the service making the connection.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:=internet | stats by (service) count() as attempts",
+          "queryType": "statsRange",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 11
+    },
+    {
+      "type": "timeseries",
+      "title": "Internet attempts by destination",
+      "description": "Grouped by destination address.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:=internet | stats by (dst) count() as attempts",
+          "queryType": "statsRange",
+          "legendFormat": "{{dst}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 12
+    },
+    {
+      "type": "table",
+      "title": "Internet connections",
+      "description": "Each row is one service reaching one internet destination.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\" | extract_regexp `^firewall (?P<service>[a-z0-9-]+)/(?P<rule>[a-z0-9-]+): IN=(?P<in_if>\\S*) OUT=(?P<out_if>\\S*) (?:MAC=\\S+ )?SRC=(?P<src>\\S+) DST=(?P<dst>\\S+) .*?PROTO=(?P<proto>[A-Za-z0-9-]+)(?: SPT=(?P<sport>\\d+) DPT=(?P<dport>\\d+))?` | filter rule:=internet | stats by (host, service, src, dst, proto, dport) count() as attempts, max(_time) as seen | math round(seen / 1e6) as last_seen | delete seen | sort by (attempts desc) | limit 500",
+          "queryType": "stats"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "__name__"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "host": 0,
+              "service": 1,
+              "src": 2,
+              "dst": 3,
+              "proto": 4,
+              "dport": 5,
+              "attempts": 6,
+              "last_seen": 7
+            },
+            "renameByName": {
+              "host": "Host",
+              "service": "Source service",
+              "src": "Source address",
+              "dst": "Destination address",
+              "proto": "Protocol",
+              "dport": "Port",
+              "attempts": "Attempts",
+              "last_seen": "Last seen"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "wrapText": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last seen"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeFromNow"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Attempts",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "id": 13
+    },
+    {
+      "type": "row",
+      "title": "Raw log",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "panels": [],
+      "id": 14
+    },
+    {
+      "type": "logs",
+      "title": "Firewall log",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "{container=\"host\", transport=\"kernel\", host=~\"$host\"} ~\"^firewall [a-z0-9-]+/\"",
+          "queryType": "instant",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "enableInfiniteScrolling": true
+      },
+      "id": 15
+    }
+  ]
+}

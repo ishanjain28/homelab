@@ -26,8 +26,8 @@ let
 
         expose = mkBoolOpt (defaults.expose or true) "Whether to expose this endpoint through the container firewall.";
 
-        from = mkOpt (types.nullOr (types.listOf types.nonEmptyStr)) (defaults.from or null
-        ) "Services allowed to connect. null leaves the endpoint unrestricted.";
+        from = mkOpt (types.nullOr (types.listOf types.nonEmptyStr)) (defaults.from or [ ]
+        ) "Services or @groups allowed to connect. null leaves the endpoint unrestricted.";
       };
     };
 
@@ -317,8 +317,12 @@ let
             message = "${name}: networking.mode must be \"both\" with networking.hostNetwork.";
           }
           {
-            assertion = all (endpoint: endpoint.from == null) (attrValues service.networking.endpoints) || !hostNetwork;
+            assertion = all (endpoint: endpoint.from == [ ]) (attrValues service.networking.endpoints) || !hostNetwork;
             message = "${name}: networking.endpoints.*.from is not supported with networking.hostNetwork.";
+          }
+          {
+            assertion = service.networking.internet || !hostNetwork;
+            message = "${name}: networking.internet = false is not supported with networking.hostNetwork.";
           }
         ];
       }
@@ -441,6 +445,8 @@ let
           "drop"
           "log"
         ]) "log" "What happens to traffic no endpoint rule allows: drop it, or only log it.";
+
+        internet = mkBoolOpt true "Whether the service may open connections to the internet.";
 
         endpoints = endpointsOption endpoints;
       };

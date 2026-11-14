@@ -24,6 +24,8 @@
   actual-server = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30341;
@@ -43,10 +45,7 @@
       instance = "postgresql-home-primary";
       name = "huawei_sms";
     };
-    networking = {
-      vlans = [ 50 ];
-      endpoints.api.from = [ ];
-    };
+    networking.vlans = [ 50 ];
     runtimeId = 27777;
   };
 
@@ -63,6 +62,8 @@
     };
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30339;
@@ -87,30 +88,54 @@
     volumes = [ "openvscode-server" ];
   };
   cups = enabled // {
-    networking.vlans = [ 70 ];
+    networking = {
+      vlans = [ 70 ];
+      internet = false;
+      endpoints.ipp.from = [ "@all_lan" ];
+    };
     runtimeId = 30347;
     volumes = [ "cups" ];
   };
 
   multicaster = enabled // {
-    networking.vlans = [
-      10
-      20
-      30
-      40
-      70
-    ];
+    networking = {
+      vlans = [
+        10
+        20
+        30
+        40
+        70
+      ];
+      internet = false;
+      endpoints.mdns.from = [
+        "@all_lan"
+        "@link-local"
+      ];
+    };
     runtimeId = 36925;
   };
 
   netflector = enabled // {
-    networking.vlans = [
-      50
-      10
-      20
-      30
-      40
-    ];
+    networking = {
+      vlans = [
+        50
+        10
+        20
+        30
+        40
+      ];
+      internet = false;
+      endpoints = {
+        ssdp.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+        wsd.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+      };
+    };
     runtimeId = 36997;
   };
 
@@ -138,6 +163,7 @@
   backrest = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30366;
@@ -163,6 +189,8 @@
   copyparty = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30396;
@@ -176,6 +204,8 @@
     };
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30394;

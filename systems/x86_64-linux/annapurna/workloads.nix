@@ -4,6 +4,7 @@
     monitor.name = "PostgreSQL Primary";
     networking = {
       vlans = [ 50 ];
+      internet = false;
       endpoints.postgres.from = [
         "atuin"
         "authelia"
@@ -77,7 +78,7 @@
     monitor.name = "PostgreSQL Secondary";
     networking = {
       vlans = [ 50 ];
-      endpoints.postgres.from = [ ];
+      internet = false;
     };
     runtimeId = 36933;
     volumes = [ "postgresql-del-mirror" ];
@@ -121,6 +122,8 @@
   bentopdf = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 50715;
@@ -133,6 +136,8 @@
     };
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30342;
@@ -140,7 +145,28 @@
 
   omada = enabled // {
     monitor.name = "Omada Controller";
-    networking.vlans = [ 99 ];
+    networking = {
+      vlans = [ 99 ];
+      internet = false;
+      endpoints = {
+        adopt-v1.from = [ "@mgmt" ];
+        app-discovery.from = [ "@mgmt" ];
+        device-monitor.from = [ "@mgmt" ];
+        discovery.from = [ "@mgmt" ];
+        manager-v1.from = [ "@mgmt" ];
+        manager-v2.from = [ "@mgmt" ];
+        olt-discovery.from = [ "@mgmt" ];
+        portal-https.from = [ "@mgmt" ];
+        rtty.from = [ "@mgmt" ];
+        transfer-v2.from = [ "@mgmt" ];
+        upgrade-v1.from = [ "@mgmt" ];
+        web-http.from = [ "@mgmt" ];
+        web-https.from = [
+          "@mgmt"
+          "@caddy"
+        ];
+      };
+    };
     runtimeId = 30349;
     volumes = [ "omada" ];
   };
@@ -232,7 +258,11 @@
   };
 
   unpackerr = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
+    };
     runtimeId = 30359;
     shares = [ "wd-4tb" ];
   };
@@ -255,12 +285,18 @@
   jellyfin = enabled // {
     networking = {
       vlans = [ 50 ];
-      endpoints.web.from = [
-        "caddy"
-        "seerr"
-        "tracearr"
-        "netflector"
-      ];
+      endpoints = {
+        web.from = [
+          "caddy"
+          "seerr"
+          "tracearr"
+          "netflector"
+        ];
+        ssdp.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+      };
     };
     runtimeId = 30360;
     volumes = [ "jellyfin" ];
@@ -288,16 +324,33 @@
   };
 
   victoriametrics = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      internet = false;
+      endpoints.web.from = [
+        "grafana"
+        "telegraf-snmp"
+        "@mgmt"
+        "@manaslu"
+      ];
+    };
     runtimeId = 36929;
     volumes = [ "victoriametrics" ];
   };
 
   victorialogs = enabled // {
-    networking.vlans = [
-      50
-      99
-    ];
+    networking = {
+      vlans = [
+        50
+        99
+      ];
+      endpoints.web.from = [
+        "grafana"
+        "alloy-syslog"
+        "@mgmt"
+        "@manaslu"
+      ];
+    };
     runtimeId = 36935;
     volumes = [ "victorialogs" ];
   };
@@ -331,7 +384,11 @@
 
   samba = enabled // {
     monitor.name = "NAS";
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      internet = false;
+      endpoints.smb.from = [ "@lan" ];
+    };
     runtimeId = 30363;
     shares = [
       "ishan"
@@ -348,10 +405,16 @@
 
   caddy = enabled // {
     monitor.name = "Ingress Proxy IPv4";
-    networking.vlans = [
-      50
-      140
-    ];
+    networking = {
+      vlans = [
+        50
+        140
+      ];
+      endpoints.healthcheck.from = [
+        "@all_lan"
+        "@manaslu"
+      ];
+    };
     runtimeId = 30352;
     configFile = "secrets/caddy/home.json";
   };
@@ -374,15 +437,30 @@
         dns = {
           port = 53;
           transport = "tcp-and-udp";
+          from = [
+            "@all_lan"
+            "@manaslu"
+          ];
         };
         tls = {
           port = 853;
           transport = "tcp-and-udp";
+          from = [
+            "@all_lan"
+            "@manaslu"
+          ];
         };
-        https.port = 443;
+        https = {
+          port = 443;
+          from = [
+            "@all_lan"
+            "@manaslu"
+          ];
+        };
         web = {
           port = 80;
           expose = true;
+          from = [ "caddy" ];
         };
       };
     };
@@ -392,7 +470,14 @@
   };
 
   asterisk = enabled // {
-    networking.vlans = [ 140 ];
+    networking = {
+      vlans = [ 140 ];
+      endpoints = {
+        sip-tcp.from = [ "@vlan140" ];
+        sip-udp.from = [ "@vlan140" ];
+        sip-tls.from = [ "@vlan140" ];
+      };
+    };
     runtimeId = 30362;
     logging = disabled;
   };
@@ -404,6 +489,7 @@
     };
     networking = {
       vlans = [ 50 ];
+      internet = false;
       endpoints.ldap.from = [
         "authelia"
         "grafana"
@@ -450,13 +536,19 @@
   };
 
   gatus = enabled // {
-    networking.vlans = [
-      50
-      10
-      99
-      70
-      140
-    ];
+    networking = {
+      vlans = [
+        50
+        10
+        99
+        70
+        140
+      ];
+      endpoints.web.from = [
+        "caddy"
+        "@manaslu"
+      ];
+    };
     runtimeId = 36924;
     database = {
       instance = "postgresql-home-primary";
@@ -529,18 +621,24 @@
 
   alloy-syslog = enabled // {
     monitor.name = "Syslog";
-    networking.vlans = [
-      50
-      99
-    ];
+    networking = {
+      vlans = [
+        50
+        99
+      ];
+      internet = false;
+    };
     runtimeId = 30346;
   };
 
   telegraf-snmp = enabled // {
-    networking.vlans = [
-      50
-      99
-    ];
+    networking = {
+      vlans = [
+        50
+        99
+      ];
+      internet = false;
+    };
     runtimeId = 36931;
   };
 

@@ -25,16 +25,46 @@ let
     else
       map (mkIpv6Address ref) vlans;
 
+  isGroup = hasPrefix "@";
+
+  groupRules =
+    match: entry:
+    let
+      name = removePrefix "@" entry;
+    in
+    mapAttrsToList (family: cidrs: "${match} ${family} saddr { ${concatStringsSep ", " cidrs} } accept") (
+      firewallGroups.${name} or (throw "firewall: unknown group '${name}'")
+    );
+
   callersOf =
     service: endpointName: endpoint:
-    endpoint.from ++ optional (service.monitor.enable && service.monitor.endpoint == endpointName) "gatus";
+    filter (entry: !isGroup entry) endpoint.from
+    ++ optional (service.monitor.enable && service.monitor.endpoint == endpointName) "gatus";
 
   firewalledEndpoints =
     service: filterAttrs (_name: endpoint: endpoint.from != null && endpoint.expose) service.networking.endpoints;
 
+  enabledServices = filterAttrs (_name: service: service.enable && service ? networking) config.${namespace}.services;
+
   services = filterAttrs (
-    _name: service: service.enable && service ? networking && firewalledEndpoints service != { }
-  ) config.${namespace}.services;
+    _name: service: !service.networking.hostNetwork && firewalledEndpoints service != { }
+  ) enabledServices;
+
+  offline = filterAttrs (_name: service: !service.networking.internet) enabledServices;
+
+  mkChain = name: rules: "chain ${name} {\n${concatMapStrings (rule: "  ${rule}\n") rules}}\n";
+
+  verdict =
+    service: label:
+    if service.networking.firewall == "log" then
+      ''log prefix "firewall ${service.name}/${label}: " level info''
+    else
+      "drop";
+
+  internetRules = service: [
+    "ct state new ip daddr != { ${concatStringsSep ", " firewallGroups.private.ip} } ${verdict service "internet"}"
+    "ct state new ip6 daddr 2000::/3 ip6 daddr != { ${concatStringsSep ", " firewallGroups.private.ip6} } ${verdict service "internet"}"
+  ];
 
   rulesFor =
     service:
@@ -46,14 +76,8 @@ let
           match = "meta l4proto ${protocol} th dport ${toString endpoint.port}";
         in
         map (caller: "${match} ip6 saddr @${caller} accept") (unique (callersOf service endpointName endpoint))
-        ++ [
-          (
-            if service.networking.firewall == "log" then
-              ''ct state new ${match} log prefix "firewall ${service.name}/${endpointName}: " level info''
-            else
-              "${match} drop"
-          )
-        ]
+        ++ concatMap (groupRules match) (unique (filter isGroup endpoint.from))
+        ++ [ "ct state new ${match} ${verdict service endpointName}" ]
       ) (firewalledEndpoints service)
     );
 
@@ -63,14 +87,22 @@ let
     )
   );
 
-  jumpToChain = concatLists (
-    mapAttrsToList (
-      name: service: map (vlan: ''"${mkContainerVethName name vlan}" : jump ${name}'') service.networking.vlans
-    ) services
-  );
+  jumpToChain =
+    suffix: selected:
+    concatLists (
+      mapAttrsToList (
+        name: service: map (vlan: ''"${mkContainerVethName name vlan}" : jump ${name}${suffix}'') service.networking.vlans
+      ) selected
+    );
+
+  forwardRules = [
+    "type filter hook forward priority filter; policy accept;"
+  ]
+  ++ optional (services != { }) "oifname vmap { ${concatStringsSep ", " (jumpToChain "" services)} }"
+  ++ optional (offline != { }) "iifname vmap { ${concatStringsSep ", " (jumpToChain "-internet" offline)} }";
 in
 {
-  config = mkIf (services != { }) {
+  config = mkIf (services != { } || offline != { }) {
     networking.nftables.tables.homelab = {
       family = "bridge";
       content =
@@ -80,18 +112,9 @@ in
             elements = { ${concatStringsSep ", " (addressesOf caller)} }
           }
         '') callers
-        + ''
-          chain forward {
-            type filter hook forward priority filter; policy accept;
-            oifname vmap { ${concatStringsSep ", " jumpToChain} }
-          }
-        ''
-        + concatStrings (
-          mapAttrsToList (name: service: ''
-            chain ${name} {
-            ${concatMapStrings (rule: "  ${rule}\n") (rulesFor service)}}
-          '') services
-        );
+        + mkChain "forward" forwardRules
+        + concatStrings (mapAttrsToList (name: service: mkChain name (rulesFor service)) services)
+        + concatStrings (mapAttrsToList (name: service: mkChain "${name}-internet" (internetRules service)) offline);
     };
   };
 }
