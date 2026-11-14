@@ -172,6 +172,7 @@
   bulwark = enabled // {
     networking = {
       vlans = [ 50 ];
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30393;
@@ -180,6 +181,7 @@
   kavita = enabled // {
     networking = {
       vlans = [ 50 ];
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30395;

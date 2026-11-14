@@ -330,10 +330,12 @@
   victoriametrics = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
       internet = false;
       endpoints.web.from = [
         "grafana"
         "telegraf-snmp"
+        "vlan50-debug"
         "@mgmt"
         "@manaslu"
       ];
@@ -348,9 +350,11 @@
         50
         99
       ];
+      mode = "ipv6";
       endpoints.web.from = [
         "grafana"
         "alloy-syslog"
+        "vlan50-debug"
         "@mgmt"
         "@manaslu"
       ];
@@ -366,6 +370,7 @@
     };
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 31918;
@@ -498,11 +503,12 @@
     };
     networking = {
       vlans = [ 50 ];
-      internet = false;
+      internet = true;
       endpoints.ldap.from = [
         "authelia"
         "grafana"
         "jellyfin"
+        "stalwart"
       ];
       endpoints.web.from = [ "caddy" ];
     };
@@ -516,7 +522,10 @@
     };
     networking = {
       vlans = [ 50 ];
-      endpoints.web.from = [ "caddy" ];
+      endpoints.web.from = [
+        "caddy"
+        "@manaslu"
+      ];
     };
     runtimeId = 20001;
   };
@@ -528,8 +537,11 @@
     };
     networking = {
       vlans = [ 50 ];
-      # null: not firewalled, reachable from anywhere
-      endpoints.smtp.from = null;
+      endpoints = {
+        # null: not firewalled, reachable from anywhere
+        smtp.from = null;
+        http.from = [ "caddy" ];
+      };
     };
     runtimeId = 30364;
     volumes = [ "stalwart" ];
