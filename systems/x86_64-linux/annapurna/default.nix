@@ -136,6 +136,13 @@ in
             linkConfig.RequiredForOnline = "no";
             vlan = [ "vlan99" ];
             bridgeVLANs = [ { VLAN = [ 99 ]; } ];
+            bridgeFDBs = [
+              {
+                MACAddress = mkMacAddress "${hostName}:99";
+                VLANId = 99;
+                AssociatedWith = "self";
+              }
+            ];
           };
         }
         (mkNetworkIf {

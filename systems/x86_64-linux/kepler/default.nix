@@ -82,6 +82,13 @@ in
             vlan = [ "vlan99" ];
             # Add VLAN to the Bridge (CPU)
             bridgeVLANs = [ { VLAN = [ 99 ]; } ];
+            bridgeFDBs = [
+              {
+                MACAddress = mkMacAddress "${hostName}:99";
+                VLANId = 99;
+                AssociatedWith = "self";
+              }
+            ];
           };
           # "30-vb-vlan99-containers" = {
           #   matchConfig.Name = "vb-a*"; # Matches nspawn default vbridge prefix

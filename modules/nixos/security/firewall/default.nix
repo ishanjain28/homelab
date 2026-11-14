@@ -56,10 +56,10 @@ let
 
   verdict =
     service: label:
-    if service.networking.firewall == "log" then
-      ''log prefix "firewall ${service.name}/${label}: " level info''
-    else
-      "drop";
+    let
+      log = ''log prefix "firewall ${service.name}/${label}: " level info'';
+    in
+    if service.networking.firewall == "log" then log else "${log} drop";
 
   internetRules = service: [
     "ct state new ip daddr != { ${concatStringsSep ", " firewallGroups.private.ip} } ${verdict service "internet"}"

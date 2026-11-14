@@ -49,21 +49,6 @@
   },
   "panels": [
     {
-      "type": "text",
-      "title": "",
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "Traffic the container firewall does not allow. In **log** mode it is only logged and still gets through; in **drop** mode it is blocked.\n\n**Inbound:** a connection to a service endpoint from a caller not in its `from` list. **Internet:** a new connection to the internet from a service with `networking.internet = false`."
-      },
-      "id": 1
-    },
-    {
       "type": "stat",
       "title": "Inbound attempts",
       "description": "Connections to endpoints from callers not in their from list.",
@@ -75,7 +60,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 0
       },
       "targets": [
         {
@@ -126,7 +111,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 3
+        "y": 0
       },
       "targets": [
         {
@@ -177,7 +162,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 3
+        "y": 0
       },
       "targets": [
         {
@@ -228,7 +213,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 3
+        "y": 0
       },
       "targets": [
         {
@@ -275,7 +260,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 4
       },
       "panels": [],
       "id": 6
@@ -292,7 +277,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 5
       },
       "targets": [
         {
@@ -350,7 +335,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 5
       },
       "targets": [
         {
@@ -408,7 +393,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "targets": [
         {
@@ -513,7 +498,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 25
       },
       "panels": [],
       "id": 10
@@ -530,7 +515,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 29
+        "y": 26
       },
       "targets": [
         {
@@ -588,7 +573,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 29
+        "y": 26
       },
       "targets": [
         {
@@ -646,7 +631,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 34
       },
       "targets": [
         {
@@ -749,7 +734,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 46
       },
       "panels": [],
       "id": 14
@@ -765,7 +750,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 47
       },
       "targets": [
         {

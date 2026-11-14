@@ -444,7 +444,7 @@ let
         firewall = mkOpt (types.enum [
           "drop"
           "log"
-        ]) "log" "What happens to traffic no endpoint rule allows: drop it, or only log it.";
+        ]) "drop" "What happens to traffic no endpoint rule allows: log and drop it, or only log it.";
 
         internet = mkBoolOpt true "Whether the service may open connections to the internet.";
 

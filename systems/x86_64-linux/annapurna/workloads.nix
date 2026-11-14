@@ -410,10 +410,15 @@
         50
         140
       ];
-      endpoints.healthcheck.from = [
-        "@all_lan"
-        "@manaslu"
-      ];
+      endpoints = {
+        # null: not firewalled, reachable from anywhere
+        http.from = null;
+        https.from = null;
+        healthcheck.from = [
+          "@all_lan"
+          "@manaslu"
+        ];
+      };
     };
     runtimeId = 30352;
     configFile = "secrets/caddy/home.json";
@@ -627,6 +632,11 @@
         99
       ];
       internet = false;
+      endpoints = {
+        omada.from = [ "@mgmt" ];
+        rfc3164.from = [ "@mgmt" ];
+        rfc5424.from = [ "@mgmt" ];
+      };
     };
     runtimeId = 30346;
   };
