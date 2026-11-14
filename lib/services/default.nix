@@ -6,22 +6,41 @@ let
   certificatePath = id: "/run/certs/${id}";
   profiles = import ../containers/default.nix;
   inherit (profiles) getContainerProfile getServiceProfile;
-  endpointType = types.submodule {
-    options = {
-      port = mkOption {
-        type = types.port;
-        description = "Port number.";
+  endpointType =
+    defaults:
+    types.submodule {
+      options = {
+        port = mkOption (
+          {
+            type = types.port;
+            description = "Port number.";
+          }
+          // optionalAttrs (defaults ? port) { default = defaults.port; }
+        );
+
+        transport = mkOpt (types.enum [
+          "tcp"
+          "udp"
+          "tcp-and-udp"
+        ]) (defaults.transport or "tcp") "Transport protocol exposed through the container firewall.";
+
+        expose = mkBoolOpt (defaults.expose or true) "Whether to expose this endpoint through the container firewall.";
+
+        from = mkOpt (types.nullOr (types.listOf types.nonEmptyStr)) (defaults.from or null
+        ) "Services allowed to connect. null leaves the endpoint unrestricted.";
       };
-
-      transport = mkOpt (types.enum [
-        "tcp"
-        "udp"
-        "tcp-and-udp"
-      ]) "tcp" "Transport protocol exposed through the container firewall.";
-
-      expose = mkBoolOpt true "Whether to expose this endpoint through the container firewall.";
     };
-  };
+
+  endpointsOption =
+    defaults:
+    mkOption {
+      type = types.submodule {
+        freeformType = types.attrsOf (endpointType { });
+        options = mapAttrs (name: endpoint: mkOpt (endpointType endpoint) { } "The ${name} endpoint.") defaults;
+      };
+      default = { };
+      description = "Named listener endpoints for this service.";
+    };
 
   portNumbersFor =
     protocol: endpoints:
@@ -108,7 +127,7 @@ let
             linkConfig = {
               MACAddress = mkMacAddress "${name}:${toString vlan}";
               RequiredForOnline = "routable";
-              RequiredFamilyForOnline = if mode == "both" then "any" else mode;
+              RequiredFamilyForOnline = mode;
             };
             networkConfig = {
               Description = "${name} service container VLAN ${toString vlan}";
@@ -297,6 +316,10 @@ let
             assertion = mode == "both" || !hostNetwork;
             message = "${name}: networking.mode must be \"both\" with networking.hostNetwork.";
           }
+          {
+            assertion = all (endpoint: endpoint.from == null) (attrValues service.networking.endpoints) || !hostNetwork;
+            message = "${name}: networking.endpoints.*.from is not supported with networking.hostNetwork.";
+          }
         ];
       }
       (mkIf databaseEnabled {
@@ -414,7 +437,12 @@ let
           "ipv6"
         ]) "both" "IP families configured on the service container's VLAN interfaces.";
 
-        endpoints = mkOpt (types.attrsOf endpointType) endpoints "Named listener endpoints for this service.";
+        firewall = mkOpt (types.enum [
+          "drop"
+          "log"
+        ]) "log" "What happens to traffic no endpoint rule allows: drop it, or only log it.";
+
+        endpoints = endpointsOption endpoints;
       };
 
       volumes = mkOpt (types.listOf types.nonEmptyStr) [ ] "Volume IDs to attach to this service container.";

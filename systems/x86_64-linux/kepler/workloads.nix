@@ -22,13 +22,19 @@
   };
 
   actual-server = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30341;
     volumes = [ "actual-server" ];
   };
 
   pvr-movies-monitor = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.app.from = [ "caddy" ];
+    };
     runtimeId = 20691;
   };
 
@@ -37,7 +43,10 @@
       instance = "postgresql-home-primary";
       name = "huawei_sms";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.api.from = [ ];
+    };
     runtimeId = 27777;
   };
 
@@ -52,19 +61,28 @@
       instance = "postgresql-home-primary";
       name = "mathesar_django";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30339;
   };
 
   changedetection = enabled // {
     monitor.name = "Change Detection";
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30344;
     volumes = [ "changedetection" ];
   };
 
   openvscode-server = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30345;
     volumes = [ "openvscode-server" ];
   };
@@ -118,23 +136,35 @@
   };
 
   backrest = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30366;
   };
 
   bulwark = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30393;
   };
 
   kavita = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30395;
     volumes = [ "kavita" ];
   };
 
   copyparty = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30396;
     volumes = [ "copyparty" ];
   };
@@ -144,7 +174,10 @@
       instance = "postgresql-home-primary";
       name = "atuin";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30394;
   };
 }

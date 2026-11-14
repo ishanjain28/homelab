@@ -14,13 +14,14 @@ in
   ];
 
   homelab = {
+    inherit backups;
+    inherit volumes;
+
     profiles.server = enabled;
     metrics = enabled // {
       sensors = disabled;
     };
 
-    inherit backups;
-    inherit volumes;
     services = workloads;
 
     hardware.networking = enabled // {

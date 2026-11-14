@@ -13,10 +13,11 @@ in
   ];
 
   homelab = {
-    profiles.server = enabled;
-    metrics = enabled;
     inherit backups;
     inherit vms;
+
+    profiles.server = enabled;
+    metrics = enabled;
 
     hardware.vfio = enabled // {
       iommu = "amd";

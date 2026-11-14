@@ -15,14 +15,15 @@ in
   ];
 
   homelab = {
+    inherit backups;
+    inherit volumes;
+    inherit vms;
+
     profiles.server = enabled;
     metrics = enabled // {
       intelGpu = enabled;
     };
-    inherit backups;
-    inherit volumes;
     services = workloads;
-    inherit vms;
     devices.render = {
       hostPath = "/dev/dri/renderD128";
       udevMatch = ''SUBSYSTEM=="drm", KERNEL=="renderD128"'';

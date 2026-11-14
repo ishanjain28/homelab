@@ -20,9 +20,10 @@ in
   ];
 
   homelab = {
-    profiles.server = enabled;
     inherit backups;
     inherit volumes;
+
+    profiles.server = enabled;
     services = workloads;
     logging = enabled // {
       hostVlan = 50;

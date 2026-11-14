@@ -2,7 +2,29 @@
 {
   postgresql-home-primary = enabled // {
     monitor.name = "PostgreSQL Primary";
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.postgres.from = [
+        "atuin"
+        "authelia"
+        "bazarr"
+        "garmin-sync"
+        "gitea"
+        "grafana"
+        "huawei-sms"
+        "lidarr"
+        "lldap"
+        "mathesar"
+        "paperless"
+        "prowlarr"
+        "radarr"
+        "seerr"
+        "sonarr"
+        "stalwart"
+        "tracearr"
+        "windmill"
+      ];
+    };
     runtimeId = 36932;
     volumes = [ "postgresql-home-primary" ];
     resources = {
@@ -53,7 +75,10 @@
 
   postgresql-del-mirror = enabled // {
     monitor.name = "PostgreSQL Secondary";
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.postgres.from = [ ];
+    };
     runtimeId = 36933;
     volumes = [ "postgresql-del-mirror" ];
     resources = {
@@ -82,7 +107,10 @@
   };
 
   karakeep = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30348;
     volumes = [
       "karakeep"
@@ -91,7 +119,10 @@
   };
 
   bentopdf = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 50715;
   };
 
@@ -100,7 +131,10 @@
       instance = "postgresql-home-primary";
       name = "tracearr";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30342;
   };
 
@@ -116,7 +150,15 @@
       instance = "postgresql-home-primary";
       name = "prowlarr-main";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "radarr"
+        "sonarr"
+        "lidarr"
+      ];
+    };
     runtimeId = 30350;
   };
 
@@ -125,7 +167,16 @@
       instance = "postgresql-home-primary";
       name = "radarrmain";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "prowlarr"
+        "bazarr"
+        "unpackerr"
+        "seerr"
+      ];
+    };
     runtimeId = 30354;
     shares = [ "wd-4tb" ];
   };
@@ -135,7 +186,16 @@
       instance = "postgresql-home-primary";
       name = "sonarrmain";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "prowlarr"
+        "bazarr"
+        "unpackerr"
+        "seerr"
+      ];
+    };
     runtimeId = 30355;
     shares = [ "wd-4tb" ];
   };
@@ -145,7 +205,10 @@
       instance = "postgresql-home-primary";
       name = "bazarr";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30356;
     volumes = [ "bazarr" ];
     shares = [ "wd-4tb" ];
@@ -156,7 +219,14 @@
       instance = "postgresql-home-primary";
       name = "lidarrmain";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "prowlarr"
+        "unpackerr"
+      ];
+    };
     runtimeId = 30358;
     shares = [ "music" ];
   };
@@ -168,14 +238,30 @@
   };
 
   qbittorrent = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "radarr"
+        "sonarr"
+        "lidarr"
+      ];
+    };
     runtimeId = 30361;
     volumes = [ "qbittorrent" ];
     shares = [ "wd-4tb" ];
   };
 
   jellyfin = enabled // {
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "seerr"
+        "tracearr"
+        "netflector"
+      ];
+    };
     runtimeId = 30360;
     volumes = [ "jellyfin" ];
     shares = [
@@ -190,7 +276,13 @@
       instance = "postgresql-home-primary";
       name = "gitea";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "gitea-runner"
+      ];
+    };
     runtimeId = 36930;
     volumes = [ "gitea" ];
   };
@@ -215,7 +307,10 @@
       instance = "postgresql-home-primary";
       name = "grafana";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 31918;
     volumes = [ "grafana" ];
   };
@@ -225,7 +320,10 @@
       instance = "postgresql-home-primary";
       name = "paperless";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30387;
     shares = [ "paperless" ];
     volumes = [ "paperless" ];
@@ -304,7 +402,15 @@
       instance = "postgresql-home-primary";
       name = "ldap";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.ldap.from = [
+        "authelia"
+        "grafana"
+        "jellyfin"
+      ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 25457;
   };
 
@@ -313,7 +419,10 @@
       instance = "postgresql-home-primary";
       name = "authelia";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 20001;
   };
 
@@ -333,7 +442,10 @@
       instance = "postgresql-home-primary";
       name = "windmill";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
     runtimeId = 30353;
   };
 
@@ -405,7 +517,13 @@
       instance = "postgresql-home-primary";
       name = "jellyseerr";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "tracearr"
+      ];
+    };
     runtimeId = 30340;
   };
 

@@ -61,9 +61,11 @@ let
       octet = offset: builtins.substring offset 2 hash;
     in
     "${ipv6Prefixes.${toString vlan}}:${octet 0}:${octet 2}ff:fe${octet 4}:${octet 6}${octet 8}";
+
+  ipv6Vlans = builtins.filter (vlan: ipv6Prefixes ? ${toString vlan});
 in
 {
-  inherit ipv6Prefixes mkIpv6Address mkMacAddress;
+  inherit ipv6Vlans mkIpv6Address mkMacAddress;
 
   mkIfLink =
     { name, macAddress }:

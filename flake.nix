@@ -103,42 +103,21 @@
             nix
           ];
           text = ''
-            set -euo pipefail
-
-            flake="''${HOMELAB_FLAKE:-.}"
-
-            usage() {
-              echo "usage: config gatus|gatus-home" >&2
-              exit 2
-            }
-
-            target="''${1:-}"
-            shift || true
-
-            case "$target" in
-              gatus)
-                [[ $# -eq 0 ]] || usage
-                config_attr="configs.gatus"
-                ;;
-              gatus-home)
-                [[ $# -eq 0 ]] || usage
-                config_attr="configs.gatus-home"
-                ;;
-              *)
-                usage
-                ;;
-            esac
-
-            path="$(
-              nix --option eval-cache false build --no-link --print-out-paths \
-                "$flake#$config_attr"
-            )"
-            printf '##########\n## Config: %s\n##########\n\n' "$target"
+            path="$(nix --option eval-cache false build --no-link --print-out-paths "''${HOMELAB_FLAKE:-.}#configs.''${1:?usage: config gatus|gatus-home}")"
             cat "$path"
           '';
         };
+      firewallCommand =
+        pkgs:
+        pkgs.writeShellApplication {
+          name = "firewall";
+          runtimeInputs = [ pkgs.nix ];
+          text = ''
+            nix eval --raw "''${HOMELAB_FLAKE:-.}#firewall.''${1:?usage: firewall <host>}"
+          '';
+        };
       inherit ((import ./lib/module/default.nix { lib = inputs.nixpkgs.lib; })) shellAliases editorVariables;
-      inherit (import ./lib/networking/default.nix { lib = inputs.nixpkgs.lib; }) ipv6Prefixes mkIpv6Address;
+      inherit (import ./lib/networking/default.nix { lib = inputs.nixpkgs.lib; }) ipv6Vlans mkIpv6Address;
       shellAliasHook = inputs.nixpkgs.lib.concatStringsSep "\n" (
         inputs.nixpkgs.lib.mapAttrsToList (
           name: command: "alias ${name}=${inputs.nixpkgs.lib.escapeShellArg command}"
@@ -152,6 +131,7 @@
         pkgs.mkShell {
           packages = [
             (configCommand pkgs)
+            (firewallCommand pkgs)
             pkgs.age
             pkgs.atuin
             pkgs.deploy-rs
@@ -237,6 +217,18 @@
     }
     // {
       inherit (inputs) self;
+      firewall = lib.mapAttrs (
+        _host: system:
+        let
+          nftables = system.config.networking.nftables;
+        in
+        lib.concatMapStrings (table: ''
+          table ${table.family} ${table.name} {
+          ${table.content}}
+
+        '') (lib.filter (table: table.enable) (lib.attrValues nftables.tables))
+        + nftables.ruleset
+      ) self.nixosConfigurations;
       configs = {
         gatus = self.nixosConfigurations.manaslu.config.services.gatus.configFile;
         gatus-home = self.nixosConfigurations.annapurna.config.services.gatus.configFile;
@@ -246,7 +238,6 @@
       };
       dnsDirect.services =
         let
-          v6Vlans = entry: lib.filter (vlan: lib.hasAttr (toString vlan) ipv6Prefixes) entry.vlans;
           entries =
             lib.mapAttrs (_key: service: {
               inherit (service) name host;
@@ -257,8 +248,8 @@
         lib.foldl' lib.recursiveUpdate { } (
           lib.mapAttrsToList (_key: entry: {
             ${entry.name}.direct.${lib.head (lib.splitString "." fleetRegistry.hosts.${entry.host}.domain)}.v6 =
-              map (mkIpv6Address entry.name) (v6Vlans entry);
-          }) (lib.filterAttrs (_key: entry: v6Vlans entry != [ ]) entries)
+              map (mkIpv6Address entry.name) (ipv6Vlans entry.vlans);
+          }) (lib.filterAttrs (_key: entry: ipv6Vlans entry.vlans != [ ]) entries)
         );
     };
 }
