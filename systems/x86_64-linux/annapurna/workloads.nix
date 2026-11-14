@@ -314,10 +314,14 @@
     };
     networking = {
       vlans = [ 50 ];
-      endpoints.web.from = [
-        "caddy"
-        "gitea-runner"
-      ];
+      endpoints = {
+        web.from = [
+          "caddy"
+          "gitea-runner"
+        ];
+        # null: not firewalled, reachable from anywhere
+        ssh.from = null;
+      };
     };
     runtimeId = 36930;
     volumes = [ "gitea" ];
@@ -522,7 +526,11 @@
       instance = "postgresql-home-primary";
       name = "stalwart";
     };
-    networking.vlans = [ 50 ];
+    networking = {
+      vlans = [ 50 ];
+      # null: not firewalled, reachable from anywhere
+      endpoints.smtp.from = null;
+    };
     runtimeId = 30364;
     volumes = [ "stalwart" ];
     certificates = [ "mail-home" ];
