@@ -161,8 +161,8 @@ home-manager switch --flake .#<user>@<home> -b backup
 **Deployment**
 * One flake (snowfall-lib) for every host, home and package; deploy-rs with magic rollback. Rolls back if the SSH connection to machine breaks after deployment.
 * Bootstrap ISO and disko disk layouts for installing new machines.
-* systemd-boot boot assessment: a new generation is only blessed once SSH comes up, otherwise the host reboots into the previous one. Optional Secure Boot through lanzaboote.
-* Remote rescue baseline: hardware watchdog, reboot on panic or failed boot, Tailscale always on.
+* systemd-boot boot assessment: a new generation is only blessed once SSH comes up, otherwise the host reboots into the previous one. Optional Secure Boot through lanzaboote but not enabled for now.
+* Remote rescue baseline: hardware watchdog, reboot on panic or failed boot, Tailscale is always on.
 * Weekly `nh clean`, store optimisation and binary cache substitution on every host.
 
 **Service containers**
@@ -195,7 +195,7 @@ home-manager switch --flake .#<user>@<home> -b backup
 * systemd-networkd with interfaces renamed by permanent MAC.
 * WireGuard between home and Delhi, BIRD BGP for announcing my IPv6 prefixes, Tailscale subnet routes.
 * QEMU VMs with VFIO PCI and USB passthrough, hugepages and VLAN attachments.
-* DNS entries are managed by DNSControl. There is a basic config with all the DNS records I need and the rest are generated using secrets/dns/dns.json as the source. The DNS updates are pushed to AdGuardHome instances and Cloudflare.
+* DNS entries are managed by DNSControl. There is a basic config with all the DNS records I need and the rest are generated using secrets/dns/records.json as the source. The DNS updates are pushed to AdGuardHome instances and Cloudflare.
 
 **Hosts and shells**
 * Immutable users, SSH keys from `ssh-keys.txt`.

@@ -19,8 +19,13 @@ let
   });
 in
 {
-  authelia = (prev.authelia.override { authelia-web = web; }).overrideAttrs {
+  authelia = (prev.authelia.override { authelia-web = web; }).overrideAttrs (old: {
     inherit src version;
     vendorHash = "sha256-qWEsDOoD/iiP2Z4eh0wOb7w096rdstm+mFCwY3auogM=";
-  };
+
+    # No one who uses my instance needs a language other than English and it's a magnet for bots.
+    postPatch = old.postPatch + ''
+      find internal/server/locales -mindepth 1 -maxdepth 1 -type d ! -name en -exec rm -r {} +
+    '';
+  });
 }

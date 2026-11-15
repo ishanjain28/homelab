@@ -11,6 +11,12 @@ let
   srv = config.${namespace}.services;
   cfg = srv.authelia;
   containerConfPath = "/run/container-secrets/authelia.yml";
+
+  # Authelia will not follow symlinks outside of assets directory so files need to be copied.
+  assets = pkgs.runCommand "authelia-assets" { } ''
+    install -D -m 0444 ${repoFile "assets/icons/logo.png"} $out/logo.png
+    install -D -m 0444 ${repoFile "assets/icons/favicon.ico"} $out/favicon.ico
+  '';
 in
 {
   options.${namespace}.services.authelia = mkServiceOptions {
@@ -55,6 +61,7 @@ in
           environmentVariables = {
             AUTHELIA_SERVER_ADDRESS = "tcp://0.0.0.0:${toString cfg.networking.endpoints.web.port}";
             AUTHELIA_SERVER_TIMEOUTS_IDLE = "3m";
+            AUTHELIA_SERVER_ASSET_PATH = "${assets}/";
           };
         };
 

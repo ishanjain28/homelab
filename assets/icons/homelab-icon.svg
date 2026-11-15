@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16204a"/>
+      <stop offset="0.45" stop-color="#4b4a8c"/>
+      <stop offset="0.75" stop-color="#c47a8e"/>
+      <stop offset="1" stop-color="#f6b183"/>
+    </linearGradient>
+    <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe9d6"/>
+      <stop offset="0.5" stop-color="#ffd2bd"/>
+      <stop offset="1" stop-color="#e9b9b5"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9c8fbf"/>
+      <stop offset="1" stop-color="#6f6aa3"/>
+    </linearGradient>
+    <linearGradient id="hills" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2550"/>
+      <stop offset="1" stop-color="#0d1330"/>
+    </linearGradient>
+    <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9b9b5" stop-opacity="0"/>
+      <stop offset="1" stop-color="#b98ea6" stop-opacity="0.9"/>
+    </linearGradient>
+    <clipPath id="badge"><rect width="512" height="512" rx="112"/></clipPath>
+  </defs>
+  <g clip-path="url(#badge)">
+    <rect width="512" height="512" fill="url(#sky)"/>
+    <circle cx="96" cy="96" r="1.8" fill="#fff" opacity="0.7"/>
+    <circle cx="410" cy="70" r="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="300" cy="48" r="1.2" fill="#fff" opacity="0.5"/>
+
+    <path fill="url(#snow)" d="M0 310 L22 288 L49 231 L63 250 L76 248 L90 239 L109 264 L128 229 L155 210 L172 219 L188 210 L207 233 L226 219 L251 199 L272 183 L292 176 L302 183 L316 199 L330 207 L343 215 L360 233 L382 248 L411 222 L431 242 L452 256 L491 258 L512 266 L512 420 L0 420 Z"/>
+
+    <g fill="url(#shade)">
+      <path d="M292 176 L302 183 L316 199 L330 207 L343 215 L360 233 L382 248 L377 275 L362 283 L343 288 L325 291 L310 280 L299 239 Z"/>
+      <path d="M155 210 L172 219 L188 210 L207 233 L205 256 L191 261 L177 256 L165 237 Z"/>
+      <path d="M49 231 L63 250 L61 269 L52 258 Z"/>
+      <path d="M90 239 L109 264 L106 280 L96 269 Z"/>
+      <path d="M411 222 L431 242 L452 256 L449 277 L432 275 L417 253 Z"/>
+    </g>
+    <path fill="#4a4478" opacity="0.9" d="M233 215 L251 199 L272 183 L292 176 L290 196 L282 223 L270 242 L255 253 L242 245 Z"/>
+
+    <rect x="0" y="286" width="512" height="84" fill="url(#mist)"/>
+    <path fill="url(#hills)" d="M0 380 L40 360 L86 368 L130 346 L176 356 L222 338 L270 352 L318 334 L364 350 L410 332 L456 346 L512 330 L512 512 L0 512 Z"/>
+    <path fill="#0a0f26" d="M0 430 L60 410 L120 420 L180 400 L250 414 L320 396 L390 412 L450 398 L512 408 L512 512 L0 512 Z"/>
+  </g>
+</svg>

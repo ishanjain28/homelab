@@ -39,7 +39,12 @@ in
             title = "Health Dashboard";
             header = "Ishan's Homelab Status";
             description = "Status of my infra in Delhi & at Home";
-            logo = "https://dl.ishanjain.me/login.optimized.svg";
+            logo = "\${GATUS_ASSETS_URL}/homelab-icon.svg";
+            favicon = {
+              default = "\${GATUS_ASSETS_URL}/homelab-icon-32.png";
+              size16x16 = "\${GATUS_ASSETS_URL}/homelab-icon-16.png";
+              size32x32 = "\${GATUS_ASSETS_URL}/homelab-icon-32.png";
+            };
             default-sort-by = "name";
           };
 
