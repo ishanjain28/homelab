@@ -91,7 +91,14 @@
     networking = {
       vlans = [ 70 ];
       internet = false;
-      endpoints.ipp.from = [ "@all_lan" ];
+      endpoints = {
+        ipp.from = [ "@all_lan" ];
+        sane.from = [ "@all_lan" ];
+        mdns.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+      };
     };
     runtimeId = 30347;
     volumes = [ "cups" ];

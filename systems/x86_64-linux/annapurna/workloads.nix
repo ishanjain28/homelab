@@ -291,6 +291,7 @@
           "seerr"
           "tracearr"
           "netflector"
+          "@all_lan"
         ];
         ssdp.from = [
           "@all_lan"
@@ -396,7 +397,17 @@
     networking = {
       vlans = [ 50 ];
       internet = false;
-      endpoints.smb.from = [ "@lan" ];
+      endpoints = {
+        smb.from = [ "@lan" ];
+        wsdd-discovery.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+        wsdd-http.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+      };
     };
     runtimeId = 30363;
     shares = [

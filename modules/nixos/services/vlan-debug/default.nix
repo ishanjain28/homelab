@@ -155,7 +155,10 @@ in
       nameValuePair (mkName vlan) (mkServiceOptions {
         name = mkName vlan;
         description = "VLAN ${toString vlan} debug container";
-        endpoints.ssh.port = 22;
+        endpoints.ssh = {
+          port = 22;
+          from = [ "@trusted" ];
+        };
         logging = disabled;
       })
     ) vlanIds
