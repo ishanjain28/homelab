@@ -87,6 +87,7 @@ in
 
       services.samba-wsdd = enabled // {
         openFirewall = false;
+        extraOptions = [ "--ipv4only" ];
       };
     };
   });

@@ -4,6 +4,7 @@
     monitor.name = "PostgreSQL Primary";
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
       internet = false;
       endpoints.postgres.from = [
         "atuin"
@@ -352,6 +353,7 @@
         99
       ];
       mode = "ipv6";
+      internet = false;
       endpoints.web.from = [
         "grafana"
         "alloy-syslog"
@@ -385,6 +387,8 @@
     };
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
       endpoints.web.from = [ "caddy" ];
     };
     runtimeId = 30387;
@@ -398,7 +402,10 @@
       vlans = [ 50 ];
       internet = false;
       endpoints = {
-        smb.from = [ "@lan" ];
+        smb.from = [
+          "@lan"
+          "@trusted"
+        ];
         wsdd-discovery.from = [
           "@all_lan"
           "@link-local"

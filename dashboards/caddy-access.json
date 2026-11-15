@@ -12,7 +12,7 @@
   "editable": true,
   "graphTooltip": 1,
   "timezone": "browser",
-  "refresh": "1m",
+  "refresh": "30s",
   "time": {
     "from": "now-24h",
     "to": "now"

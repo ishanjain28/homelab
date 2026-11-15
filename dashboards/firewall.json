@@ -10,10 +10,10 @@
   "timezone": "browser",
   "editable": false,
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
-  "refresh": "1m",
+  "refresh": "30s",
   "graphTooltip": 1,
   "annotations": {
     "list": []

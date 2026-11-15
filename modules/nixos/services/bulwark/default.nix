@@ -42,6 +42,7 @@ in
       HOSTNAME = "::";
       PORT = toString cfg.networking.endpoints.web.port;
       NEXT_TELEMETRY_DISABLED = "1";
+      BULWARK_UPDATE_CHECK = "off";
       ADMIN_DATA_DIR = "${stateDir}/admin";
       SETTINGS_DATA_DIR = "${stateDir}/settings";
       TELEMETRY_DATA_DIR = "${stateDir}/telemetry";

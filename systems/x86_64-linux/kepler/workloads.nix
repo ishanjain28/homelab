@@ -179,6 +179,7 @@
   bulwark = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
       internet = false;
       endpoints.web.from = [ "caddy" ];
     };
@@ -188,6 +189,7 @@
   kavita = enabled // {
     networking = {
       vlans = [ 50 ];
+      mode = "ipv6";
       internet = false;
       endpoints.web.from = [ "caddy" ];
     };
