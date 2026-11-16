@@ -11,7 +11,11 @@ jobs:
       - name: Update
         run: |
           set -euo pipefail
-          nix flake update 2>&1 | tee "$RUNNER_TEMP/flake-update.log"
+
+          git config user.name gitea-actions
+          git config user.email gitea-actions@localhost
+
+          nix flake update --quiet --commit-lock-file
       - name: Evaluate
         run: |
           set -euo pipefail
@@ -21,14 +25,7 @@ jobs:
             echo
           done
           nix eval --raw .#packages.x86_64-linux --apply 'ps: toString (map (p: p.drvPath) (builtins.attrValues ps))'
-      - name: Commit
+      - name: Push commit
         run: |
           set -euo pipefail
-          if git diff --quiet flake.lock; then
-            echo "flake.lock unchanged"
-            exit 0
-          fi
-          git config user.name gitea-actions
-          git config user.email gitea-actions@localhost
-          { printf 'update flakes\n\n'; cat "$RUNNER_TEMP/flake-update.log"; } | git commit -F - flake.lock
           git push origin "HEAD:${{ gitea.ref_name }}"
