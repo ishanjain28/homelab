@@ -173,6 +173,20 @@ let
       # Fix for https://github.com/NixOS/nixpkgs/issues/493934
       security.pam.services.login.updateWtmp = mkForce false;
 
+      security.pam.services = {
+        chfn = disabled;
+        chpasswd = disabled;
+        chsh = disabled;
+        groupadd = disabled;
+        groupdel = disabled;
+        groupmems = disabled;
+        groupmod = disabled;
+        passwd = disabled;
+        useradd = disabled;
+        userdel = disabled;
+        usermod = disabled;
+      };
+
       documentation = disabled;
       environment.defaultPackages = mkForce [ ];
       services.dbus.packages = [ config.systemd.package ];
@@ -186,6 +200,7 @@ let
       system.nssModules = mkForce [ ];
       services.resolved.settings.Resolve.DNSStubListener = false;
       boot.kernel.sysctl."net.mptcp.enabled" = 0;
+      environment.etc."sysctl.d/55-nixos-aslr-entropy.conf" = disabled;
       systemd.oomd = disabled;
       systemd.settings.Manager = {
         ShowStatus = false;
@@ -314,7 +329,7 @@ let
           }
           {
             assertion = mode == "both" || !hostNetwork;
-            message = "${name}: networking.mode must be \"both\" with networking.hostNetwork.";
+            message = ''${name}: networking.mode must be "both" with networking.hostNetwork.'';
           }
           {
             assertion = all (endpoint: endpoint.from == [ ]) (attrValues service.networking.endpoints) || !hostNetwork;

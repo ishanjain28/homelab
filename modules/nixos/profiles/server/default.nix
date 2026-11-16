@@ -37,6 +37,10 @@ in
 
     systemd.targets.multi-user = enabled;
 
+    containers = mapAttrs (_name: _service: { config.nixpkgs.pkgs = pkgs; }) (
+      filterAttrs (_name: service: service.enable) config.system.homelab.registry.services
+    );
+
     # Running OCI containers inside nspawn containers triggers an error like
     # unable to create session key: disk quota exceeded
     # Gitea runners do this so I needed to increase disk quota for keyring

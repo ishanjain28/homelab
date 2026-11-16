@@ -195,7 +195,7 @@
         hosts = {
           annapurna.modules = [ ];
           kanchenjunga.modules = [ ];
-          kepler.modules = [ ];
+          kamet.modules = [ ];
         };
       };
 

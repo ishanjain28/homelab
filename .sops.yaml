@@ -1,5 +1,5 @@
 keys:
-  - &kepler age13ks0vqf5dnavpq29ukkuhwgk4a2r5cdk52g9ls0aalcd0wg6yy2sq2fpwc
+  - &kamet age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
   - &annapurna age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
   - &kanchenjunga age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
   - &work_macbook age1s45dwj5ger9hrnta0rguvcetkc5zjws4zac9g89g2jwvvuttmfgs2dudue
@@ -22,7 +22,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -32,7 +32,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -42,7 +42,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -54,7 +54,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -64,7 +64,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -74,7 +74,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -91,7 +91,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -110,7 +110,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -120,7 +120,7 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga
           - *manaslu
@@ -130,6 +130,6 @@ creation_rules:
           - *homelab_p1
           - *homelab_p2
           - *homelab_p3
-          - *kepler
+          - *kamet
           - *annapurna
           - *kanchenjunga

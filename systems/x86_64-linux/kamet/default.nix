@@ -2,10 +2,11 @@
 with lib;
 with lib.${namespace};
 let
-  hostName = "kepler";
+  hostName = "kamet";
   backups = import ./backups.nix;
   volumes = import ./volumes.nix;
   workloads = import ./workloads.nix { inherit lib namespace; };
+  vms = import ./vms.nix { inherit lib namespace; };
 in
 {
   imports = [
@@ -16,6 +17,7 @@ in
   homelab = {
     inherit backups;
     inherit volumes;
+    inherit vms;
 
     profiles.server = enabled;
     metrics = enabled // {
@@ -32,7 +34,7 @@ in
       # MAC address as reference.
       links = mkIfLink {
         name = "eth0";
-        macAddress = "DC:24:11:DE:01:EF";
+        macAddress = "A8:A1:59:61:D6:F3";
       };
 
       netdevs = mkMerge [
@@ -50,10 +52,6 @@ in
             networkConfig = {
               Bridge = "br0";
             };
-            # Kepler is temporarily nested inside Proxmox. Mark the VM uplink
-            # as the multicast-router port so IGMP reports cross both bridges.
-            # Remove this when Kepler moves to bare metal.
-            bridgeConfig.MulticastRouter = "permanent";
             linkConfig.RequiredForOnline = "no";
             # Add allowed VLANs to the Trunk Port
             bridgeVLANs = [

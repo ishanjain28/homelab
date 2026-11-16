@@ -6,7 +6,6 @@ let
   backups = import ./backups.nix;
   volumes = import ./volumes.nix;
   workloads = import ./workloads.nix { inherit lib namespace; };
-  vms = import ./vms.nix { inherit lib namespace; };
 in
 {
   imports = [
@@ -17,7 +16,6 @@ in
   homelab = {
     inherit backups;
     inherit volumes;
-    inherit vms;
 
     profiles.server = enabled;
     metrics = enabled // {

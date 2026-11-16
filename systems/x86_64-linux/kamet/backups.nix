@@ -6,7 +6,7 @@
   };
 
   targets.gdrive = {
-    repository = "rclone:gdrive:kepler";
+    repository = "rclone:gdrive:kamet";
     maintenance = {
       onCalendar = "Sun 06:00";
       readDataSubset = "1%";
