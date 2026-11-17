@@ -472,6 +472,7 @@
           from = [
             "@all_lan"
             "@manaslu"
+            "@vpn"
           ];
         };
         tls = {

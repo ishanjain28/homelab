@@ -147,13 +147,19 @@
   };
 
   ripe-atlas-primary = enabled // {
-    networking.vlans = [ 150 ];
+    networking = {
+      vlans = [ 150 ];
+      mode = "ipv4";
+    };
     runtimeId = 36926;
     volumes = [ "ripe-atlas-primary" ];
   };
 
   ripe-atlas-lte = enabled // {
-    networking.vlans = [ 160 ];
+    networking = {
+      vlans = [ 160 ];
+      mode = "ipv4";
+    };
     runtimeId = 36927;
     volumes = [ "ripe-atlas-lte" ];
   };
