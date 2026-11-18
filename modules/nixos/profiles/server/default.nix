@@ -53,7 +53,6 @@ in
       "net.mptcp.enabled" = 0;
       "vm.overcommit_memory" = mkIf (any (name: config.${namespace}.services.${name}.enable) [
         "authelia"
-        "redis"
         "tracearr"
       ]) 1;
     };
