@@ -52,7 +52,7 @@
   gitea-runner = enabled // {
     networking.vlans = [ 50 ];
     runtimeId = 36928;
-    giteaURI = "https://git.ishanjain.me";
+    giteaURI = "http://gitea:3000";
   };
 
   mathesar = enabled // {
