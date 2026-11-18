@@ -49,6 +49,17 @@
     runtimeId = 27777;
   };
 
+  novnc = enabled // {
+    networking = {
+      vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
+      endpoints.web.from = [ "caddy" ];
+    };
+    runtimeId = 30397;
+    vm = "win11";
+  };
+
   gitea-runner = enabled // {
     networking.vlans = [ 50 ];
     runtimeId = 36928;

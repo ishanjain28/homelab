@@ -70,6 +70,9 @@ let
         usbDevices =
           mkOpt (types.listOf usbDeviceType) [ ]
             "Host USB devices attached to the guest whenever they are plugged in.";
+        consoleGid =
+          mkOpt (types.nullOr types.ints.unsigned) null
+            "Host GID allowed to open the guest's VNC console socket in /run/vms/<name>/console; null disables the console.";
         cpuAffinity =
           mkOpt types.str ""
             "Host CPUs the virtual machine may run on, in systemd CPUAffinity= syntax; empty allows all.";
@@ -81,8 +84,10 @@ let
   vmUser = name: "vm-${name}";
   tpm = vm: vm.os == "windows";
   tapName = name: vlan: "vm-${name}-${toString vlan}";
+  tapUnit = name: vlan: "sys-subsystem-net-devices-${replaceStrings [ "-" ] [ "\\x2d" ] (tapName name vlan)}.device";
   stateDir = name: "vms/${name}";
   runDir = name: "/run/vms/${name}";
+  consoleDir = name: "${runDir name}/console";
 
   pciSlot = address: builtins.substring 0 10 address;
   pciFunction = address: builtins.substring 11 1 address;
@@ -267,6 +272,14 @@ let
     ++ mkDiskArgs vm
     ++ mkPciArgs vm
     ++ mkUsbArgs vm
+    ++ optionals (vm.consoleGid != null) [
+      "-vga"
+      "std"
+      "-vnc"
+      "unix:${consoleDir name}/vnc.sock"
+      "-device"
+      "usb-tablet,bus=xhci.0"
+    ]
     ++ mkNetArgs name vm
     ++ mkScsiArgs vm
     ++ vm.extraArgs;
@@ -293,26 +306,7 @@ let
           echo "$dev" > /sys/bus/pci/drivers_probe
         fi
       done
-
-      for dev in ${escapeShellArgs vm.pciDevices}; do
-        sysdev="/sys/bus/pci/devices/$dev"
-        group="$(basename "$(readlink "$sysdev/iommu_group")")"
-        for member in "$sysdev"/iommu_group/devices/*; do
-          address="$(basename "$member")"
-          [ "$address" = "$dev" ] && continue
-          case "$(cat "$member/class")" in 0x0604*) continue ;; esac
-          driver="$(basename "$(readlink "$member/driver" 2>/dev/null || echo none)")"
-          case "$driver" in none | vfio-pci | pcieport | pci-stub) continue ;; esac
-          echo "IOMMU group $group member $address is bound to $driver; it must also be passed through or unbound" >&2
-          exit 1
-        done
-        for _ in $(seq 1 50); do
-          [ -e "/dev/vfio/$group" ] && break
-          sleep 0.2
-        done
-        chgrp kvm "/dev/vfio/$group"
-        chmod 0660 "/dev/vfio/$group"
-      done
+      ${optionalString (vm.pciDevices != [ ]) "udevadm settle"}
 
       for disk in ${escapeShellArgs vm.disks}; do
         device="$(readlink -f "$disk")"
@@ -321,17 +315,6 @@ let
           exit 1
         fi
         setfacl -m "u:${vmUser name}:rw" "$device"
-      done
-
-      for tap in ${escapeShellArgs (map (tapName name) vm.vlans)}; do
-        for _ in $(seq 1 50); do
-          [ -e "/sys/class/net/$tap" ] && break
-          sleep 0.2
-        done
-        if [ ! -e "/sys/class/net/$tap" ]; then
-          echo "Tap interface $tap was not created by systemd-networkd" >&2
-          exit 1
-        fi
       done
 
       ${optionalString (tpm vm) ''
@@ -439,6 +422,11 @@ let
       ) vm.vlans
     );
 
+    systemd.tmpfiles.rules = optionals (vm.consoleGid != null) [
+      "d ${runDir name} 0755 ${vmUser name} ${vmUser name} -"
+      "d ${consoleDir name} 2710 ${vmUser name} ${toString vm.consoleGid} -"
+    ];
+
     services.udev.extraRules = concatMapStringsSep "\n" (
       device:
       ''SUBSYSTEM=="usb", ATTR{idVendor}=="${device.vendorId}", ATTR{idProduct}=="${device.productId}", GROUP="kvm", MODE="0660"''
@@ -469,10 +457,8 @@ let
     systemd.services."vm-${name}" = {
       description = "Virtual machine ${name}";
       wantedBy = optional vm.autoStart "multi-user.target";
-      # The tap devices come from systemd-networkd; the prepare script waits
-      # for them, so there is no need to wait for the host to be online.
-      after = [ "systemd-networkd.service" ] ++ optional (tpm vm) "vm-${name}-swtpm.service";
-      requires = optional (tpm vm) "vm-${name}-swtpm.service";
+      after = map (tapUnit name) vm.vlans ++ optional (tpm vm) "vm-${name}-swtpm.service";
+      requires = map (tapUnit name) vm.vlans ++ optional (tpm vm) "vm-${name}-swtpm.service";
       # Config changes apply on the next manual restart instead of killing a
       # running guest during nixos-rebuild switch.
       restartIfChanged = false;
@@ -481,6 +467,7 @@ let
         coreutils
         jq
         socat
+        config.systemd.package
         util-linux
       ];
       unitConfig.StartLimitIntervalSec = 0;
@@ -503,6 +490,7 @@ let
         TimeoutStopSec = "3min";
         Restart = "on-failure";
         RestartSec = "5s";
+        UMask = "0007";
         LimitMEMLOCK = "infinity";
         LimitNOFILE = 1048576;
         OOMScoreAdjust = -500;
@@ -572,6 +560,7 @@ in
     systemd.network.netdevs = mkMerge (map (vm: vm.systemd.network.netdevs) vmConfigs);
     systemd.network.networks = mkMerge (map (vm: vm.systemd.network.networks) vmConfigs);
     systemd.services = mkMerge (map (vm: vm.systemd.services) vmConfigs);
+    systemd.tmpfiles.rules = concatMap (vm: vm.systemd.tmpfiles.rules) vmConfigs;
     services.udev.extraRules = concatStringsSep "\n" (map (vm: vm.services.udev.extraRules) vmConfigs);
   };
 }
