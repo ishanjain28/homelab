@@ -1,13 +1,13 @@
 { pkgs, ... }:
 let
   pname = "caddy";
-  version = "2.11.7";
+  version = "2.11.9";
   src = ./.;
 in
 pkgs.buildGoModule {
   inherit pname version src;
 
-  vendorHash = "sha256-Wx8wT1KdlL1kQSlw+tXnhYhIcI+gINYAYcQnEeeh/vs=";
+  vendorHash = "sha256-uIRfVBGDOIBiXDQsOW8g7C2muEPDTAVsrNmqRe1EKVI=";
 
   postPatch = ''
     go mod edit -require=github.com/caddyserver/caddy/v2@v${version}

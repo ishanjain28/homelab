@@ -129,5 +129,13 @@ in
     format = "binary";
   };
 
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 20 * 1024; # 20GiB swap
+    }
+  ];
+  boot.kernel.sysctl."vm.swappiness" = 0;
+
   system.stateVersion = "26.05";
 }
