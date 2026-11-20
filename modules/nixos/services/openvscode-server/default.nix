@@ -16,18 +16,24 @@ let
   hostNixUid = containerUidOffset + cfg.runtimeId;
   shellPackages = with pkgs; [
     bashInteractive
+    cargo
+    clippy
     coreutils
     curl
     fd
     file
     findutils
     fish
+    gcc
     git
     gnugrep
     gnused
     gnutar
+    go
+    gopls
     gzip
     jq
+    just
     less
     nano
     nix
@@ -36,6 +42,9 @@ let
     openssh
     ripgrep
     rsync
+    rust-analyzer
+    rustc
+    rustfmt
     unzip
     wget
     zip
