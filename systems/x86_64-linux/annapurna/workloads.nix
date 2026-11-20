@@ -95,7 +95,8 @@
     '';
     settings = {
       max_connections = 100;
-      shared_buffers = "512MB";
+      shared_buffers = "128MB";
+      random_page_cost = 1.1;
       dynamic_shared_memory_type = "posix";
       wal_level = "replica";
       wal_compression = true;

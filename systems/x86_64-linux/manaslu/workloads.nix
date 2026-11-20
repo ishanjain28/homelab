@@ -15,6 +15,8 @@
     settings = {
       listen_addresses = "127.0.0.1,10.1.1.3";
       shared_buffers = "128MB";
+      effective_cache_size = "1GB";
+      random_page_cost = 1.1;
       wal_level = "replica";
       max_wal_senders = 10;
       max_slot_wal_keep_size = "1GB";

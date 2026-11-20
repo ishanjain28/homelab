@@ -52,7 +52,7 @@ in
             type = "postgres";
             caching = true;
             path = "\${POSTGRES_URL}";
-            maximum-number-of-results = 40320;
+            maximum-number-of-results = 20160;
             maximum-number-of-events = 2000;
           };
 
