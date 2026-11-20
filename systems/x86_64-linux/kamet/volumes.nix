@@ -69,4 +69,15 @@
     mountPath = "/srv/copyparty";
     size = "50G";
   };
+
+  obsidian-livesync = {
+    uuid = "0cb8ca0d-b2aa-4645-95ad-ca0f48c35e2d";
+    mountPath = "/var/lib/couchdb";
+    size = "512M";
+    backup.groups = [
+      "hourly"
+      "daily"
+      "offsite"
+    ];
+  };
 }

@@ -31,6 +31,8 @@ let
     less
     nano
     nix
+    nixd
+    nixfmt
     openssh
     ripgrep
     rsync
@@ -83,6 +85,12 @@ in
         file = "secrets/openvscode-server.token";
         format = "binary";
         mountPath = connectionTokenPath;
+      };
+
+      secrets.settings = {
+        file = "secrets/openvscode-settings.json";
+        format = "json";
+        mountPath = "${stateDir}/user-data/Machine/settings.json";
       };
 
       resources = {

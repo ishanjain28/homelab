@@ -225,6 +225,17 @@
     volumes = [ "copyparty" ];
   };
 
+  obsidian-livesync = enabled // {
+    networking = {
+      vlans = [ 50 ];
+      mode = "ipv6";
+      internet = false;
+      endpoints.web.from = [ "caddy" ];
+    };
+    runtimeId = 30398;
+    volumes = [ "obsidian-livesync" ];
+  };
+
   atuin = enabled // {
     database = {
       instance = "postgresql-home-primary";
