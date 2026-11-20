@@ -8,19 +8,14 @@
   zlib,
   bash,
   bun,
-  cargo,
   coreutils,
   deno,
-  dotnet-sdk_9,
   flock,
-  go,
   gnumake,
   nsjail,
   node-gyp,
   nodejs,
-  php,
   pkg-config,
-  powershell,
   procps,
   python312,
   uv,
@@ -92,19 +87,13 @@ stdenv.mkDerivation (finalAttrs: {
       } \
       --prefix PATH : "$out/bin" \
       --set PYTHON_PATH "${python312}/bin/python3" \
-      --set GO_PATH "${go}/bin/go" \
       --set DENO_PATH "${deno}/bin/deno" \
       --set NSJAIL_PATH "${nsjail}/bin/nsjail" \
       --set FLOCK_PATH "${flock}/bin/flock" \
       --set BASH_PATH "${bash}/bin/bash" \
-      --set POWERSHELL_PATH "${powershell}/bin/pwsh" \
       --set BUN_PATH "${bun}/bin/bun" \
       --set NODE_BIN_PATH "${nodejs}/bin/node" \
-      --set UV_PATH "$out/bin/windmill-uv" \
-      --set DOTNET_PATH "${dotnet-sdk_9}/bin/dotnet" \
-      --set DOTNET_ROOT "${dotnet-sdk_9}/share/dotnet" \
-      --set PHP_PATH "${php}/bin/php" \
-      --set CARGO_PATH "${cargo}/bin/cargo"
+      --set UV_PATH "$out/bin/windmill-uv"
   '';
 
   meta = {

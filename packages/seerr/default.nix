@@ -44,6 +44,7 @@ pkgs.stdenv.mkDerivation {
     cp -r package.json dist node_modules $out/share/${pname}/
 
     # All the extra files it asks for to work properly
+    rm -rf .next/cache
     cp -r seerr-api.yml .next $out/share/${pname}/
 
     cp -r public $out/share/${pname}/
