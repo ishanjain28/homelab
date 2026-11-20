@@ -245,7 +245,7 @@ let
       host = postgresqlInstances.${database.instance}.address;
       failureThreshold = 10;
       checkInterval = 30;
-      check = "${pkgs.postgresql}/bin/pg_isready -q -h ${host} -p 5432 -d postgres -U ishan -t 5";
+      check = "${pkgs.postgresql_18}/bin/pg_isready -q -h ${host} -p 5432 -d postgres -U ishan -t 5";
     in
     {
       systemd.timers.database-ready = {

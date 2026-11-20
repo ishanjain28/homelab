@@ -95,7 +95,7 @@ pkgs.stdenv.mkDerivation {
 
     makeWrapper ${nodejs}/bin/node $out/bin/${pname} \
       --chdir "$runtimeRoot" \
-      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.postgresql ]} \
+      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.postgresql_18 ]} \
       --set APP_VERSION '${version}' \
       --set APP_TAG 'v${version}' \
       --add-flags "$runtimeRoot/apps/server/dist/index.js"
