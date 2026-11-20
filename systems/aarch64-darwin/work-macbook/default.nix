@@ -15,6 +15,18 @@ _: {
     "/Applications/Visual Studio Code.app"
   ];
 
+  homebrew.casks = [
+    "google-chrome"
+    "google-chrome@canary"
+    "spotify"
+    "slack"
+    "thunderbird"
+    "zoom"
+    "utm"
+    "firefox"
+    "visual-studio-code"
+  ];
+
   nix.enable = false;
   system.stateVersion = 6;
 }

@@ -5,9 +5,14 @@ _: {
     NSGlobalDomain = {
       AppleShowAllExtensions = true;
       NSAutomaticCapitalizationEnabled = true;
-      NSAutomaticDashSubstitutionEnabled = true;
-      NSAutomaticPeriodSubstitutionEnabled = true;
-      NSAutomaticQuoteSubstitutionEnabled = true;
+      NSAutomaticDashSubstitutionEnabled = false;
+      NSAutomaticPeriodSubstitutionEnabled = false;
+      NSAutomaticQuoteSubstitutionEnabled = false;
+    };
+
+    CustomUserPreferences."com.apple.desktopservices" = {
+      DSDontWriteNetworkStores = true;
+      DSDontWriteUSBStores = true;
     };
 
     finder = {
