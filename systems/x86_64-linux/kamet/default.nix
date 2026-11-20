@@ -20,9 +20,7 @@ in
     inherit vms;
 
     profiles.server = enabled;
-    metrics = enabled // {
-      sensors = disabled;
-    };
+    metrics = enabled;
 
     services = workloads;
 

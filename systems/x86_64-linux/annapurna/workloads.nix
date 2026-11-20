@@ -321,6 +321,7 @@
         web.from = [
           "caddy"
           "gitea-runner"
+          "openvscode-server"
         ];
         # null: not firewalled, reachable from anywhere
         ssh.from = null;
