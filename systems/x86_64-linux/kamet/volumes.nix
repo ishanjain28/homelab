@@ -21,7 +21,7 @@
 
   openvscode-server = {
     uuid = "6baec4af-fa52-4153-9e1d-c612777fdf9e";
-    size = "10G";
+    size = "20G";
     backup.groups = [
       "daily"
       "offsite"
