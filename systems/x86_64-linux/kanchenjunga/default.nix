@@ -126,10 +126,5 @@ in
 
   systemd.settings.Manager.CPUAffinity = "0-5 12-17";
 
-  sops.secrets.tailscale-auth-key = {
-    sopsFile = repoFile "secrets/tailscale/auth-key";
-    format = "binary";
-  };
-
   system.stateVersion = "26.05";
 }

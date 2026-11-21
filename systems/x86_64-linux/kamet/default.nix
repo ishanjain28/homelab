@@ -122,11 +122,6 @@ in
     };
   };
 
-  sops.secrets.tailscale-auth-key = {
-    sopsFile = repoFile "secrets/tailscale/auth-key";
-    format = "binary";
-  };
-
   swapDevices = [
     {
       device = "/swapfile";

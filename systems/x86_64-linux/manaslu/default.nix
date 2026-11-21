@@ -210,10 +210,5 @@ in
 
   users.users.ishan.extraGroups = [ "homelab-share-dl" ];
 
-  sops.secrets.tailscale-auth-key = {
-    sopsFile = repoFile "secrets/tailscale/auth-key";
-    format = "binary";
-  };
-
   system.stateVersion = "26.05";
 }

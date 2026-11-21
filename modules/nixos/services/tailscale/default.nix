@@ -13,17 +13,21 @@ in
 {
   options.${namespace}.services.tailscale = with types; {
     enable = mkEnableOption "Tailscale";
-    authKeyFile = mkOpt path "/run/secrets/tailscale-auth-key" "Path to a file containing a Tailscale auth key.";
     advertiseRoutes = mkOpt (listOf str) [ ] "Subnet routes to advertise through this node.";
     package = mkPackageOption pkgs "tailscale" { };
   };
 
   config = mkIf cfg.enable {
+    sops.secrets.tailscale-auth-key = {
+      sopsFile = repoFile "secrets/tailscale/auth-key";
+      format = "binary";
+    };
+
     services.tailscale = enabled // {
       inherit (cfg) package;
       openFirewall = true;
       useRoutingFeatures = if cfg.advertiseRoutes == [ ] then "client" else "server";
-      inherit (cfg) authKeyFile;
+      authKeyFile = config.sops.secrets.tailscale-auth-key.path;
       extraUpFlags = mkIf (cfg.advertiseRoutes != [ ]) [ "--advertise-routes=${concatStringsSep "," cfg.advertiseRoutes}" ];
       extraSetFlags = [ "--accept-dns=false" ];
     };
