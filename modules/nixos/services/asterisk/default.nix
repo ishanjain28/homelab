@@ -36,7 +36,6 @@ in
         [
           "cdr"
           "cdr_custom"
-          "confbridge"
           "dnsmgr"
           "extensions"
           "indications"
@@ -45,15 +44,12 @@ in
           "musiconhold"
           "pjsip"
           "pjsip_jio"
-          "pjsip_notify"
-          "queues"
-          "resolver_unbound"
           "rtp"
-          "voicemail"
         ]
         (name: {
-          file = "secrets/asterisk/${name}.conf";
-          format = "binary";
+          file = "secrets/asterisk.yaml";
+          format = "yaml";
+          key = "${name}.conf";
           mountPath = "/etc/asterisk/${name}.conf";
         });
 
@@ -78,7 +74,7 @@ in
           to = 20000;
         }
         {
-          # Keep this in sync with secrets/asterisk/rtp.conf.
+          # Keep this in sync with rtp.conf in secrets/asterisk.yaml.
           from = 52000;
           to = 52200;
         }
