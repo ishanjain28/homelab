@@ -168,7 +168,7 @@ in
     };
 
     system.boot = enabled // {
-      secure = disabled;
+      secure = enabled;
       timeout = 5;
     };
   };

@@ -22,7 +22,7 @@ in
     };
     secure = {
       enable = mkBoolOpt false "Enable Secure Boot";
-      pkiBundle = mkOpt types.str "/etc/secureboot" "The path to the PKI bundle";
+      pkiBundle = mkOpt types.str "/var/lib/sbctl" "The path to the PKI bundle";
     };
   };
 
@@ -32,8 +32,8 @@ in
 
       # Secure Boot
       lanzaboote = {
-        inherit (cfg.secure) enable;
-        inherit (cfg.secure) pkiBundle;
+        inherit (cfg.secure) enable pkiBundle;
+        bootCounting.initialTries = if cfg.bootCounting.enable then cfg.bootCounting.tries else 0;
       };
 
       # Bootloader
@@ -50,6 +50,8 @@ in
         timeout = mkDefault cfg.timeout;
       };
     };
+
+    environment.systemPackages = mkIf cfg.secure.enable [ pkgs.sbctl ];
 
     systemd.services = {
       systemd-bless-boot = {
