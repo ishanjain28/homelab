@@ -31,7 +31,10 @@
       statix.includes = [ "*.nix" ];
       shellcheck.excludes = [ "*.envrc" ];
       taplo.excludes = [ "secrets/**" ];
-      yamlfmt.excludes = [ "secrets/**" ];
+      yamlfmt.excludes = [
+        "secrets/**"
+        ".sops.yaml"
+      ];
     };
   };
 }

@@ -132,8 +132,8 @@ Deploying from aarch64 to x64? Install `qemu-user-static`, add `extra-platforms 
 
 The persistent volumes are created on the initial deployment but services will fail to start because the secrets are encrypted with a different key. It uses SSH key on the host to encrypt credentials.
 This ssh key is generated on deployment and is not part of the repo. Optionally, It can be specified using `sshKeyFile`.
-After deployment copy the generated public key from the host(from `/etc/ssh/ssh_host_ed25519_key.pub`) and update all the secrets using `echo '<key>' | nix run nixpkgs#ssh-to-age`.
-Add the key in `.sops.yaml` and then run `find secrets -type f -exec sops updatekeys -y {} \;` to update all the secrets.
+After deployment add `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub` from the host to `keys` in `packages/sops-sync` and run `nix run .#sops-sync`.
+`.sops.yaml` is generated: each host gets the secrets its config uses; run `nix run .#sops-sync` after adding a secret or moving a service.
 
 Google Drive backups: the remote must be called `gdrive`; every host reads `secrets/backups/rclone.conf`.
 ```console

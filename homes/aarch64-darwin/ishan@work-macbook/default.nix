@@ -22,7 +22,7 @@ with lib.${namespace};
   sops = {
     age.keyFile = "${config.home.homeDirectory}/Library/Application Support/sops/age/keys.txt";
     secrets.work-gitconfig = {
-      sopsFile = lib.snowfall.fs.get-file "secrets/git/gitconfig.work";
+      sopsFile = repoFile "secrets/git/gitconfig.work";
       format = "binary";
     };
   };

@@ -1,135 +1,677 @@
-keys:
-  - &kamet age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
-  - &annapurna age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
-  - &kanchenjunga age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
-  - &work_macbook age1s45dwj5ger9hrnta0rguvcetkc5zjws4zac9g89g2jwvvuttmfgs2dudue
-  - &manaslu age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
-  - &ci_dns age1zj74mu46knf8zgp6fjtcy6um2w3lfxg4lyjkzkhz7c5jgj3e9uzsevusp4
-  - &homelab_p1 age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
-  - &homelab_p2 age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
-  - &homelab_p3 age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+%YAML 1.1
+---
 creation_rules:
-  - path_regex: secrets/(vaultwarden/.*|caddy/delhi\.json|adguardhome/delhi\.yml|gatus/delhi\.env|bird\.password|freshrss/.*|wg-home-vpn.conf|wg-ipv6.conf|znc/.*)$
-    key_groups:
-      - age:
-          - *manaslu
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-  - path_regex: secrets/gatus/delhi\.yml$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: secrets/(backups|alerts)/.*$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: secrets/dns/records\.json$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-          - *work_macbook
-          - *ci_dns
-  - path_regex: secrets/tailscale/auth-key$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: secrets/users/ishan-password$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: secrets/atuin/sync-address$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: secrets/git/gitconfig\.work$
-    key_groups:
-      - age:
-          - *work_macbook
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-  - path_regex: secrets/git/gitconfig$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  # DNS changes are operator actions; server host keys do not need these credentials.
-  - path_regex: (secrets/dns/.*)$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *ci_dns
-  - path_regex: secrets/postgresql/.*\.json$
-    encrypted_regex: ^(users)$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: secrets/acme\.json$
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
-          - *manaslu
-  - path_regex: .*secrets/.*
-    key_groups:
-      - age:
-          - *homelab_p1
-          - *homelab_p2
-          - *homelab_p3
-          - *kamet
-          - *annapurna
-          - *kanchenjunga
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/acme\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/actual-server\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/adguardhome/delhi\.yml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/adguardhome/home\.yaml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/alerts/pushover\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/cdr\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/cdr_custom\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/confbridge\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/dnsmgr\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/extensions\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/indications\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/logger\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/modules\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/musiconhold\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/pjsip\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/pjsip_jio\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/pjsip_notify\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/queues\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/resolver_unbound\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/rtp\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/asterisk/voicemail\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/atuin\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/atuin/sync-address$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/authelia\.yml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/backrest/config\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/backups/rclone\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/backups/restic\.password$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/bazarr\.yml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/bird\.password$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/bulwark\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/caddy/delhi\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/caddy/home\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/copyparty-accounts\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1zj74mu46knf8zgp6fjtcy6um2w3lfxg4lyjkzkhz7c5jgj3e9uzsevusp4
+  path_regex: ^secrets/dns/creds\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+    - age1zj74mu46knf8zgp6fjtcy6um2w3lfxg4lyjkzkhz7c5jgj3e9uzsevusp4
+    - age1s45dwj5ger9hrnta0rguvcetkc5zjws4zac9g89g2jwvvuttmfgs2dudue
+  path_regex: ^secrets/dns/records\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/freshrss/database-password$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/freshrss/password$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/garmin/garmin\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/garmin/oauth1_token$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/garmin/oauth2_token$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/gatus/delhi\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/gatus/delhi\.yml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/gatus/home\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/gatus/home\.yml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1s45dwj5ger9hrnta0rguvcetkc5zjws4zac9g89g2jwvvuttmfgs2dudue
+  path_regex: ^secrets/git/gitconfig\.work$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/gitea-runner\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/gitea\.config$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/grafana/alerting\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/grafana/grafana\.ini$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/grafana/ldap\.toml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/huawei-sms\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/karakeep/karakeep\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/karakeep/meilisearch\.key$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/kavita/appsettings\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/lidarr\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/lldap/config\.toml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/lldap/server\.key$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/mathesar\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/multicaster\.toml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/netflector\.toml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/obsidian-livesync/admin\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/openvscode-server\.token$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/openvscode-settings\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/paperless\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/postgresql/postgresql-del-mirror\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/postgresql/postgresql-del-primary\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/postgresql/postgresql-home-primary\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/prowlarr\.xml$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/pvr-movies-monitor\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/qbit\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/radarr\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/ripe-atlas/airtel\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+  path_regex: ^secrets/ripe-atlas/primary\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/samba/smb\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/samba/smbpasswd$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/samba/users$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/seerr/config\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/seerr/vars\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/sonarr\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/stalwart/config\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/tailscale/auth-key$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/tracearr\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/unpackerr\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+    - age1kyujec5hpyzrr4ld5ckxpma0evu2thjx2jkqjfycy3r38xfkgu3sz8u6kw
+    - age1cvepfy7dpd408h7wn4thm23wzlwu3km67fzp3et2e3rrvurwjfsq60uf6r
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/users/ishan-password$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/vaultwarden/config\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/vaultwarden/keys\.json$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/wg-home-vpn\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/wg-ipv6\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/windmill\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/znc/znc\.conf$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1xrr2y03ph2el9fwnvgngqujhf4kpcra3znlrcn90wte9nkea23wssqhzq7
+  path_regex: ^secrets/znc/znc\.pem$
+- encrypted_regex: ^(users)$
+  key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+  path_regex: ^secrets/postgresql/
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+  path_regex: .*
