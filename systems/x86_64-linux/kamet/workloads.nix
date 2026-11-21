@@ -115,24 +115,6 @@
     volumes = [ "cups" ];
   };
 
-  multicaster = enabled // {
-    networking = {
-      vlans = [
-        10
-        20
-        30
-        40
-        70
-      ];
-      internet = false;
-      endpoints.mdns.from = [
-        "@all_lan"
-        "@link-local"
-      ];
-    };
-    runtimeId = 36925;
-  };
-
   netflector = enabled // {
     networking = {
       vlans = [
@@ -141,6 +123,7 @@
         20
         30
         40
+        70
       ];
       internet = false;
       endpoints = {
@@ -149,6 +132,10 @@
           "@link-local"
         ];
         wsd.from = [
+          "@all_lan"
+          "@link-local"
+        ];
+        mdns.from = [
           "@all_lan"
           "@link-local"
         ];

@@ -14,7 +14,7 @@ in
 {
   options.${namespace}.services.netflector = mkServiceOptions {
     name = "netflector";
-    description = "SSDP and Samba WS-Discovery across VLANs";
+    description = "SSDP, WS-Discovery and mDNS across VLANs";
     endpoints = {
       ssdp = {
         port = 1900;
@@ -22,6 +22,10 @@ in
       };
       wsd = {
         port = 3702;
+        transport = "udp";
+      };
+      mdns = {
+        port = 5353;
         transport = "udp";
       };
     };
