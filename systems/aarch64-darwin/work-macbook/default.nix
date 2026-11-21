@@ -16,14 +16,10 @@ _: {
   ];
 
   homebrew.casks = [
-    "google-chrome"
     "google-chrome@canary"
     "spotify"
-    "slack"
     "thunderbird"
-    "zoom"
     "utm"
-    "firefox"
     "visual-studio-code"
   ];
 
