@@ -155,6 +155,7 @@
             # Show sops secrets decrypted in git diff/log; falls back to ciphertext without a key.
             git config diff.sops.textconv "sh -c 'sops -d \"\$0\" 2>/dev/null || cat \"\$0\"'"
             git config core.pager "less --tabs=2"
+            git config blame.ignoreRevsFile .git-blame-ignore-revs
           '';
         };
     in
