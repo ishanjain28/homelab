@@ -12,7 +12,7 @@ This is an attempt to fix all of that and get a more uniform flow for applicatio
 | System | Location | Hardware | Runs |
 |---|---|---|---|
 | annapurna | Home | Intel i5 12400, 2TB WD SN570 NVMe (OS, service volumes), 3×10TB Seagate Exos in ZFS raidz1 + 1 separate 10TB Seagate Exos, 4TB WD | Media (jellyfin, sonarr, radarr, lidarr, prowlarr, bazarr, unpackerr, qbittorrent, seerr, tracearr), samba, ingress caddy, adguardhome, authelia, lldap, stalwart, asterisk, gitea, windmill, karakeep, paperless, omada, bentopdf, gatus, PostgreSQL primary and Delhi mirror, grafana, victorialogs, victoriametrics, alloy-syslog, telegraf-snmp, VLAN debug containers |
-| kamet | Home | ASRock DeskMini X300W, AMD Ryzen 5 5600G, 500GB WD SN570 (OS) + 1TB WD SN770 (LVM pool) | actual, atuin, backrest, bulwark, changedetection, copyparty, cups, garmin-sync, gitea-runner, huawei-sms, kavita, mathesar, netflector, openvscode-server, pvr-movies-monitor, ripe-atlas probes |
+| kamet | Home | ASRock DeskMini X300W, AMD Ryzen 5 5600G, 500GB WD SN570 (OS) + 1TB WD SN770 (LVM pool) | actual, airtrail, atuin, backrest, bulwark, changedetection, copyparty, cups, garmin-sync, gitea-runner, huawei-sms, kavita, mathesar, netflector, openvscode-server, pvr-movies-monitor, ripe-atlas probes |
 | kanchenjunga | Home | AMD 5900x, 1TBx2 Samsung 970 EVO Plus NVMe, 2TB WD SN750, VFIO passthrough | VMs: win10, work |
 | manaslu | Delhi | Vultr VPS, 1 core, 2GB memory | BIRD, WireGuard, caddy, adguardhome, gatus, vaultwarden, freshrss, znc, PostgreSQL primary |
 | vaalserberg | Amsterdam | iFog VPS | BIRD (BGP with iFog) |

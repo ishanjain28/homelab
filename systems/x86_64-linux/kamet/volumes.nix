@@ -80,4 +80,13 @@
       "offsite"
     ];
   };
+
+  airtrail = {
+    uuid = "da354e11-8228-4432-8065-95f2b10357e7";
+    size = "1G";
+    backup.groups = [
+      "daily"
+      "offsite"
+    ];
+  };
 }

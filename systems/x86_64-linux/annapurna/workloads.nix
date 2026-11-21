@@ -7,6 +7,7 @@
       mode = "ipv6";
       internet = false;
       endpoints.postgres.from = [
+        "airtrail"
         "atuin"
         "authelia"
         "bazarr"

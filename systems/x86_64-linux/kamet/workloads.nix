@@ -236,4 +236,14 @@
     };
     runtimeId = 30394;
   };
+
+  airtrail = enabled // {
+    database.instance = "postgresql-home-primary";
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
+    runtimeId = 30399;
+    volumes = [ "airtrail" ];
+  };
 }
