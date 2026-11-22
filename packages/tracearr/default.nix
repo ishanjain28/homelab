@@ -2,7 +2,7 @@
 let
   pname = "tracearr";
   version = "3.2.1";
-  nodejs = pkgs.nodejs-slim_24;
+  nodejs = pkgs.nodejs-slim_26;
   pnpm = pkgs.pnpm_12.override { nodejs-slim = nodejs; };
   basemapBuild = "20260811";
   basemap = pkgs.stdenvNoCC.mkDerivation {

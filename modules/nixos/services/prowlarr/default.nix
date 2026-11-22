@@ -40,9 +40,12 @@ in
     containerConfig = {
       services.prowlarr = enabled // {
         openFirewall = false;
-        settings.server = {
-          bindaddress = "*";
-          port = cfg.networking.endpoints.web.port;
+        settings = {
+          server = {
+            bindaddress = "*";
+            port = cfg.networking.endpoints.web.port;
+          };
+          log.consoleLevel = "warn";
         };
       };
 

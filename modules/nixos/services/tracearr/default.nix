@@ -51,10 +51,11 @@ in
         bind = "127.0.0.1";
         port = 6379;
         openFirewall = false;
+        logLevel = "warning";
         settings = {
           protected-mode = "yes";
           maxmemory = "256mb";
-          maxmemory-policy = "allkeys-lru";
+          maxmemory-policy = "noeviction";
           appendonly = "no";
         };
       };
