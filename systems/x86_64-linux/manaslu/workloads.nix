@@ -1,5 +1,10 @@
 { lib, namespace }: with lib.${namespace};
 {
+  tailscale = {
+    advertiseRoutes = [ ];
+    encryptState = false;
+  };
+
   postgresql-del-primary = enabled // {
     monitor = {
       group = "DEL";
