@@ -1,0 +1,36 @@
+--- a/src/layouts/LoginLayout.tsx
++++ b/src/layouts/LoginLayout.tsx
+@@ -19,6 +19,14 @@
+ import { getLocaleInformation } from "@services/LocaleInformation";
+ import { getLogoOverride } from "@utils/Configuration";
+ 
++import background1 from "../assets/images/login-background-1.webp";
++import background2 from "../assets/images/login-background-2.webp";
++import background3 from "../assets/images/login-background-3.webp";
++import background4 from "../assets/images/login-background-4.webp";
++
++const backgrounds = [background1, background2, background3, background4];
++const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
++
+ const maxWidthMap: Record<string, string> = {
+     lg: "max-w-4xl",
+     md: "max-w-2xl",
+@@ -84,7 +92,7 @@
+     const containerMaxWidth = props.maxWidth === false ? "" : (maxWidthMap[props.maxWidth ?? "xs"] ?? "max-w-xs");
+ 
+     return (
+-        <div>
++        <div className="lg:grid lg:min-h-screen lg:grid-cols-[650px_1fr] lg:grid-rows-[auto_1fr] 2xl:grid-cols-[800px_1fr]">
+             <AppBarLoginPortal
+                 userInfo={props.userInfo}
+                 onLocaleChange={handleChangeLanguage}
+@@ -119,6 +127,9 @@
+                 </div>
+                 <PrivacyPolicyDrawer />
+             </div>
++            <div className="relative m-6 hidden overflow-hidden rounded-[40px] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:block">
++                <img src={background} alt="" className="absolute inset-0 h-full w-full object-cover" />
++            </div>
+         </div>
+     );
+ };

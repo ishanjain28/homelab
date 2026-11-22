@@ -9,6 +9,10 @@ let
   };
   web = prev.authelia.web.overrideAttrs (old: {
     inherit src version;
+    patches = [ ./login-background.patch ];
+    postPatch = old.postPatch + ''
+      install -m 0444 -t src/assets/images ${../../assets/authelia}/*.webp
+    '';
     pnpmDeps = prev.fetchPnpmDeps {
       inherit (old) pname sourceRoot;
       inherit src version;
