@@ -127,5 +127,7 @@ in
 
   systemd.settings.Manager.CPUAffinity = "0-5 12-17";
 
+  environment.etc."sensors.d/homelab.conf".source = ./sensors.conf;
+
   system.stateVersion = "26.05";
 }

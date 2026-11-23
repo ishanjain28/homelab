@@ -29,7 +29,7 @@ let
     };
     inputs.exec = [
       {
-        commands = [ "${intelGpuSample}" ];
+        commands = [ [ "${intelGpuSample}" ] ];
         timeout = "10s";
         name_override = "intel_gpu";
         data_format = "csv";
@@ -335,7 +335,17 @@ in
               }
             ];
           }
-          // optionalAttrs metrics.sensors.enable { sensors = [ { } ]; }
+          // optionalAttrs metrics.sensors.enable {
+            sensors = [
+              {
+                fieldinclude = [
+                  "temp_input"
+                  "fan_input"
+                ];
+                metricpass = "!(has(fields.temp_input) && fields.temp_input == 0.0)";
+              }
+            ];
+          }
           // optionalAttrs config.boot.zfs.enabled {
             zfs = [
               {

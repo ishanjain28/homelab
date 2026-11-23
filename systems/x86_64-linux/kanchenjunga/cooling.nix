@@ -11,28 +11,23 @@ let
   kernel = config.boot.kernelPackages;
   liquidctl = "${getExe pkgs.liquidctl} --match H150i";
 
+  hwmon = "hwmon/hwmon[[:print:]]*";
+  cpuTemp = "/sys/devices/pci0000:00/0000:00:18.3/${hwmon}/temp1_input";
   caseFans = [
-    "/sys/devices/platform/it87.2624/hwmon/hwmon[[:print:]]*/pwm3"
-    "/sys/devices/platform/it87.2656/hwmon/hwmon[[:print:]]*/pwm1"
-    "/sys/devices/platform/it87.2656/hwmon/hwmon[[:print:]]*/pwm3"
+    "/sys/devices/platform/it87.2624/${hwmon}/pwm3"
+    "/sys/devices/platform/it87.2656/${hwmon}/pwm1"
+    "/sys/devices/platform/it87.2656/${hwmon}/pwm3"
   ];
-
-  fancontrol = {
-    FCTEMPS = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon[[:print:]]*/temp1_input";
-    MINTEMP = "50";
-    MAXTEMP = "80";
-    MINSTART = "60";
-    MINSTOP = "60";
-    MINPWM = "60";
-    AVERAGE = "6";
-  };
+  allFans = value: concatMapStringsSep " " (fan: "${fan}=${toString value}") caseFans;
 
   h150iStatus = pkgs.writeShellScript "h150i-status" ''
     XDG_RUNTIME_DIR=/run/telegraf ${liquidctl} --json status | ${getExe pkgs.jq} -r '
-      .[].status[]
-      | select(.unit == "°C" or .unit == "rpm")
-      | (.key | ascii_downcase | sub(" (speed|temperature)$"; "") | gsub(" "; "")) as $feature
-      | "sensors,chip=h150i,feature=\($feature) \(if .unit == "rpm" then "fan_input" else "temp_input" end)=\(.value)"
+      .[0].status | map({ (.key): .value }) | add
+      | "sensors,chip=h150i,feature=liquid temp_input=\(.["Liquid temperature"])",
+        "sensors,chip=h150i,feature=pump fan_input=\(.["Pump speed"])",
+        "sensors,chip=h150i,feature=fan1 fan_input=\(.["Fan 1 speed"])",
+        "sensors,chip=h150i,feature=fan2 fan_input=\(.["Fan 2 speed"])",
+        "sensors,chip=h150i,feature=fan3 fan_input=\(.["Fan 3 speed"])"
     '
   '';
 in
@@ -59,17 +54,21 @@ in
   };
 
   hardware.fancontrol = enabled // {
-    config = concatLines (
-      [ "INTERVAL=5" ]
-      ++ mapAttrsToList (
-        key: value: "${key}=${concatMapStringsSep " " (pwm: "${pwm}=${value}") caseFans}"
-      ) fancontrol
-    );
+    config = ''
+      INTERVAL=5
+      FCTEMPS=${allFans cpuTemp}
+      MINTEMP=${allFans 50}
+      MAXTEMP=${allFans 80}
+      MINSTART=${allFans 60}
+      MINSTOP=${allFans 60}
+      MINPWM=${allFans 60}
+      AVERAGE=${allFans 6}
+    '';
   };
 
   services.telegraf.extraConfig.inputs.exec = [
     {
-      commands = [ "${h150iStatus}" ];
+      commands = [ [ "${h150iStatus}" ] ];
       timeout = "10s";
       data_format = "influx";
     }

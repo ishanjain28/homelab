@@ -184,5 +184,7 @@ in
     ];
   };
 
+  environment.etc."sensors.d/homelab.conf".source = ./sensors.conf;
+
   system.stateVersion = "26.05";
 }

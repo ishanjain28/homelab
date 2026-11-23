@@ -15,7 +15,10 @@ with lib.${namespace};
     "sd_mod"
   ];
   boot.initrd.kernelModules = [ "dm-snapshot" ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [
+    "kvm-intel"
+    "nct6775"
+  ];
   boot.extraModulePackages = [ ];
   boot.supportedFilesystems.zfs = true;
   boot.zfs.extraPools = [ "main" ];

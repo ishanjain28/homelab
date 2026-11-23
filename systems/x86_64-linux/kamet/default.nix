@@ -130,5 +130,7 @@ in
   ];
   boot.kernel.sysctl."vm.swappiness" = 0;
 
+  environment.etc."sensors.d/homelab.conf".source = ./sensors.conf;
+
   system.stateVersion = "26.05";
 }
