@@ -4,9 +4,7 @@ let
 
   python = pkgs.python3.override {
     packageOverrides = self: super: {
-      clevercsv = super.clevercsv.overridePythonAttrs (_: {
-        doCheck = false;
-      });
+      clevercsv = super.clevercsv.override { chardet = self.chardet_5; };
 
       django-modern-rpc = self.buildPythonPackage rec {
         pname = "django-modern-rpc";

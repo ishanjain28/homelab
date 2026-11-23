@@ -58,10 +58,6 @@
         productId = "c548";
       }
       {
-        vendorId = "1b1c";
-        productId = "0c22";
-      }
-      {
         vendorId = "1d6b";
         productId = "0104";
       }

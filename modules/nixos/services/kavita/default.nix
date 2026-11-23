@@ -34,9 +34,7 @@ in
       TasksMax = 512;
     };
     containerConfig = {
-      services.kavita = enabled // {
-        tokenKeyFile = settingsPath;
-      };
+      services.kavita = enabled;
 
       systemd.services.kavita.preStart = mkForce "install -m600 ${settingsPath} /var/lib/kavita/config/appsettings.json";
     };

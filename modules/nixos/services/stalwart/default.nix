@@ -29,7 +29,7 @@ in
 
   config = mkIf cfg.enable (mkSingleServiceContainer {
     service = cfg;
-    command = "${pkgs.stalwart_1_0}/bin/stalwart --config ${configPath}";
+    command = "${pkgs.stalwart_1}/bin/stalwart --config ${configPath}";
     secrets.config = {
       file = "secrets/stalwart/config.json";
       format = "json";

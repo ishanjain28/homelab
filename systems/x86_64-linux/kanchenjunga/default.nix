@@ -8,6 +8,7 @@ let
 in
 {
   imports = [
+    ./cooling.nix
     ./disk-config.nix
     ./hardware-configuration.nix
   ];

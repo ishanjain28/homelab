@@ -23,6 +23,7 @@ in
       };
       overlays = disabled;
       targets.neovim = disabled;
+      targets.wayprompt = disabled;
     };
   };
 }

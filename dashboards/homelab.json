@@ -2221,6 +2221,100 @@
       }
     },
     {
+      "id": 35,
+      "type": "timeseries",
+      "title": "Fans",
+      "description": "Fan and pump speeds from lm_sensors chips and liquidctl coolers. Headers that have not reported a speed in the last day are hidden.",
+      "datasource": {
+        "type": "victoriametrics-metrics-datasource",
+        "uid": "efyik59h6cbnkc"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      },
+      "interval": "1m",
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-metrics-datasource",
+            "uid": "efyik59h6cbnkc"
+          },
+          "expr": "sensors_fan_input{host=~\"$host\"} and max_over_time(sensors_fan_input{host=~\"$host\"}[1d]) > 0",
+          "refId": "A",
+          "legendFormat": "{{host}} {{chip}} {{feature}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "unit": "rotrpm",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "pointSize": 4,
+            "spanNulls": false,
+            "insertNulls": false,
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisCenteredZero": false,
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "enableFacetedFilter": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
       "type": "row",
       "title": "GPUs",
       "collapsed": false,
@@ -2228,7 +2322,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 69
       },
       "id": 31,
       "panels": []
@@ -2246,7 +2340,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 61
+        "y": 70
       },
       "interval": "1m",
       "targets": [
@@ -2359,7 +2453,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 61
+        "y": 70
       },
       "interval": "1m",
       "targets": [
@@ -2452,7 +2546,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 70
+        "y": 79
       },
       "interval": "1m",
       "targets": [
@@ -2541,7 +2635,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 79
+        "y": 88
       },
       "panels": []
     },
@@ -2558,7 +2652,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 80
+        "y": 89
       },
       "interval": "1m",
       "targets": [
@@ -2653,7 +2747,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 80
+        "y": 89
       },
       "interval": "1m",
       "targets": [
@@ -2756,7 +2850,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 89
+        "y": 98
       },
       "interval": "1m",
       "targets": [
@@ -2849,7 +2943,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 89
+        "y": 98
       },
       "targets": [
         {
@@ -2924,7 +3018,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 98
+        "y": 107
       },
       "panels": [
         {
@@ -2940,7 +3034,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 99
+            "y": 108
           },
           "interval": "1m",
           "targets": [
@@ -3101,7 +3195,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 99
+            "y": 108
           },
           "interval": "1m",
           "targets": [
@@ -3195,7 +3289,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 108
+            "y": 117
           },
           "interval": "1m",
           "targets": [
@@ -3289,7 +3383,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 108
+            "y": 117
           },
           "interval": "1m",
           "targets": [
