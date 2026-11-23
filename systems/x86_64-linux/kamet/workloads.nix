@@ -155,15 +155,6 @@
     runtimeId = 30365;
   };
 
-  backrest = enabled // {
-    networking = {
-      vlans = [ 50 ];
-      mode = "ipv6";
-      endpoints.web.from = [ "caddy" ];
-    };
-    runtimeId = 30366;
-  };
-
   bulwark = enabled // {
     networking = {
       vlans = [ 50 ];
