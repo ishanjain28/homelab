@@ -14,6 +14,7 @@
         "garmin-sync"
         "gitea"
         "grafana"
+        "home-assistant"
         "huawei-sms"
         "lidarr"
         "lldap"

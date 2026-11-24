@@ -221,4 +221,20 @@
     runtimeId = 30399;
     volumes = [ "airtrail" ];
   };
+
+  home-assistant = enabled // {
+    networking = {
+      vlans = [
+        50
+        10
+      ];
+      endpoints.web.from = [ "caddy" ];
+    };
+    runtimeId = 30400;
+    database = {
+      instance = "postgresql-home-primary";
+      name = "home_assistant";
+    };
+    volumes = [ "home-assistant" ];
+  };
 }

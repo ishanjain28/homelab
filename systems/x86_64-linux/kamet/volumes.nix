@@ -89,4 +89,14 @@
       "offsite"
     ];
   };
+
+  home-assistant = {
+    uuid = "c502ef1d-7ae4-4b1c-a73f-f61317d4f4a3";
+    mountPath = "/var/lib/hass";
+    size = "5G";
+    backup.groups = [
+      "daily"
+      "offsite"
+    ];
+  };
 }
