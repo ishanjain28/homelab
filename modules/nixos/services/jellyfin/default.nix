@@ -44,7 +44,6 @@ in
       systemd.services.jellyfin.path = [ pkgs.jellyfin-ffmpeg ];
 
       services.jellyfin = enabled // {
-        openFirewall = false;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
         hardwareAcceleration = enabled // {

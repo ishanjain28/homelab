@@ -2,7 +2,6 @@
   config,
   lib,
   namespace,
-  pkgs,
   ...
 }:
 with lib;
@@ -51,7 +50,6 @@ in
 
     containerConfig = {
       services.karakeep = enabled // {
-        package = pkgs.karakeep;
         browser = enabled;
         meilisearch = enabled;
         environmentFile = karakeepEnv;

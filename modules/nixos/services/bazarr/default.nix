@@ -19,7 +19,7 @@ in
     monitor = enabled // {
       endpoint = "web";
       protocol = "http";
-      path = "/bazarr/ping";
+      path = "/ping";
     };
   };
 
@@ -39,7 +39,6 @@ in
 
     containerConfig = {
       services.bazarr = enabled // {
-        openFirewall = false;
         settings.general.port = cfg.networking.endpoints.web.port;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;

@@ -55,7 +55,6 @@ in
 
       containerConfig = {
         services.authelia.instances.main = enabled // {
-          package = pkgs.authelia;
           settingsFiles = [ containerConfPath ];
           secrets.manual = true;
           environmentVariables = {
@@ -66,9 +65,6 @@ in
         };
 
         services.redis.servers."" = enabled // {
-          bind = "127.0.0.1";
-          port = 6379;
-          openFirewall = false;
           settings = {
             protected-mode = "yes";
             maxmemory = "256mb";

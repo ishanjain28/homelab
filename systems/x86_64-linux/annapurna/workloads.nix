@@ -22,8 +22,10 @@
         "paperless"
         "prowlarr"
         "radarr"
+        "radarr-4k"
         "seerr"
         "sonarr"
+        "sonarr-4k"
         "stalwart"
         "tracearr"
         "windmill"
@@ -183,7 +185,9 @@
       endpoints.web.from = [
         "caddy"
         "radarr"
+        "radarr-4k"
         "sonarr"
+        "sonarr-4k"
         "lidarr"
       ];
     };
@@ -228,6 +232,48 @@
     shares = [ "wd-4tb" ];
   };
 
+  radarr-4k = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "radarr4kmain";
+    };
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "prowlarr"
+        "unpackerr"
+        "seerr"
+      ];
+    };
+    runtimeId = 30366;
+    shares = [
+      "wd-4tb"
+      "media"
+    ];
+  };
+
+  sonarr-4k = enabled // {
+    database = {
+      instance = "postgresql-home-primary";
+      name = "sonarr4kmain";
+    };
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [
+        "caddy"
+        "prowlarr"
+        "unpackerr"
+        "seerr"
+      ];
+    };
+    runtimeId = 30367;
+    shares = [
+      "wd-4tb"
+      "media"
+    ];
+  };
+
   bazarr = enabled // {
     database = {
       instance = "postgresql-home-primary";
@@ -266,7 +312,10 @@
       internet = false;
     };
     runtimeId = 30359;
-    shares = [ "wd-4tb" ];
+    shares = [
+      "wd-4tb"
+      "media"
+    ];
   };
 
   qbittorrent = enabled // {
@@ -275,13 +324,18 @@
       endpoints.web.from = [
         "caddy"
         "radarr"
+        "radarr-4k"
         "sonarr"
+        "sonarr-4k"
         "lidarr"
       ];
     };
     runtimeId = 30361;
     volumes = [ "qbittorrent" ];
-    shares = [ "wd-4tb" ];
+    shares = [
+      "wd-4tb"
+      "media"
+    ];
   };
 
   jellyfin = enabled // {
@@ -305,6 +359,7 @@
     volumes = [ "jellyfin" ];
     shares = [
       "wd-4tb"
+      "media"
       "music"
     ];
     devices = [ "render" ];
@@ -456,7 +511,6 @@
   adguardhome = enabled // {
     monitor = {
       name = "Home DNS";
-      group = "Homelab";
       endpoint = "tls";
       protocol = "tls";
       client.insecure = true;
@@ -524,7 +578,6 @@
     };
     networking = {
       vlans = [ 50 ];
-      internet = true;
       endpoints.ldap.from = [
         "authelia"
         "grafana"

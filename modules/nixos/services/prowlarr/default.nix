@@ -19,7 +19,7 @@ in
     monitor = enabled // {
       endpoint = "web";
       protocol = "http";
-      path = "/prowlarr/ping";
+      path = "/ping";
     };
   };
 
@@ -39,10 +39,8 @@ in
 
     containerConfig = {
       services.prowlarr = enabled // {
-        openFirewall = false;
         settings = {
           server = {
-            bindaddress = "*";
             port = cfg.networking.endpoints.web.port;
           };
           log.consoleLevel = "warn";

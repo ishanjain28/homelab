@@ -16,7 +16,6 @@ in
   options.${namespace}.services.unpackerr = mkServiceOptions {
     name = "unpackerr";
     description = "Archive Unpackerr";
-    monitor = disabled;
   };
 
   config = mkIf cfg.enable (mkServiceContainer {

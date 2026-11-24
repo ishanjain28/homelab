@@ -48,9 +48,6 @@ in
 
     containerConfig = {
       services.redis.servers."" = enabled // {
-        bind = "127.0.0.1";
-        port = 6379;
-        openFirewall = false;
         logLevel = "warning";
         settings = {
           protected-mode = "yes";

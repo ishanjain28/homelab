@@ -2,7 +2,6 @@
   config,
   lib,
   namespace,
-  pkgs,
   ...
 }:
 with lib;
@@ -20,7 +19,7 @@ in
     monitor = enabled // {
       endpoint = "web";
       protocol = "http";
-      path = "/radarr/ping";
+      path = "/ping";
     };
   };
 
@@ -43,13 +42,10 @@ in
 
     containerConfig = {
       services.radarr = enabled // {
-        package = pkgs.radarr;
-        openFirewall = false;
         user = cfg.runtimeUser.name;
         group = cfg.runtimeUser.group;
         environmentFiles = [ environmentFile ];
         settings.server = {
-          bindaddress = "*";
           port = cfg.networking.endpoints.web.port;
         };
       };

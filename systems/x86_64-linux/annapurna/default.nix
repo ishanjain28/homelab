@@ -30,12 +30,14 @@ in
       wd-4tb = {
         hostPath = "/mnt/wd-4tb";
         gid = 30357;
-        readOnly = false;
+      };
+      media = {
+        hostPath = "/main/media";
+        gid = 30388;
       };
       music = {
         hostPath = "/main/music";
         gid = 30382;
-        readOnly = false;
       };
       ishan = {
         hostPath = "/main/ishan";

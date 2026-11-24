@@ -410,6 +410,13 @@ creation_rules:
     - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
     - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
     - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/radarr-4k\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
   path_regex: ^secrets/radarr\.env$
 - key_groups:
   - age:
@@ -460,6 +467,13 @@ creation_rules:
     - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
     - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
   path_regex: ^secrets/seerr/vars\.env$
+- key_groups:
+  - age:
+    - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj
+    - age1yubikey1q0znr9l27dq3wfu3ep2hhzujtjyfy2v86l2jew3murewkt6c4ajactg724a
+    - age1yubikey1q2qs6sm4gghdr6qcfmgf4c0cct25p9mn5p9d3vejl4w0sgul0luzgkskpz7
+    - age1yzg8yagn35ltasll84ghskth9jz9ve2lar43hvk438z9velxl5jsunzt08
+  path_regex: ^secrets/sonarr-4k\.env$
 - key_groups:
   - age:
     - age1yubikey1q0kyddtpx2j980tggcjn8dnxjvn046zvaygfzfryc5cy560wwmnxwhzd7sj

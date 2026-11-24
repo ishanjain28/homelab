@@ -2,7 +2,6 @@
   config,
   lib,
   namespace,
-  pkgs,
   ...
 }:
 with lib;
@@ -48,11 +47,9 @@ in
 
     containerConfig = {
       services.paperless = enabled // {
-        package = pkgs.paperless-ngx;
         user = cfg.runtimeUser.name;
         address = "::";
         port = cfg.networking.endpoints.web.port;
-        dataDir = "/var/lib/paperless";
         mediaDir = "${root}/media";
         consumptionDir = "${root}/consume";
         inherit environmentFile;
