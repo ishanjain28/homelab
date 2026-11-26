@@ -1,0 +1,218 @@
+{
+  "depends": [
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/7wwwlplx2r1pra2yci8ld4kg6s4ckyhm-source",
+      "rev": "a1eaaa87af756c21db4524c38cad4a004218f740",
+      "sha256": "1xy3cq1z93x8hpf8c5xarg53vhhscgs4d7aq5x2j3c7hnlcr7kak",
+      "url": "https://github.com/karaxnim/karax/archive/a1eaaa87af756c21db4524c38cad4a004218f740.tar.gz",
+      "ref": "1.5.0",
+      "packages": [
+        "karax"
+      ],
+      "srcDir": ""
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/d2yidyfsqd850ijxkf3yisp0x61a0crw-source",
+      "rev": "70af832b6eb37b148b0dbbc51085a73163c20041",
+      "sha256": "1xkjygniwpbpqzy2w5w9773jv40dklpwhcc003hbf2rn2ghpvgqw",
+      "url": "https://github.com/dom96/sass/archive/70af832b6eb37b148b0dbbc51085a73163c20041.tar.gz",
+      "ref": "v0.2.0",
+      "packages": [
+        "sass"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/f2xp1v0vnplwfjnk8nqsi7gd9pnb9gcv-source",
+      "rev": "b3dbc9c4d08e58c5b7bfad6dc7ef2ee52f2f4c08",
+      "sha256": "1v4rz42lwcazs6isi3kmjylkisr84mh0kgmlqycx4i885dn3g0l4",
+      "url": "https://github.com/cheatfate/nimcrypto/archive/b3dbc9c4d08e58c5b7bfad6dc7ef2ee52f2f4c08.tar.gz",
+      "ref": "v0.7.3^{}",
+      "packages": [
+        "nimcrypto"
+      ],
+      "srcDir": ""
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/3ha9jx6zafxb338r5xi1bydxnjsjppl5-source",
+      "rev": "5a7a7bafd1da23b25332316a7b888e6586f4177a",
+      "sha256": "10b3jmq9dhyfkj3r0jwk9zigrn048jb7xwh7vkbqar5wgfgmqljr",
+      "url": "https://github.com/soasme/nim-markdown/archive/5a7a7bafd1da23b25332316a7b888e6586f4177a.tar.gz",
+      "ref": "v0.8.8",
+      "packages": [
+        "markdown"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/sv8ydzdf509akbm3b93qlppklgvlx40x-source",
+      "rev": "5ffa3021d78e79f18482192548b8bd835002f7ab",
+      "sha256": "0h3nxnjclqd1gn9q3p9lad4i6ypwdisnbqj6rafm9155ydkc724v",
+      "url": "https://github.com/nim-lang/htmlparser/archive/5ffa3021d78e79f18482192548b8bd835002f7ab.tar.gz",
+      "ref": "v0.1.0",
+      "packages": [
+        "htmlparser"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/c6wn9azj0kyvl818a40hzqzis0im8gnb-source",
+      "rev": "9e6fbb6",
+      "sha256": "09yxshkfpacgl6x8f77snjcwz37r519vh7rrnqrnh5npvgk3h24j",
+      "url": "https://github.com/Araq/packedjson/archive/9e6fbb6.tar.gz",
+      "packages": [
+        "packedjson"
+      ],
+      "srcDir": ""
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/v2i65kqvcgcqmlqllx8gb9ipmaqvwisr-source",
+      "rev": "4fed6553d539cbbfb17ab5fea16a58b4f1916e7d",
+      "sha256": "1a55c0v2zy4hgzckaj1bb1q9a5vgxrclrr7zqgbrlg78c7il5inf",
+      "url": "https://github.com/guzba/supersnappy/archive/4fed6553d539cbbfb17ab5fea16a58b4f1916e7d.tar.gz",
+      "ref": "2.1.4",
+      "packages": [
+        "supersnappy"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/gwh94rsq3viiy85rzk00xiyfg671ig5d-source",
+      "rev": "fc7869f83d168e6ca1413fe97873140fd5805183",
+      "sha256": "1nvcicdkxpixmzx68bf8f7abjz3n3p5rs3lzf0qh4ggr1y4w7sfm",
+      "url": "https://github.com/zedeus/redpool/archive/fc7869f83d168e6ca1413fe97873140fd5805183.tar.gz",
+      "ref": "v0.2.2",
+      "packages": [
+        "redpool"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/d2ccdhm958z9rzampbi2din88753sbia-source",
+      "rev": "a533ab242510e893f75cd8a7c9fac24a6243ec3d",
+      "sha256": "1d0aqfzbsl164lhh3fgk8kzmzz6sg96szzlhgqdaazmyzhg7mhz7",
+      "url": "https://github.com/zedeus/redis/archive/a533ab242510e893f75cd8a7c9fac24a6243ec3d.tar.gz",
+      "ref": "v0.4.1",
+      "packages": [
+        "redis"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/y7jw44rcmvhwbwd02qh6d6mnrg4xk00v-source",
+      "rev": "bcb8c1e1be6abb0a0e35a3c6040cdd9391cc993f",
+      "sha256": "0vk10ap93jqrmzxjjnwm1w45x7fvbihxjqc92nb1ic2y9x33i5v3",
+      "url": "https://github.com/guzba/zippy/archive/bcb8c1e1be6abb0a0e35a3c6040cdd9391cc993f.tar.gz",
+      "ref": "0.10.19",
+      "packages": [
+        "zippy"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/8lxcz0fmm6myip77ka4sn3fms3m502gd-source",
+      "rev": "c7091b096bcf275f47b666ef74bce73eda187ee3",
+      "sha256": "1j56hhf4g5b2sm6190lxlr0qih0mdszk0d39ii79hpyzk787a6dy",
+      "url": "https://github.com/treeform/flatty/archive/c7091b096bcf275f47b666ef74bce73eda187ee3.tar.gz",
+      "ref": "0.4.0",
+      "packages": [
+        "flatty"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/p34ky5dizbgjilm7g4yfqggz45pdgf2n-source",
+      "rev": "bb647e1ca21af25ffdc423bcb96feeeeae963ca2",
+      "sha256": "0f7mp9hf673y14dj84ysdw5xbciqkwx0mn9c12zn105mcmn1f8mm",
+      "url": "https://github.com/treeform/jsony/archive/bb647e1ca21af25ffdc423bcb96feeeeae963ca2.tar.gz",
+      "ref": "1.1.6",
+      "packages": [
+        "jsony"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "packages": [
+        "oauth"
+      ],
+      "path": "/nix/store/bqfq4db6nwycmkdrql9igsbrayqsw3g2-source",
+      "ref": "v0.11",
+      "rev": "ec2e058fc46f04deaf3cb55eca32b3b83c614953",
+      "sha256": "1wv8v4xid64z0wbb814n31gf3c6dzlqr3b83b5ls0kqby73krlsm",
+      "srcDir": "src",
+      "url": "https://github.com/CORDEA/oauth/archive/ec2e058fc46f04deaf3cb55eca32b3b83c614953.tar.gz"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/hx85br48sjcridmda4l35cx7c9imxabg-source",
+      "rev": "abc13d11c210b614960fe8760e581d44cfb2e3e9",
+      "sha256": "1x12ypfj341gjg3rh7zjq1wns8rngfyky6gqgb92lyhlvs7h4xzj",
+      "url": "https://github.com/dom96/httpbeast/archive/abc13d11c210b614960fe8760e581d44cfb2e3e9.tar.gz",
+      "ref": "v0.4.1",
+      "packages": [
+        "httpbeast"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/h214k8m5qdw6ajh45f2wjzld856qcvc6-source",
+      "rev": "c9c0c7b51e2e83cc9305a895a0b144a297b4bea8",
+      "sha256": "0x1jahhx0wcfay79v0xqddyadf5ckcilhv25cq1g6rarshcg1zvd",
+      "url": "https://github.com/treeform/ws/archive/c9c0c7b51e2e83cc9305a895a0b144a297b4bea8.tar.gz",
+      "ref": "0.6.0",
+      "packages": [
+        "ws"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/jkf2p6sp0506crd1awpq2x98m527v4mb-source",
+      "rev": "19bb965ef04f57128f4f4ea2e690ff9f7d6a81b1",
+      "sha256": "0dk0ixgpxmaz2kf12a3fvzdaknn38qnwgdhp7yag0m5fbhhz2kjc",
+      "url": "https://github.com/euantorano/dotenv.nim/archive/19bb965ef04f57128f4f4ea2e690ff9f7d6a81b1.tar.gz",
+      "ref": "2.0.2",
+      "packages": [
+        "dotenv"
+      ],
+      "srcDir": "src"
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/a6a0ycxsaxpqks42aq9wicj8ars7z7ai-source",
+      "rev": "92ccc5800bb0ac4865b275a2ce3c1544e98b48bc",
+      "sha256": "00zvvd8ssy22srg74xzapknmgmi82v534npjdrk5805shswfhqdm",
+      "url": "https://github.com/onionhammer/sha1/archive/92ccc5800bb0ac4865b275a2ce3c1544e98b48bc.tar.gz",
+      "ref": "master",
+      "packages": [
+        "sha1"
+      ],
+      "srcDir": ""
+    },
+    {
+      "method": "fetchzip",
+      "path": "/nix/store/qdiiihi53gmbwbj06qa16p8qpks9lvw7-source",
+      "rev": "0e6bdc3ed5bae8c7cc9",
+      "sha256": "111dzyvqlg1r1jngcz3d9px8kfbxpcdi8phs26bxkmbxzjkwrmmv",
+      "url": "https://github.com/cheatfate/asynctools/archive/0e6bdc3ed5bae8c7cc9.tar.gz",
+      "packages": [
+        "asynctools"
+      ],
+      "srcDir": ""
+    }
+  ]
+}

@@ -74,6 +74,14 @@
     volumes = [ "changedetection" ];
   };
 
+  nitter = enabled // {
+    networking = {
+      vlans = [ 50 ];
+      endpoints.web.from = [ "caddy" ];
+    };
+    runtimeId = 30351;
+  };
+
   openvscode-server = enabled // {
     networking = {
       vlans = [ 50 ];

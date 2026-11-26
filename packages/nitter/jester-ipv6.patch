@@ -1,0 +1,11 @@
+--- a/jester.nim
++++ b/jester.nim
+@@ -536,7 +536,7 @@
+       self.settings.port,
+       proc (req: asynchttpserver.Request): Future[void] {.gcsafe, closure.} =
+         result = handleRequest(jes, req),
+-      self.settings.bindAddr)
++      self.settings.bindAddr, domain = Domain.AF_INET6)
+     if not self.settings.futureErrorHandler.isNil:
+       serveFut.callback = self.settings.futureErrorHandler
+     else:
