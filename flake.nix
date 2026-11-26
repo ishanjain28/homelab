@@ -189,15 +189,10 @@
           nixos = [
             disko.nixosModules.disko
             lanzaboote.nixosModules.lanzaboote
-            nixos-generators.nixosModules.all-formats
             sops-nix.nixosModules.sops
           ];
         };
-        hosts = {
-          annapurna.modules = [ ];
-          kanchenjunga.modules = [ ];
-          kamet.modules = [ ];
-        };
+        hosts.minimal.modules = [ nixos-generators.nixosModules.all-formats ];
       };
 
       homes = with inputs; {
@@ -207,10 +202,7 @@
         ];
       };
 
-      outputs-builder = channels: {
-        formatter = (treefmtModule channels.nixpkgs ./treefmt.nix).config.build.wrapper;
-        packages.volume = channels.nixpkgs.callPackage ./packages/volume { };
-      };
+      outputs-builder = channels: { formatter = (treefmtModule channels.nixpkgs ./treefmt.nix).config.build.wrapper; };
 
       templates = {
         rust.description = "devshell for Rust projects";

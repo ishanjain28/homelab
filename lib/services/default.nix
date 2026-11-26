@@ -66,7 +66,6 @@ let
       config,
       containerProfile ? "unprivileged",
       resources ? { },
-      containerTimeout ? "3min",
     }:
     let
       containerProfileConfig = getContainerProfile containerProfile;
@@ -103,8 +102,8 @@ let
       systemd.network.networks = hostVethNetworks;
 
       systemd.services."container@${name}".serviceConfig = {
-        TimeoutStartSec = mkForce containerTimeout;
-        TimeoutStopSec = mkForce containerTimeout;
+        TimeoutStartSec = mkForce "3min";
+        TimeoutStopSec = mkForce "3min";
       }
       // resources;
     };
@@ -300,7 +299,6 @@ let
       containerConfig ? { },
       containerProfile ? "unprivileged",
       resources ? { },
-      containerTimeout ? "3min",
       databaseUnits ? [ service.name ],
       serviceProfiles ? { },
     }:
@@ -388,7 +386,6 @@ let
           vlans
           containerProfile
           resources
-          containerTimeout
           hostNetwork
           ;
         config = mkMerge [
@@ -541,7 +538,6 @@ let
       after ? [ ],
       wants ? [ ],
       resources ? { },
-      containerTimeout ? "3min",
     }:
     let
       inherit (service) name runtimeUser;
@@ -559,7 +555,6 @@ let
         service
         containerProfile
         resources
-        containerTimeout
         secrets
         ;
       databaseUnits = [ serviceName ];

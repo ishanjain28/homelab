@@ -99,12 +99,10 @@ in
 
     environment.systemPackages = with pkgs; [
       bashInteractive
-      bind
       btop
       coreutils
       curl
       dig
-      dnsutils
       e2fsprogs
       fd
       file
@@ -132,7 +130,6 @@ in
       nvme-cli
       openssl
       pciutils
-      pkg-config
       procps
       psmisc
       ripgrep
