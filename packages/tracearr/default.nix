@@ -11,7 +11,7 @@ let
     SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     outputHashMode = "flat";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-6pHtC6B/wnsHLgEtIzoi6ZR2Exe8ck1mdGXAFx601Vw=";
+    outputHash = "sha256-IYXORXY5h/D7weWDk+9xNN9FYfWR4GEKgxvovTQbcZY=";
     buildCommand = "pmtiles extract https://build.protomaps.com/${basemapBuild}.pmtiles $out --maxzoom=8";
   };
 
