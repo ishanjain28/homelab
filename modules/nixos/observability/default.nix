@@ -403,6 +403,10 @@ in
           "CAP_SYS_RAWIO"
         ];
       };
+
+      services.udev.extraRules = ''
+        SUBSYSTEM=="nvme", KERNEL=="nvme[0-9]*", GROUP="disk", MODE="0660"
+      '';
     })
 
     (mkIf (metrics.enable && metrics.intelGpu.enable) {

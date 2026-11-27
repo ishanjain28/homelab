@@ -3958,72 +3958,6 @@
       "panels": []
     },
     {
-      "id": 51,
-      "type": "stat",
-      "title": "Local SNR",
-      "description": "Signal-to-noise ratio seen by the local CPE (AP end). Reads 0 while no station is associated.",
-      "datasource": {
-        "type": "victoriametrics-metrics-datasource",
-        "uid": "efyik59h6cbnkc"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 0,
-        "y": 86
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "victoriametrics-metrics-datasource",
-            "uid": "efyik59h6cbnkc"
-          },
-          "expr": "max without (model, version, serial, mode) (ptp_snr{agent_host=\"10.0.99.99\"})",
-          "refId": "A",
-          "legendFormat": ""
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "dB",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 15
-              },
-              {
-                "color": "green",
-                "value": 25
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "textMode": "value",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        }
-      }
-    },
-    {
       "id": 52,
       "type": "stat",
       "title": "Local Tx CCQ",
@@ -4034,8 +3968,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 3,
+        "w": 4,
+        "x": 4,
         "y": 86
       },
       "targets": [
@@ -4100,8 +4034,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 6,
+        "w": 4,
+        "x": 0,
         "y": 86
       },
       "targets": [
@@ -4166,8 +4100,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 9,
+        "w": 4,
+        "x": 8,
         "y": 86
       },
       "targets": [
@@ -4232,7 +4166,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 4,
         "x": 0,
         "y": 90
       },
@@ -4294,8 +4228,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 3,
+        "w": 4,
+        "x": 4,
         "y": 90
       },
       "targets": [
@@ -4360,8 +4294,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 6,
+        "w": 4,
+        "x": 8,
         "y": 90
       },
       "targets": [
@@ -4431,15 +4365,6 @@
         "y": 86
       },
       "targets": [
-        {
-          "datasource": {
-            "type": "victoriametrics-metrics-datasource",
-            "uid": "efyik59h6cbnkc"
-          },
-          "expr": "max without (model, version, serial, mode) (ptp_snr{agent_host=\"10.0.99.99\"})",
-          "refId": "A",
-          "legendFormat": "Local SNR"
-        },
         {
           "datasource": {
             "type": "victoriametrics-metrics-datasource",

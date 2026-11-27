@@ -1937,7 +1937,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "smart_device_temp_c{host!=\"\"}",
+          "expr": "label_replace(smart_device_temp_c{host!=\"\"}, \"serial_no\", \"$1\", \"serial_no\", \".*(.{4})\")",
           "refId": "A",
           "legendFormat": "{{host}} {{model}} {{serial_no}}"
         },
