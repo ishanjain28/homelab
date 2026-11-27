@@ -31,7 +31,7 @@ _: {
     lvm_vg.pool = {
       type = "lvm_vg";
       lvs.dl = {
-        size = "2G";
+        size = "4G";
         content = {
           type = "filesystem";
           format = "ext4";

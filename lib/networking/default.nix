@@ -6,7 +6,10 @@ let
   # Shorthand for generating interface link configuration
   genIfLink = { name, macAddress }: {
     matchConfig.PermanentMACAddress = macAddress;
-    linkConfig.Name = name;
+    linkConfig = {
+      Name = name;
+      WakeOnLan = "magic";
+    };
   };
 
   # Shorthand for generating tagged vlan interfaces
