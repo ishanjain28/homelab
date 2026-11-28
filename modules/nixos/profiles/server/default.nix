@@ -51,6 +51,18 @@ in
       "net.core.default_qdisc" = "fq";
       "net.ipv4.tcp_congestion_control" = "bbr";
       "net.mptcp.enabled" = 0;
+      "kernel.yama.ptrace_scope" = 2;
+      "kernel.kptr_restrict" = 2;
+      "kernel.unprivileged_bpf_disabled" = 1;
+      "net.core.bpf_jit_harden" = 2;
+      "fs.protected_fifos" = 2;
+      "fs.protected_regular" = 2;
+      "dev.tty.ldisc_autoload" = 0;
+      "net.ipv4.tcp_rfc1337" = 1;
+      "net.ipv4.conf.all.send_redirects" = 0;
+      "net.ipv4.conf.default.send_redirects" = 0;
+      "vm.mmap_rnd_bits" = 32;
+      "vm.mmap_rnd_compat_bits" = 16;
       "vm.overcommit_memory" = mkIf (any (name: config.${namespace}.services.${name}.enable) [
         "authelia"
         "tracearr"
@@ -61,6 +73,10 @@ in
       "tcp_bbr"
       "wireguard"
     ];
+
+    boot.kernelParams = [ "slab_nomerge" ];
+
+    security.protectKernelImage = true;
 
     sops.secrets.ishan-password = {
       sopsFile = repoFile "secrets/users/ishan-password";
