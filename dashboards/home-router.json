@@ -1484,7 +1484,7 @@
           "color": {
             "mode": "palette-classic-by-name"
           },
-          "unit": "bytes",
+          "unit": "decbytes",
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
@@ -2238,7 +2238,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
+          "unit": "decbytes",
           "color": {
             "mode": "thresholds"
           },
@@ -2300,7 +2300,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
+          "unit": "decbytes",
           "color": {
             "mode": "thresholds"
           },
@@ -2621,7 +2621,7 @@
           "color": {
             "mode": "palette-classic-by-name"
           },
-          "unit": "bytes",
+          "unit": "decbytes",
           "custom": {
             "drawStyle": "bars",
             "lineInterpolation": "linear",
@@ -3657,7 +3657,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
+          "unit": "decbytes",
           "color": {
             "mode": "thresholds"
           },
@@ -3719,7 +3719,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
+          "unit": "decbytes",
           "color": {
             "mode": "thresholds"
           },
@@ -4040,7 +4040,7 @@
           "color": {
             "mode": "palette-classic-by-name"
           },
-          "unit": "bytes",
+          "unit": "decbytes",
           "custom": {
             "drawStyle": "bars",
             "lineInterpolation": "linear",

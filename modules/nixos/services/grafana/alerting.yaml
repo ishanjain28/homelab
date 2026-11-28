@@ -219,7 +219,7 @@ groups:
         noDataState: OK
         execErrState: Error
         annotations:
-          summary: "{{ $labels.host }} {{ $labels.container }} restarted {{ $values.A.Value }} times in 15 minutes"
+          summary: "{{ $labels.host }} {{ $labels.container }}: {{ $labels.unit }} was restarted {{ $values.A.Value }} times in 15 minutes"
         data:
           - refId: A
             datasourceUid: victorialogs
@@ -228,7 +228,7 @@ groups:
               to: 0
             model:
               refId: A
-              expr: '{source="journald"} "Scheduled restart job" | stats by (host, container) count() as restarts'
+              expr: '{source="journald"} _msg:~"^[^ :]+: Scheduled restart job" | extract "<unit>: " | stats by (host, container, unit) count() as restarts | fields host, container, unit, restarts'
               queryType: stats
           - refId: B
             datasourceUid: __expr__
@@ -241,6 +241,35 @@ groups:
                     type: gt
                     params:
                       - 3
+      - uid: unit-failed
+        title: Unit failed
+        condition: B
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.container }}: {{ $labels.unit }} failed and was not restarted"
+        data:
+          - refId: A
+            datasourceUid: victorialogs
+            relativeTimeRange:
+              from: 900
+              to: 0
+            model:
+              refId: A
+              expr: '{source="journald"} _msg:~"^[^ :]+: (Failed with result|Scheduled restart job)" | extract "<unit>: " | stats by (host, container, unit) count() if ("Failed with result") as failed, count() if ("Scheduled restart job") as restarts | math failed - restarts as stuck | filter stuck:>0 | fields host, container, unit, stuck'
+              queryType: stats
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
       - uid: log-error-burst
         title: Error burst in logs
         condition: B

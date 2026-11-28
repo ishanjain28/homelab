@@ -397,7 +397,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
+          "unit": "decbytes",
           "color": {
             "mode": "thresholds"
           },
@@ -458,7 +458,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
+          "unit": "decbytes",
           "color": {
             "mode": "thresholds"
           },
@@ -830,7 +830,7 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "bytes"
+                "value": "decbytes"
               }
             ]
           },
@@ -1158,7 +1158,7 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "bytes"
+                "value": "decbytes"
               }
             ]
           },
@@ -1170,7 +1170,7 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "bytes"
+                "value": "decbytes"
               }
             ]
           },
@@ -1234,7 +1234,7 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "bytes"
+                "value": "decbytes"
               }
             ]
           }
@@ -1448,7 +1448,7 @@
           "color": {
             "mode": "palette-classic-by-name"
           },
-          "unit": "bytes",
+          "unit": "decbytes",
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
@@ -1844,7 +1844,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "sort_by_label(label_set(rate(net_bytes_recv{host!=\"\", service=\"\"}[$__rate_interval]), \"dir\", \"rx\") or label_set(-rate(net_bytes_sent{host!=\"\", service=\"\"}[$__rate_interval]), \"dir\", \"tx\"), \"host\", \"interface\", \"dir\")",
+          "expr": "sort_by_label(label_set(rate(net_bytes_recv{host!=\"\", service=\"\"}[$__rate_interval]) * 8, \"dir\", \"rx\") or label_set(-rate(net_bytes_sent{host!=\"\", service=\"\"}[$__rate_interval]) * 8, \"dir\", \"tx\"), \"host\", \"interface\", \"dir\")",
           "refId": "A",
           "legendFormat": "{{host}} {{interface}}"
         }
@@ -1854,7 +1854,7 @@
           "color": {
             "mode": "palette-classic-by-name"
           },
-          "unit": "Bps",
+          "unit": "bps",
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
@@ -2767,7 +2767,7 @@
             "type": "victoriametrics-metrics-datasource",
             "uid": "efyik59h6cbnkc"
           },
-          "expr": "sort_by_label(label_set(rate(net_bytes_recv{host!=\"\", service!=\"\", service=~\".*\"}[$__rate_interval]), \"dir\", \"rx\") or label_set(-rate(net_bytes_sent{host!=\"\", service!=\"\", service=~\".*\"}[$__rate_interval]), \"dir\", \"tx\"), \"host\", \"service\", \"dir\")",
+          "expr": "sort_by_label(label_set(rate(net_bytes_recv{host!=\"\", service!=\"\", service=~\".*\"}[$__rate_interval]) * 8, \"dir\", \"rx\") or label_set(-rate(net_bytes_sent{host!=\"\", service!=\"\", service=~\".*\"}[$__rate_interval]) * 8, \"dir\", \"tx\"), \"host\", \"service\", \"dir\")",
           "refId": "A",
           "legendFormat": "{{host}}/{{service}}"
         }
@@ -2777,7 +2777,7 @@
           "color": {
             "mode": "palette-classic-by-name"
           },
-          "unit": "Bps",
+          "unit": "bps",
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
@@ -2979,7 +2979,7 @@
               "color": {
                 "mode": "palette-classic-by-name"
               },
-              "unit": "bytes",
+              "unit": "decbytes",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "linear",
@@ -3122,7 +3122,7 @@
               "color": {
                 "mode": "palette-classic-by-name"
               },
-              "unit": "bytes",
+              "unit": "decbytes",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "linear",
