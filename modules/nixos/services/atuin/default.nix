@@ -18,6 +18,11 @@ in
     monitor = enabled // {
       endpoint = "web";
       protocol = "http";
+      path = "/healthz";
+      conditions = [
+        "[STATUS] == 200"
+        "[BODY].status == healthy"
+      ];
     };
   };
 

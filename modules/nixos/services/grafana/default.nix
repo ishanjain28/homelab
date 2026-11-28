@@ -53,6 +53,11 @@ in
     monitor = enabled // {
       endpoint = "web";
       protocol = "http";
+      path = "/api/health";
+      conditions = [
+        "[STATUS] == 200"
+        "[BODY].database == ok"
+      ];
     };
   };
 

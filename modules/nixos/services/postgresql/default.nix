@@ -263,6 +263,11 @@ let
     ''
     + concatStrings (
       mapAttrsToList (database: sql: ''
+        ${concatMapStrings (extension: ''
+          if ! out=$(psql -X -v ON_ERROR_STOP=1 -d ${escapeShellArg database} -c ${escapeShellArg "ALTER EXTENSION ${quoteIdent extension} UPDATE"} 2>&1); then
+            case "$out" in *"does not exist"*) ;; *) echo "$out" >&2; exit 1 ;; esac
+          fi
+        '') cfg.extensions}
         psql -X -1 -v ON_ERROR_STOP=1 -d ${escapeShellArg database} -f ${sql}
       '') databaseSql
     );

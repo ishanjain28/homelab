@@ -24,6 +24,7 @@ in
     monitor = enabled // {
       endpoint = "web";
       protocol = "http";
+      path = "/health";
     };
   };
 
