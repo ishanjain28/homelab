@@ -6,6 +6,8 @@ that were better configured than others.
 
 This is an attempt to fix all of that and get a more uniform flow for application enironments, logging, monitoring, persistent volumes, security and networking.
 
+[![Ishan's Homelab](assets/homelab.svg)](assets/homelab.svg)
+
 
 ## Systems
 

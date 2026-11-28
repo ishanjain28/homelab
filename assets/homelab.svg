@@ -1,0 +1,619 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1760" height="1660" viewBox="0 0 1760 1660" font-family="sans-serif">
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;fill:#0f172a}
+.bg{fill:#ffffff}
+.title{font-size:26px;font-weight:700}
+.sub{font-size:13px;fill:#64748b}
+.site{fill:none;stroke:#cbd5e1;stroke-width:1.5;stroke-dasharray:6 5}
+.sitel{font-size:12px;font-weight:700;fill:#64748b;letter-spacing:.08em}
+.box{fill:#f8fafc;stroke:#cbd5e1;stroke-width:1.2}
+.bt{font-size:13.5px;font-weight:600}
+.bs{font-size:11.5px;fill:#64748b}
+.host{fill:#ffffff;stroke:#475569;stroke-width:1.8}
+.ht{font-size:17px;font-weight:700}
+.hs{font-size:11.5px;fill:#64748b}
+.grp{fill:#f1f5f9;stroke:#e2e8f0;stroke-width:1}
+.gt{font-size:10.5px;font-weight:700;fill:#64748b;letter-spacing:.06em}
+.chip{fill:#ffffff;stroke:#cbd5e1;stroke-width:1}
+.ct{font-size:11.5px}
+.phy{fill:none;stroke:#94a3b8;stroke-width:1.6}
+.air{fill:none;stroke:#94a3b8;stroke-width:1.6;stroke-dasharray:3 3}
+.wg{fill:none;stroke:#7c3aed;stroke-width:2;stroke-dasharray:8 5}
+.ing{fill:none;stroke:#2563eb;stroke-width:2.2}
+.db{fill:none;stroke:#ea580c;stroke-width:2}
+.tel{fill:none;stroke:#16a34a;stroke-width:2.2;stroke-dasharray:1 4;stroke-linecap:round}
+.sso{fill:none;stroke:#0d9488;stroke-width:1.6}
+.el{font-size:11px;fill:#64748b}
+.elwg{font-size:11px;fill:#7c3aed}
+.eling{font-size:11px;fill:#2563eb}
+.eldb{font-size:11px;fill:#ea580c}
+.eltel{font-size:11px;fill:#16a34a}
+.elsso{font-size:11px;fill:#0d9488}
+.pgdot{fill:#ea580c}
+.lt{font-size:12px}
+.lh{font-size:11px;font-weight:700;fill:#64748b;letter-spacing:.06em}
+.m-ing{fill:#2563eb}
+.m-db{fill:#ea580c}
+.m-tel{fill:#16a34a}
+.m-wg{fill:#7c3aed}
+.m-sso{fill:#0d9488}
+.m-phy{fill:#94a3b8}
+@media (prefers-color-scheme: dark){
+text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;fill:#e6edf3}
+.bg{fill:#0d1117}
+.sub{font-size:13px;fill:#8b949e}
+.site{fill:none;stroke:#30363d;stroke-width:1.5;stroke-dasharray:6 5}
+.sitel{font-size:12px;font-weight:700;fill:#8b949e;letter-spacing:.08em}
+.box{fill:#161b22;stroke:#30363d;stroke-width:1.2}
+.bs{font-size:11.5px;fill:#8b949e}
+.host{fill:#0d1117;stroke:#8b949e;stroke-width:1.8}
+.hs{font-size:11.5px;fill:#8b949e}
+.grp{fill:#161b22;stroke:#30363d;stroke-width:1}
+.gt{font-size:10.5px;font-weight:700;fill:#8b949e;letter-spacing:.06em}
+.chip{fill:#0d1117;stroke:#30363d;stroke-width:1}
+.phy{fill:none;stroke:#6e7681;stroke-width:1.6}
+.air{fill:none;stroke:#6e7681;stroke-width:1.6;stroke-dasharray:3 3}
+.wg{fill:none;stroke:#a78bfa;stroke-width:2;stroke-dasharray:8 5}
+.ing{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.db{fill:none;stroke:#fb923c;stroke-width:2}
+.tel{fill:none;stroke:#3fb950;stroke-width:2.2;stroke-dasharray:1 4;stroke-linecap:round}
+.sso{fill:none;stroke:#2dd4bf;stroke-width:1.6}
+.el{font-size:11px;fill:#8b949e}
+.elwg{font-size:11px;fill:#a78bfa}
+.eling{font-size:11px;fill:#58a6ff}
+.eldb{font-size:11px;fill:#fb923c}
+.eltel{font-size:11px;fill:#3fb950}
+.elsso{font-size:11px;fill:#2dd4bf}
+.pgdot{fill:#fb923c}
+.lh{font-size:11px;font-weight:700;fill:#8b949e;letter-spacing:.06em}
+.m-ing{fill:#58a6ff}
+.m-db{fill:#fb923c}
+.m-tel{fill:#3fb950}
+.m-wg{fill:#a78bfa}
+.m-sso{fill:#2dd4bf}
+.m-phy{fill:#6e7681}
+}
+.pgcyl{fill:#fff7ed;stroke:#ea580c;stroke-width:1.3}
+@media (prefers-color-scheme: dark){.pgcyl{fill:#0d1117;stroke:#fb923c}.v10{fill:#60a5fa}.v20{fill:#22d3ee}.v30{fill:#2dd4bf}.v40{fill:#a3e635}.v50{fill:#a78bfa}.v60{fill:#d6d3d1}.v70{fill:#f472b6}.v99{fill:#94a3b8}.v140{fill:#f59e0b}.v150{fill:#fde047}.v160{fill:#f87171}}</style><defs>
+<marker id="a-ing" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-ing"/></marker>
+<marker id="a-db" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-db"/></marker>
+<marker id="a-tel" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-tel"/></marker>
+<marker id="a-wg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-wg"/></marker>
+<marker id="a-sso" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-sso"/></marker>
+<marker id="a-phy" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-phy"/></marker>
+</defs>
+<rect x="0.0" y="0.0" width="1760.0" height="1660.0" rx="0" class="bg"/>
+<text x="24.0" y="46.0" class="title" text-anchor="start">Ishan's Homelab</text>
+<text x="24.0" y="68.0" class="sub" text-anchor="start">Hosts, network, devices and services, with traffic flows and colour-coded VLANs.</text>
+<rect x="20" y="84" width="310" height="154" rx="14" class="site"/>
+<text x="36.0" y="104.0" class="sitel" text-anchor="start">AMSTERDAM</text>
+<rect x="30.0" y="116.0" width="290.0" height="113.0" rx="10" class="host"/>
+<text x="44.0" y="143.0" class="ht" text-anchor="start">rimo</text>
+<text x="92.0" y="143.0" class="hs" text-anchor="start">iFog VPS, x86_64 NixOS</text>
+<rect x="42.0" y="162.0" width="266.0" height="55.0" rx="7" class="grp"/>
+<text x="51.0" y="177.0" class="gt" text-anchor="start">ROUTING</text>
+<rect x="50.0" y="184.0" width="122.0" height="22.0" rx="5" class="chip"/>
+<text x="58.0" y="199.0" class="ct" text-anchor="start">BIRD, AS199347</text>
+<rect x="178.0" y="184.0" width="122.0" height="22.0" rx="5" class="chip"/>
+<text x="186.0" y="199.0" class="ct" text-anchor="start">iFog IXP peering</text>
+<path d="M320.0,128.0 L700.0,128.0" class="phy"/>
+<path d="M68,300 h174 a28,28 0 0 1 0,56 h-174 a28,28 0 0 1 0,-56 z" class="box"/>
+<text x="155.0" y="325.0" class="bt" text-anchor="middle">Google Drive</text>
+<text x="155.0" y="341.0" class="bs" text-anchor="middle">restic offsite copies</text>
+<path d="M328,300 h164 a28,28 0 0 1 0,56 h-164 a28,28 0 0 1 0,-56 z" class="box"/>
+<text x="410.0" y="325.0" class="bt" text-anchor="middle">PIA VPN</text>
+<text x="410.0" y="341.0" class="bs" text-anchor="middle">router uplink, qBittorrent</text>
+<path d="M728,100 h244 a28,28 0 0 1 0,56 h-244 a28,28 0 0 1 0,-56 z" class="box"/>
+<text x="850.0" y="133.0" class="bt" text-anchor="middle">Internet</text>
+<rect x="540.0" y="230.0" width="230.0" height="56.0" rx="8" class="box"/>
+<text x="655.0" y="255.0" class="bt" text-anchor="middle">Jio Fiber</text>
+<text x="655.0" y="271.0" class="bs" text-anchor="middle">WAN1, primary, ONT on SFP</text>
+<rect x="910.0" y="230.0" width="230.0" height="56.0" rx="8" class="box"/>
+<text x="1025.0" y="255.0" class="bt" text-anchor="middle">LTE/5G modem</text>
+<text x="1025.0" y="271.0" class="bs" text-anchor="middle">WAN2, ether8, failover</text>
+<path d="M790.0,156.0 L680.0,230.0" class="phy"/>
+<path d="M910.0,156.0 L1010.0,230.0" class="phy"/>
+<rect x="1250" y="84" width="490" height="392" rx="14" class="site"/>
+<text x="1266.0" y="104.0" class="sitel" text-anchor="start">DELHI</text>
+<rect x="1262.0" y="116.0" width="466.0" height="335.0" rx="10" class="host"/>
+<text x="1276.0" y="143.0" class="ht" text-anchor="start">manaslu</text>
+<text x="1354.0" y="143.0" class="hs" text-anchor="start">Vultr VPS, x86_64 NixOS</text>
+<rect x="1274.0" y="162.0" width="442.0" height="55.0" rx="7" class="grp"/>
+<text x="1283.0" y="177.0" class="gt" text-anchor="start">EDGE</text>
+<rect x="1282.0" y="184.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1290.0" y="199.0" class="ct" text-anchor="start">Caddy</text>
+<rect x="1498.0" y="184.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1506.0" y="199.0" class="ct" text-anchor="start">AdGuard Home</text>
+<rect x="1274.0" y="227.0" width="442.0" height="82.0" rx="7" class="grp"/>
+<text x="1283.0" y="242.0" class="gt" text-anchor="start">APPS</text>
+<rect x="1282.0" y="249.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1290.0" y="264.0" class="ct" text-anchor="start">Vaultwarden</text>
+<path d="M1474.0,257 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1478.0" cy="257" rx="4" ry="2" class="pgcyl"/>
+<rect x="1498.0" y="249.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1506.0" y="264.0" class="ct" text-anchor="start">FreshRSS</text>
+<path d="M1690.0,257 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1694.0" cy="257" rx="4" ry="2" class="pgcyl"/>
+<rect x="1282.0" y="276.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1290.0" y="291.0" class="ct" text-anchor="start">ZNC IRC bouncer</text>
+<rect x="1274.0" y="319.0" width="442.0" height="55.0" rx="7" class="grp"/>
+<text x="1283.0" y="334.0" class="gt" text-anchor="start">DATA &amp; MONITORING</text>
+<rect x="1282.0" y="341.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1290.0" y="356.0" class="ct" text-anchor="start">Postgres primary</text>
+<rect x="1498.0" y="341.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1506.0" y="356.0" class="ct" text-anchor="start">Gatus, watches home</text>
+<rect x="1274.0" y="384.0" width="442.0" height="55.0" rx="7" class="grp"/>
+<text x="1283.0" y="399.0" class="gt" text-anchor="start">ROUTING</text>
+<rect x="1282.0" y="406.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1290.0" y="421.0" class="ct" text-anchor="start">BIRD, AS199347</text>
+<rect x="1498.0" y="406.0" width="210.0" height="22.0" rx="5" class="chip"/>
+<text x="1506.0" y="421.0" class="ct" text-anchor="start">WireGuard to home</text>
+<path d="M1028.0,128.0 L1262.0,128.0" class="phy"/>
+<text x="1040.0" y="120.0" class="el" text-anchor="start">BGP announces home IPv6</text>
+<text x="1040.0" y="146.0" class="el" text-anchor="start">public HTTPS for Delhi</text>
+<rect x="20" y="496" width="1720" height="1144" rx="14" class="site"/>
+<text x="36.0" y="518.0" class="sitel" text-anchor="start">HOME</text>
+<rect x="690.0" y="536.0" width="360.0" height="62.0" rx="8" class="box"/>
+<text x="870.0" y="564.0" class="bt" text-anchor="middle">MikroTik RB5009UPr+S+</text>
+<text x="870.0" y="580.0" class="bs" text-anchor="middle">router, firewall, policy routing per WAN</text>
+<path d="M655.0,286.0 L655.0,450.0 L760.0,450.0 L760.0,536.0" class="phy"/>
+<text x="663.0" y="440.0" class="el" text-anchor="start">WAN1</text>
+<path d="M1025.0,286.0 L1025.0,450.0 L980.0,450.0 L980.0,536.0" class="phy"/>
+<text x="1033.0" y="440.0" class="el" text-anchor="start">ether8</text>
+<path d="M720.0,536.0 L720.0,476.0 L410.0,476.0 L410.0,356.0" class="wg"/>
+<text x="418.0" y="466.0" class="elwg" text-anchor="start">WireGuard</text>
+<path d="M1050.0,556.0 L1200.0,556.0 L1200.0,330.0 L1262.0,330.0" class="wg"/>
+<text x="1192.0" y="366.0" class="elwg" text-anchor="end">WireGuard:</text>
+<text x="1192.0" y="381.0" class="elwg" text-anchor="end">VPN, home IPv6,</text>
+<text x="1192.0" y="396.0" class="elwg" text-anchor="end">Caddy and SSO to home,</text>
+<text x="1192.0" y="411.0" class="elwg" text-anchor="end">Postgres replication,</text>
+<text x="1192.0" y="426.0" class="elwg" text-anchor="end">metrics and logs</text>
+<path d="M698.0,598.0 L698.0,652.0 L170.0,652.0" class="phy"/>
+<path d="M170.0,652.0 L170.0,682.0" class="phy"/>
+<text x="176.0" y="674.0" class="el" text-anchor="start">ether3</text>
+<path d="M430.0,652.0 L430.0,682.0" class="phy"/>
+<text x="436.0" y="674.0" class="el" text-anchor="start">ether4-6</text>
+<rect x="40.0" y="682.0" width="260.0" height="52.0" rx="8" class="box"/>
+<text x="170.0" y="705.0" class="bt" text-anchor="middle">SW1, 2F switch</text>
+<text x="170.0" y="721.0" class="bs" text-anchor="middle">TL-SG2210MP</text>
+<circle cx="290.0" cy="692.0" r="4" fill="#475569" class="v99"/>
+<path d="M110.0,734.0 L110.0,760.0" class="phy"/>
+<rect x="40.0" y="760.0" width="230.0" height="109.0" rx="7" class="grp"/>
+<text x="49.0" y="775.0" class="gt" text-anchor="start">ON SW1</text>
+<rect x="48.0" y="782.0" width="104.0" height="22.0" rx="5" class="chip"/>
+<text x="56.0" y="797.0" class="ct" text-anchor="start">Front cam</text>
+<circle cx="141.0" cy="793.0" r="4" fill="#db2777" class="v70"/>
+<rect x="158.0" y="782.0" width="104.0" height="22.0" rx="5" class="chip"/>
+<text x="166.0" y="797.0" class="ct" text-anchor="start">Roadside cam</text>
+<circle cx="251.0" cy="793.0" r="4" fill="#db2777" class="v70"/>
+<rect x="48.0" y="809.0" width="104.0" height="22.0" rx="5" class="chip"/>
+<text x="56.0" y="824.0" class="ct" text-anchor="start">Hall cam</text>
+<circle cx="141.0" cy="820.0" r="4" fill="#db2777" class="v70"/>
+<rect x="158.0" y="809.0" width="104.0" height="22.0" rx="5" class="chip"/>
+<text x="166.0" y="824.0" class="ct" text-anchor="start">AP IJ2</text>
+<circle cx="251.0" cy="820.0" r="4" fill="#475569" class="v99"/>
+<rect x="48.0" y="836.0" width="104.0" height="22.0" rx="5" class="chip"/>
+<text x="56.0" y="851.0" class="ct" text-anchor="start">AP XJ</text>
+<circle cx="141.0" cy="847.0" r="4" fill="#475569" class="v99"/>
+<path d="M285.0,734.0 L285.0,946.0 L270.0,946.0" class="phy"/>
+<rect x="40.0" y="920.0" width="230.0" height="52.0" rx="8" class="box"/>
+<text x="155.0" y="943.0" class="bt" text-anchor="middle">CPE710</text>
+<text x="155.0" y="959.0" class="bs" text-anchor="middle">PtP radio, local</text>
+<circle cx="260.0" cy="930.0" r="4" fill="#475569" class="v99"/>
+<path d="M155.0,972.0 L143.0,986.0 L167.0,1000.0 L143.0,1014.0 L167.0,1028.0 L155.0,1042.0" class="air"/>
+<text x="176.0" y="1012.0" class="el" text-anchor="start">0.97 km PtP link</text>
+<rect x="30" y="1042" width="280" height="318" rx="12" class="site"/>
+<text x="44.0" y="1062.0" class="sitel" text-anchor="start">SITE 2</text>
+<rect x="40.0" y="1072.0" width="260.0" height="52.0" rx="8" class="box"/>
+<text x="170.0" y="1095.0" class="bt" text-anchor="middle">CPE710</text>
+<text x="170.0" y="1111.0" class="bs" text-anchor="middle">PtP radio, remote</text>
+<circle cx="290.0" cy="1082.0" r="4" fill="#475569" class="v99"/>
+<path d="M170.0,1124.0 L170.0,1150.0" class="phy"/>
+<rect x="40.0" y="1150.0" width="260.0" height="52.0" rx="8" class="box"/>
+<text x="170.0" y="1173.0" class="bt" text-anchor="middle">SW3, site 2 switch</text>
+<text x="170.0" y="1189.0" class="bs" text-anchor="middle">TL-SG2210P</text>
+<circle cx="290.0" cy="1160.0" r="4" fill="#475569" class="v99"/>
+<path d="M170.0,1202.0 L170.0,1228.0" class="phy"/>
+<rect x="40.0" y="1228.0" width="260.0" height="109.0" rx="7" class="grp"/>
+<text x="49.0" y="1243.0" class="gt" text-anchor="start">ON SW3</text>
+<rect x="48.0" y="1250.0" width="119.0" height="22.0" rx="5" class="chip"/>
+<text x="56.0" y="1265.0" class="ct" text-anchor="start">Front cam</text>
+<circle cx="156.0" cy="1261.0" r="4" fill="#db2777" class="v70"/>
+<rect x="173.0" y="1250.0" width="119.0" height="22.0" rx="5" class="chip"/>
+<text x="181.0" y="1265.0" class="ct" text-anchor="start">Central cam</text>
+<circle cx="281.0" cy="1261.0" r="4" fill="#db2777" class="v70"/>
+<rect x="48.0" y="1277.0" width="119.0" height="22.0" rx="5" class="chip"/>
+<text x="56.0" y="1292.0" class="ct" text-anchor="start">Back door cam</text>
+<circle cx="156.0" cy="1288.0" r="4" fill="#db2777" class="v70"/>
+<rect x="173.0" y="1277.0" width="119.0" height="22.0" rx="5" class="chip"/>
+<text x="181.0" y="1292.0" class="ct" text-anchor="start">R1 cam</text>
+<circle cx="281.0" cy="1288.0" r="4" fill="#db2777" class="v70"/>
+<rect x="48.0" y="1304.0" width="119.0" height="22.0" rx="5" class="chip"/>
+<text x="56.0" y="1319.0" class="ct" text-anchor="start">AP SJ2</text>
+<circle cx="156.0" cy="1315.0" r="4" fill="#475569" class="v99"/>
+<rect x="320.0" y="682.0" width="290.0" height="136.0" rx="7" class="grp"/>
+<text x="329.0" y="697.0" class="gt" text-anchor="start">WI-FI APS ON THE ROUTER</text>
+<rect x="328.0" y="704.0" width="134.0" height="22.0" rx="5" class="chip"/>
+<text x="336.0" y="719.0" class="ct" text-anchor="start">AP PJ</text>
+<circle cx="451.0" cy="715.0" r="4" fill="#475569" class="v99"/>
+<rect x="468.0" y="704.0" width="134.0" height="22.0" rx="5" class="chip"/>
+<text x="476.0" y="719.0" class="ct" text-anchor="start">AP PJ2, via PJ</text>
+<circle cx="591.0" cy="715.0" r="4" fill="#475569" class="v99"/>
+<rect x="328.0" y="731.0" width="134.0" height="22.0" rx="5" class="chip"/>
+<text x="336.0" y="746.0" class="ct" text-anchor="start">AP SJ</text>
+<circle cx="451.0" cy="742.0" r="4" fill="#475569" class="v99"/>
+<rect x="468.0" y="731.0" width="134.0" height="22.0" rx="5" class="chip"/>
+<text x="476.0" y="746.0" class="ct" text-anchor="start">AP AJ</text>
+<circle cx="591.0" cy="742.0" r="4" fill="#475569" class="v99"/>
+<text x="330.0" y="770.0" class="bs" text-anchor="start">PJ, PJ2, AJ: OpenWrt, 1 A7 and 2 A6</text>
+<text x="330.0" y="788.0" class="bs" text-anchor="start">All other APs: Omada,</text>
+<text x="330.0" y="806.0" class="bs" text-anchor="start">2 EAP660 HD and 3 EAP245</text>
+<path d="M1030.0,598.0 L1030.0,682.0" class="phy"/>
+<text x="1036.0" y="640.0" class="el" text-anchor="start">ether7</text>
+<rect x="962.0" y="682.0" width="128.0" height="52.0" rx="8" class="box"/>
+<text x="1026.0" y="705.0" class="bt" text-anchor="middle">JetKVM</text>
+<text x="1026.0" y="721.0" class="bs" text-anchor="middle">annapurna console</text>
+<path d="M1050.0,580.0 L1510.0,580.0 L1510.0,682.0" class="phy"/>
+<rect x="1380.0" y="682.0" width="260.0" height="52.0" rx="8" class="box"/>
+<text x="1510.0" y="705.0" class="bt" text-anchor="middle">SW2, 1F switch</text>
+<text x="1510.0" y="721.0" class="bs" text-anchor="middle">TL-SG2210P</text>
+<circle cx="1630.0" cy="692.0" r="4" fill="#475569" class="v99"/>
+<text x="1518.0" y="640.0" class="el" text-anchor="start">ether2</text>
+<path d="M1380.0,708.0 L1362.0,708.0" class="phy"/>
+<rect x="1104.0" y="682.0" width="258.0" height="163.0" rx="7" class="grp"/>
+<text x="1113.0" y="697.0" class="gt" text-anchor="start">ON SW2</text>
+<rect x="1112.0" y="704.0" width="242.0" height="22.0" rx="5" class="chip"/>
+<text x="1120.0" y="719.0" class="ct" text-anchor="start">NVR</text>
+<circle cx="1343.0" cy="715.0" r="4" fill="#db2777" class="v70"/>
+<rect x="1112.0" y="731.0" width="242.0" height="22.0" rx="5" class="chip"/>
+<text x="1120.0" y="746.0" class="ct" text-anchor="start">Printer</text>
+<circle cx="1343.0" cy="742.0" r="4" fill="#db2777" class="v70"/>
+<rect x="1112.0" y="758.0" width="242.0" height="22.0" rx="5" class="chip"/>
+<text x="1120.0" y="773.0" class="ct" text-anchor="start">AP IJ</text>
+<circle cx="1343.0" cy="769.0" r="4" fill="#475569" class="v99"/>
+<rect x="1112.0" y="785.0" width="242.0" height="22.0" rx="5" class="chip"/>
+<text x="1120.0" y="800.0" class="ct" text-anchor="start">RIPE Atlas HW probe</text>
+<circle cx="1343.0" cy="796.0" r="4" fill="#b45309" class="v140"/>
+<rect x="1112.0" y="812.0" width="242.0" height="22.0" rx="5" class="chip"/>
+<text x="1120.0" y="827.0" class="ct" text-anchor="start">JetKVM, kanchenjunga console</text>
+<circle cx="1343.0" cy="823.0" r="4" fill="#2563eb" class="v10"/>
+<rect x="330.0" y="900.0" width="900.0" height="340.0" rx="10" class="host"/>
+<text x="344.0" y="927.0" class="ht" text-anchor="start">annapurna</text>
+<text x="442.0" y="927.0" class="hs" text-anchor="start">x86_64 NixOS, nspawn containers, ZFS, VFIO</text>
+<rect x="342.0" y="946.0" width="285.3" height="136.0" rx="7" class="grp"/>
+<text x="351.0" y="961.0" class="gt" text-anchor="start">APPS</text>
+<rect x="350.0" y="968.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="358.0" y="983.0" class="ct" text-anchor="start">Paperless-ngx</text>
+<circle cx="470.7" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M453.66666666666663,976 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="457.66666666666663" cy="976" rx="4" ry="2" class="pgcyl"/>
+<rect x="487.7" y="968.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="495.7" y="983.0" class="ct" text-anchor="start">Karakeep</text>
+<circle cx="608.3" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="350.0" y="995.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="358.0" y="1010.0" class="ct" text-anchor="start">BentoPDF</text>
+<circle cx="470.7" cy="1006.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="487.7" y="995.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="495.7" y="1010.0" class="ct" text-anchor="start">Gitea</text>
+<circle cx="608.3" cy="1006.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M591.3333333333333,1003 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="595.3333333333333" cy="1003" rx="4" ry="2" class="pgcyl"/>
+<rect x="350.0" y="1022.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="358.0" y="1037.0" class="ct" text-anchor="start">Windmill</text>
+<circle cx="470.7" cy="1033.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M453.66666666666663,1030 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="457.66666666666663" cy="1030" rx="4" ry="2" class="pgcyl"/>
+<rect x="487.7" y="1022.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="495.7" y="1037.0" class="ct" text-anchor="start">Stalwart mail</text>
+<circle cx="608.3" cy="1033.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M591.3333333333333,1030 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="595.3333333333333" cy="1030" rx="4" ry="2" class="pgcyl"/>
+<rect x="350.0" y="1049.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="358.0" y="1064.0" class="ct" text-anchor="start">Samba</text>
+<circle cx="470.7" cy="1060.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="342.0" y="1092.0" width="285.3" height="55.0" rx="7" class="grp"/>
+<text x="351.0" y="1107.0" class="gt" text-anchor="start">NETWORK &amp; VOICE</text>
+<rect x="350.0" y="1114.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="358.0" y="1129.0" class="ct" text-anchor="start">Omada controller</text>
+<circle cx="470.7" cy="1125.0" r="4" fill="#475569" class="v99"/>
+<rect x="487.7" y="1114.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="495.7" y="1129.0" class="ct" text-anchor="start">Asterisk PBX</text>
+<circle cx="608.3" cy="1125.0" r="4" fill="#b45309" class="v140"/>
+<rect x="342.0" y="1157.0" width="285.3" height="55.0" rx="7" class="grp"/>
+<text x="351.0" y="1172.0" class="gt" text-anchor="start">TOOLS</text>
+<rect x="350.0" y="1179.0" width="269.3" height="22.0" rx="5" class="chip"/>
+<text x="358.0" y="1194.0" class="ct" text-anchor="start">VLAN debug shells x9</text>
+<circle cx="608.3" cy="1190.0" r="4" fill="#dc2626" class="v160"/>
+<circle cx="598.3" cy="1190.0" r="4" fill="#eab308" class="v150"/>
+<circle cx="588.3" cy="1190.0" r="4" fill="#b45309" class="v140"/>
+<circle cx="578.3" cy="1190.0" r="4" fill="#475569" class="v99"/>
+<circle cx="568.3" cy="1190.0" r="4" fill="#7c3aed" class="v50"/>
+<circle cx="558.3" cy="1190.0" r="4" fill="#65a30d" class="v40"/>
+<circle cx="548.3" cy="1190.0" r="4" fill="#0d9488" class="v30"/>
+<circle cx="538.3" cy="1190.0" r="4" fill="#0891b2" class="v20"/>
+<circle cx="528.3" cy="1190.0" r="4" fill="#2563eb" class="v10"/>
+<rect x="637.3" y="946.0" width="285.3" height="82.0" rx="7" class="grp"/>
+<text x="646.3" y="961.0" class="gt" text-anchor="start">EDGE, SSO</text>
+<rect x="645.3" y="968.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="983.0" class="ct" text-anchor="start">Caddy</text>
+<circle cx="766.0" cy="979.0" r="4" fill="#b45309" class="v140"/>
+<circle cx="756.0" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="783.0" y="968.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="983.0" class="ct" text-anchor="start">Authelia</text>
+<circle cx="903.7" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,976 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="976" rx="4" ry="2" class="pgcyl"/>
+<rect x="645.3" y="995.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1010.0" class="ct" text-anchor="start">AdGuard Home</text>
+<circle cx="766.0" cy="1006.0" r="4" fill="#475569" class="v99"/>
+<rect x="783.0" y="995.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1010.0" class="ct" text-anchor="start">LLDAP</text>
+<circle cx="903.7" cy="1006.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,1003 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="1003" rx="4" ry="2" class="pgcyl"/>
+<rect x="637.3" y="1038.0" width="285.3" height="190.0" rx="7" class="grp"/>
+<text x="646.3" y="1053.0" class="gt" text-anchor="start">MEDIA</text>
+<rect x="645.3" y="1060.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1075.0" class="ct" text-anchor="start">Jellyfin</text>
+<circle cx="766.0" cy="1071.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="783.0" y="1060.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1075.0" class="ct" text-anchor="start">Seerr</text>
+<circle cx="903.7" cy="1071.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,1068 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="1068" rx="4" ry="2" class="pgcyl"/>
+<rect x="645.3" y="1087.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1102.0" class="ct" text-anchor="start">Sonarr</text>
+<circle cx="766.0" cy="1098.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M748.9999999999999,1095 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="752.9999999999999" cy="1095" rx="4" ry="2" class="pgcyl"/>
+<rect x="783.0" y="1087.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1102.0" class="ct" text-anchor="start">Sonarr 4K</text>
+<circle cx="903.7" cy="1098.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,1095 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="1095" rx="4" ry="2" class="pgcyl"/>
+<rect x="645.3" y="1114.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1129.0" class="ct" text-anchor="start">Radarr</text>
+<circle cx="766.0" cy="1125.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M748.9999999999999,1122 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="752.9999999999999" cy="1122" rx="4" ry="2" class="pgcyl"/>
+<rect x="783.0" y="1114.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1129.0" class="ct" text-anchor="start">Radarr 4K</text>
+<circle cx="903.7" cy="1125.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,1122 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="1122" rx="4" ry="2" class="pgcyl"/>
+<rect x="645.3" y="1141.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1156.0" class="ct" text-anchor="start">Lidarr</text>
+<circle cx="766.0" cy="1152.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M748.9999999999999,1149 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="752.9999999999999" cy="1149" rx="4" ry="2" class="pgcyl"/>
+<rect x="783.0" y="1141.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1156.0" class="ct" text-anchor="start">Bazarr</text>
+<circle cx="903.7" cy="1152.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,1149 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="1149" rx="4" ry="2" class="pgcyl"/>
+<rect x="645.3" y="1168.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1183.0" class="ct" text-anchor="start">Prowlarr</text>
+<circle cx="766.0" cy="1179.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M748.9999999999999,1176 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="752.9999999999999" cy="1176" rx="4" ry="2" class="pgcyl"/>
+<rect x="783.0" y="1168.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1183.0" class="ct" text-anchor="start">qBittorrent</text>
+<circle cx="903.7" cy="1179.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="645.3" y="1195.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="653.3" y="1210.0" class="ct" text-anchor="start">Unpackerr</text>
+<circle cx="766.0" cy="1206.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="783.0" y="1195.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="791.0" y="1210.0" class="ct" text-anchor="start">Tracearr</text>
+<circle cx="903.7" cy="1206.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M886.6666666666665,1203 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="890.6666666666665" cy="1203" rx="4" ry="2" class="pgcyl"/>
+<rect x="932.7" y="946.0" width="285.3" height="55.0" rx="7" class="grp"/>
+<text x="941.7" y="961.0" class="gt" text-anchor="start">DATA</text>
+<rect x="940.7" y="968.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="948.7" y="983.0" class="ct" text-anchor="start">Postgres primary</text>
+<circle cx="1061.3" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1078.3" y="968.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="1086.3" y="983.0" class="ct" text-anchor="start">Postgres mirror</text>
+<circle cx="1199.0" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="932.7" y="1011.0" width="285.3" height="109.0" rx="7" class="grp"/>
+<text x="941.7" y="1026.0" class="gt" text-anchor="start">OBSERVABILITY</text>
+<rect x="940.7" y="1033.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="948.7" y="1048.0" class="ct" text-anchor="start">VictoriaMetrics</text>
+<circle cx="1061.3" cy="1044.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1078.3" y="1033.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="1086.3" y="1048.0" class="ct" text-anchor="start">VictoriaLogs</text>
+<circle cx="1199.0" cy="1044.0" r="4" fill="#475569" class="v99"/>
+<circle cx="1189.0" cy="1044.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="940.7" y="1060.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="948.7" y="1075.0" class="ct" text-anchor="start">Grafana</text>
+<circle cx="1061.3" cy="1071.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1044.3333333333333,1068 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1048.3333333333333" cy="1068" rx="4" ry="2" class="pgcyl"/>
+<rect x="1078.3" y="1060.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="1086.3" y="1075.0" class="ct" text-anchor="start">Gatus</text>
+<circle cx="1199.0" cy="1071.0" r="4" fill="#b45309" class="v140"/>
+<circle cx="1189.0" cy="1071.0" r="4" fill="#475569" class="v99"/>
+<circle cx="1179.0" cy="1071.0" r="4" fill="#db2777" class="v70"/>
+<circle cx="1169.0" cy="1071.0" r="4" fill="#7c3aed" class="v50"/>
+<circle cx="1159.0" cy="1071.0" r="4" fill="#2563eb" class="v10"/>
+<rect x="940.7" y="1087.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="948.7" y="1102.0" class="ct" text-anchor="start">Alloy syslog</text>
+<circle cx="1061.3" cy="1098.0" r="4" fill="#475569" class="v99"/>
+<circle cx="1051.3" cy="1098.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1078.3" y="1087.0" width="131.7" height="22.0" rx="5" class="chip"/>
+<text x="1086.3" y="1102.0" class="ct" text-anchor="start">Telegraf SNMP</text>
+<circle cx="1199.0" cy="1098.0" r="4" fill="#475569" class="v99"/>
+<circle cx="1189.0" cy="1098.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1070.0,734.0 L1070.0,900.0" class="air"/>
+<rect x="1290.0" y="900.0" width="430.0" height="562.0" rx="10" class="host"/>
+<text x="1304.0" y="927.0" class="ht" text-anchor="start">kamet</text>
+<text x="1362.0" y="927.0" class="hs" text-anchor="start">x86_64 NixOS</text>
+<rect x="1302.0" y="946.0" width="406.0" height="82.0" rx="7" class="grp"/>
+<text x="1311.0" y="961.0" class="gt" text-anchor="start">HOME &amp; DEVICES</text>
+<rect x="1310.0" y="968.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="983.0" class="ct" text-anchor="start">Home Assistant</text>
+<circle cx="1491.0" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<circle cx="1481.0" cy="979.0" r="4" fill="#2563eb" class="v10"/>
+<path d="M1464.0,976 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1468.0" cy="976" rx="4" ry="2" class="pgcyl"/>
+<rect x="1508.0" y="968.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="983.0" class="ct" text-anchor="start">Huawei SMS relay</text>
+<circle cx="1689.0" cy="979.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1672.0,976 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1676.0" cy="976" rx="4" ry="2" class="pgcyl"/>
+<rect x="1310.0" y="995.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1010.0" class="ct" text-anchor="start">CUPS print &amp; scan</text>
+<circle cx="1491.0" cy="1006.0" r="4" fill="#db2777" class="v70"/>
+<rect x="1508.0" y="995.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1010.0" class="ct" text-anchor="start">Netflector</text>
+<circle cx="1689.0" cy="1006.0" r="4" fill="#db2777" class="v70"/>
+<circle cx="1679.0" cy="1006.0" r="4" fill="#7c3aed" class="v50"/>
+<circle cx="1669.0" cy="1006.0" r="4" fill="#65a30d" class="v40"/>
+<circle cx="1659.0" cy="1006.0" r="4" fill="#0d9488" class="v30"/>
+<circle cx="1649.0" cy="1006.0" r="4" fill="#0891b2" class="v20"/>
+<circle cx="1639.0" cy="1006.0" r="4" fill="#2563eb" class="v10"/>
+<rect x="1302.0" y="1038.0" width="406.0" height="190.0" rx="7" class="grp"/>
+<text x="1311.0" y="1053.0" class="gt" text-anchor="start">APPS</text>
+<rect x="1310.0" y="1060.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1075.0" class="ct" text-anchor="start">Actual Budget</text>
+<circle cx="1491.0" cy="1071.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1508.0" y="1060.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1075.0" class="ct" text-anchor="start">AirTrail</text>
+<circle cx="1689.0" cy="1071.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1672.0,1068 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1676.0" cy="1068" rx="4" ry="2" class="pgcyl"/>
+<rect x="1310.0" y="1087.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1102.0" class="ct" text-anchor="start">Atuin</text>
+<circle cx="1491.0" cy="1098.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1474.0,1095 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1478.0" cy="1095" rx="4" ry="2" class="pgcyl"/>
+<rect x="1508.0" y="1087.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1102.0" class="ct" text-anchor="start">Bulwark webmail</text>
+<circle cx="1689.0" cy="1098.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1310.0" y="1114.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1129.0" class="ct" text-anchor="start">Changedetection</text>
+<circle cx="1491.0" cy="1125.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1508.0" y="1114.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1129.0" class="ct" text-anchor="start">Copyparty</text>
+<circle cx="1689.0" cy="1125.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1310.0" y="1141.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1156.0" class="ct" text-anchor="start">Kavita</text>
+<circle cx="1491.0" cy="1152.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1508.0" y="1141.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1156.0" class="ct" text-anchor="start">Mathesar</text>
+<circle cx="1689.0" cy="1152.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1672.0,1149 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1676.0" cy="1149" rx="4" ry="2" class="pgcyl"/>
+<rect x="1310.0" y="1168.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1183.0" class="ct" text-anchor="start">Nitter</text>
+<circle cx="1491.0" cy="1179.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1508.0" y="1168.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1183.0" class="ct" text-anchor="start">Obsidian LiveSync</text>
+<circle cx="1689.0" cy="1179.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1310.0" y="1195.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1210.0" class="ct" text-anchor="start">OpenVSCode Server</text>
+<circle cx="1491.0" cy="1206.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1508.0" y="1195.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1210.0" class="ct" text-anchor="start">Win11 VNC console</text>
+<circle cx="1689.0" cy="1206.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1302.0" y="1238.0" width="406.0" height="82.0" rx="7" class="grp"/>
+<text x="1311.0" y="1253.0" class="gt" text-anchor="start">JOBS &amp; CI</text>
+<rect x="1310.0" y="1260.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1275.0" class="ct" text-anchor="start">Gitea runner</text>
+<circle cx="1491.0" cy="1271.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1508.0" y="1260.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1275.0" class="ct" text-anchor="start">Garmin sync</text>
+<circle cx="1689.0" cy="1271.0" r="4" fill="#7c3aed" class="v50"/>
+<path d="M1672.0,1268 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="1676.0" cy="1268" rx="4" ry="2" class="pgcyl"/>
+<rect x="1310.0" y="1287.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1302.0" class="ct" text-anchor="start">PVR movies monitor</text>
+<circle cx="1491.0" cy="1298.0" r="4" fill="#7c3aed" class="v50"/>
+<rect x="1302.0" y="1330.0" width="406.0" height="55.0" rx="7" class="grp"/>
+<text x="1311.0" y="1345.0" class="gt" text-anchor="start">PROBES</text>
+<rect x="1310.0" y="1352.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1367.0" class="ct" text-anchor="start">RIPE Atlas primary</text>
+<circle cx="1491.0" cy="1363.0" r="4" fill="#eab308" class="v150"/>
+<rect x="1508.0" y="1352.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1367.0" class="ct" text-anchor="start">RIPE Atlas LTE</text>
+<circle cx="1689.0" cy="1363.0" r="4" fill="#dc2626" class="v160"/>
+<rect x="1302.0" y="1395.0" width="406.0" height="55.0" rx="7" class="grp"/>
+<text x="1311.0" y="1410.0" class="gt" text-anchor="start">VM</text>
+<rect x="1310.0" y="1417.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1432.0" class="ct" text-anchor="start">Windows 11</text>
+<circle cx="1491.0" cy="1428.0" r="4" fill="#2563eb" class="v10"/>
+<path d="M1510.0,734.0 L1510.0,900.0" class="phy"/>
+<circle cx="1520.0" cy="870.0" r="4" fill="#2563eb" class="v10"/>
+<circle cx="1530.0" cy="870.0" r="4" fill="#0891b2" class="v20"/>
+<circle cx="1540.0" cy="870.0" r="4" fill="#0d9488" class="v30"/>
+<circle cx="1550.0" cy="870.0" r="4" fill="#65a30d" class="v40"/>
+<circle cx="1560.0" cy="870.0" r="4" fill="#7c3aed" class="v50"/>
+<circle cx="1570.0" cy="870.0" r="4" fill="#db2777" class="v70"/>
+<circle cx="1580.0" cy="870.0" r="4" fill="#475569" class="v99"/>
+<circle cx="1590.0" cy="870.0" r="4" fill="#eab308" class="v150"/>
+<circle cx="1600.0" cy="870.0" r="4" fill="#dc2626" class="v160"/>
+<rect x="1290.0" y="1486.0" width="430.0" height="113.0" rx="10" class="host"/>
+<text x="1304.0" y="1513.0" class="ht" text-anchor="start">kanchenjunga</text>
+<text x="1432.0" y="1513.0" class="hs" text-anchor="start">x86_64 NixOS, VFIO</text>
+<rect x="1302.0" y="1532.0" width="406.0" height="55.0" rx="7" class="grp"/>
+<text x="1311.0" y="1547.0" class="gt" text-anchor="start">VMS</text>
+<rect x="1310.0" y="1554.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1318.0" y="1569.0" class="ct" text-anchor="start">Work (Linux)</text>
+<circle cx="1491.0" cy="1565.0" r="4" fill="#2563eb" class="v10"/>
+<rect x="1508.0" y="1554.0" width="192.0" height="22.0" rx="5" class="chip"/>
+<text x="1516.0" y="1569.0" class="ct" text-anchor="start">Windows 10, RTX 3080</text>
+<circle cx="1689.0" cy="1565.0" r="4" fill="#2563eb" class="v10"/>
+<path d="M1640.0,708.0 L1732.0,708.0 L1732.0,1516.0 L1720.0,1516.0" class="phy"/>
+<circle cx="1712.0" cy="1474.0" r="4" fill="#2563eb" class="v10"/>
+<circle cx="1722.0" cy="1474.0" r="4" fill="#475569" class="v99"/>
+<path d="M725.3,598.0 L725.3,968.0" class="ing" marker-end="url(#a-ing)"/>
+<text x="733.3" y="640.0" class="eling" text-anchor="start">HTTPS in</text>
+<path d="M915.0,598.0 L915.0,900.0" class="tel" marker-end="url(#a-tel)"/>
+<path d="M940.0,598.0 L940.0,900.0" class="phy"/>
+<text x="948.0" y="760.0" class="el" text-anchor="start">ether1</text>
+<text x="948.0" y="776.0" class="eltel" text-anchor="start">SNMP, syslog</text>
+<circle cx="952.0" cy="796.0" r="4" fill="#2563eb" class="v10"/>
+<circle cx="962.0" cy="796.0" r="4" fill="#0891b2" class="v20"/>
+<circle cx="972.0" cy="796.0" r="4" fill="#0d9488" class="v30"/>
+<circle cx="982.0" cy="796.0" r="4" fill="#65a30d" class="v40"/>
+<circle cx="992.0" cy="796.0" r="4" fill="#7c3aed" class="v50"/>
+<circle cx="1002.0" cy="796.0" r="4" fill="#db2777" class="v70"/>
+<circle cx="1012.0" cy="796.0" r="4" fill="#475569" class="v99"/>
+<circle cx="1022.0" cy="796.0" r="4" fill="#b45309" class="v140"/>
+<circle cx="1032.0" cy="796.0" r="4" fill="#eab308" class="v150"/>
+<circle cx="1042.0" cy="796.0" r="4" fill="#dc2626" class="v160"/>
+<path d="M777.0,979.0 L782.0,979.0" class="sso" marker-end="url(#a-sso)"/>
+<path d="M848.8,990.0 L848.8,995.0" class="sso" marker-end="url(#a-sso)"/>
+<path d="M1290.0,973.5 L1220.0,973.5" class="db" marker-end="url(#a-db)"/>
+<text x="1286.0" y="967.5" class="eldb" text-anchor="end">Postgres</text>
+<path d="M1290.0,1065.5 L1220.0,1065.5" class="tel" marker-end="url(#a-tel)"/>
+<path d="M1290.0,1556.0 L1240.0,1556.0 L1240.0,1065.5" class="tel"/>
+<text x="1286.0" y="1059.5" class="eltel" text-anchor="end">metrics</text>
+<text x="1286.0" y="1081.5" class="eltel" text-anchor="end">and logs</text>
+<text x="940.7" y="1214.0" class="eling" text-anchor="start">Caddy also serves kamet's apps</text>
+<path d="M1202.0,1210.0 L1288.0,1210.0" class="ing" marker-end="url(#a-ing)"/>
+<rect x="330.0" y="1266.0" width="900.0" height="262.0" rx="10" class="grp"/>
+<text x="346.0" y="1290.0" class="lh" text-anchor="start">LINES</text>
+<path d="M350.0,1312.0 L396.0,1312.0" class="phy"/>
+<text x="408.0" y="1316.0" class="lt" text-anchor="start">physical link</text>
+<path d="M350.0,1338.0 L396.0,1338.0" class="air"/>
+<text x="408.0" y="1342.0" class="lt" text-anchor="start">radio link, console cable</text>
+<path d="M350.0,1364.0 L396.0,1364.0" class="wg" marker-end="url(#a-wg)"/>
+<text x="408.0" y="1368.0" class="lt" text-anchor="start">WireGuard tunnel</text>
+<path d="M350.0,1390.0 L396.0,1390.0" class="ing" marker-end="url(#a-ing)"/>
+<text x="408.0" y="1394.0" class="lt" text-anchor="start">web ingress through Caddy</text>
+<path d="M350.0,1416.0 L396.0,1416.0" class="sso" marker-end="url(#a-sso)"/>
+<text x="408.0" y="1420.0" class="lt" text-anchor="start">single sign-on</text>
+<path d="M350.0,1442.0 L396.0,1442.0" class="db" marker-end="url(#a-db)"/>
+<text x="408.0" y="1446.0" class="lt" text-anchor="start">PostgreSQL clients</text>
+<path d="M350.0,1468.0 L396.0,1468.0" class="tel" marker-end="url(#a-tel)"/>
+<text x="408.0" y="1472.0" class="lt" text-anchor="start">metrics and logs</text>
+<path d="M368,1488 v6 a4,2 0 0 0 8,0 v-6" class="pgcyl"/><ellipse cx="372" cy="1488" rx="4" ry="2" class="pgcyl"/>
+<text x="408.0" y="1496.0" class="lt" text-anchor="start">uses PostgreSQL</text>
+<text x="630.0" y="1290.0" class="lh" text-anchor="start">VLANS</text>
+<circle cx="639.0" cy="1312.0" r="5" fill="#2563eb" class="v10"/>
+<text x="652.0" y="1316.0" class="lt" text-anchor="start">10  my devices</text>
+<circle cx="639.0" cy="1338.0" r="5" fill="#0891b2" class="v20"/>
+<text x="652.0" y="1342.0" class="lt" text-anchor="start">20  family</text>
+<circle cx="639.0" cy="1364.0" r="5" fill="#0d9488" class="v30"/>
+<text x="652.0" y="1368.0" class="lt" text-anchor="start">30  family</text>
+<circle cx="639.0" cy="1390.0" r="5" fill="#65a30d" class="v40"/>
+<text x="652.0" y="1394.0" class="lt" text-anchor="start">40  family</text>
+<circle cx="639.0" cy="1416.0" r="5" fill="#7c3aed" class="v50"/>
+<text x="652.0" y="1420.0" class="lt" text-anchor="start">50  lab, services</text>
+<circle cx="639.0" cy="1442.0" r="5" fill="#a8a29e" class="v60"/>
+<text x="652.0" y="1446.0" class="lt" text-anchor="start">60  guest</text>
+<circle cx="939.0" cy="1312.0" r="5" fill="#db2777" class="v70"/>
+<text x="952.0" y="1316.0" class="lt" text-anchor="start">70  devices, no internet</text>
+<circle cx="939.0" cy="1338.0" r="5" fill="#475569" class="v99"/>
+<text x="952.0" y="1342.0" class="lt" text-anchor="start">99  management</text>
+<circle cx="939.0" cy="1364.0" r="5" fill="#b45309" class="v140"/>
+<text x="952.0" y="1368.0" class="lt" text-anchor="start">140  Jio-only uplink</text>
+<circle cx="939.0" cy="1390.0" r="5" fill="#eab308" class="v150"/>
+<text x="952.0" y="1394.0" class="lt" text-anchor="start">150  WAN2-only (not enforced)</text>
+<circle cx="939.0" cy="1416.0" r="5" fill="#dc2626" class="v160"/>
+<text x="952.0" y="1420.0" class="lt" text-anchor="start">160  LTE/5G-only uplink</text>
+<text x="934.0" y="1446.0" class="bs" text-anchor="start">dots on a host's line: its trunk</text>
+<rect x="40.0" y="1384.0" width="260.0" height="152.0" rx="10" class="grp"/>
+<text x="54.0" y="1408.0" class="lh" text-anchor="start">ON EVERY HOST</text>
+<text x="56.0" y="1434.0" class="lt" text-anchor="start">Telegraf and Alloy agents</text>
+<text x="56.0" y="1455.0" class="lt" text-anchor="start">Tailscale for remote access</text>
+<text x="56.0" y="1476.0" class="lt" text-anchor="start">restic: local + Google Drive</text>
+<text x="56.0" y="1497.0" class="lt" text-anchor="start">deployed with deploy-rs</text>
+<text x="56.0" y="1518.0" class="lt" text-anchor="start">secrets with sops-nix</text>
+</svg>
